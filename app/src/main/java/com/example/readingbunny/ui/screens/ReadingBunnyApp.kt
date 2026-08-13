@@ -1,0 +1,354 @@
+package com.example.readingbunny.ui.screens
+
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.CollectionsBookmark
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.readingbunny.ReadingBunnyApplication
+import com.example.readingbunny.model.ReadingStatus
+import com.example.readingbunny.ui.viewmodel.BookViewModel
+import com.example.readingbunny.ui.viewmodel.BookViewModelFactory
+import com.example.readingbunny.ui.viewmodel.BookshelfViewModel
+import com.example.readingbunny.ui.viewmodel.BookshelfViewModelFactory
+import com.example.readingbunny.ui.viewmodel.ReadingSessionViewModel
+import com.example.readingbunny.ui.viewmodel.ReadingSessionViewModelFactory
+
+@Composable
+fun ReadingBunnyApp() {
+    var selectedItem by rememberSaveable {
+        mutableIntStateOf(0)
+    }
+    var isAddingBook by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+
+
+    val context = LocalContext.current
+
+    val application =
+        context.applicationContext as ReadingBunnyApplication
+
+    val bookViewModel: BookViewModel = viewModel(
+        factory = BookViewModelFactory(application.repository)
+    )
+
+    val bookshelfViewModel: BookshelfViewModel = viewModel(
+        factory = BookshelfViewModelFactory(
+            application.decorationRepository,
+            application.bookPositionRepository
+        )
+    )
+    val decorations by bookshelfViewModel.decorations.collectAsState(
+        initial = emptyList()
+    )
+
+    val books by bookViewModel.books.collectAsState(
+        initial = emptyList()
+    )
+    val bookPositions by bookshelfViewModel.bookPositions.collectAsState(
+        initial = emptyList()
+    )
+
+
+
+    var selectedBookId by rememberSaveable {
+        mutableStateOf<Int?>(null)
+    }
+
+    val selectedBook = books.firstOrNull { book ->
+        book.id == selectedBookId
+    }
+
+    val currentBook = books.firstOrNull() { book ->
+        book.status == ReadingStatus.READING
+    }
+
+    val readingSessionViewModel: ReadingSessionViewModel = viewModel(
+        factory = ReadingSessionViewModelFactory(
+            application.readingSessionRepository
+        )
+    )
+
+    val elapsedSeconds by
+    readingSessionViewModel.elapsedSeconds.collectAsState()
+
+    val isSessionRunning by
+    readingSessionViewModel.isRunning.collectAsState()
+
+    var activeSessionBookId by rememberSaveable {
+        mutableStateOf<Int?>(null)
+    }
+
+    val activeSessionBook =
+        books.firstOrNull {
+            it.id == activeSessionBookId
+        }
+
+    if (activeSessionBook != null) {
+
+        val sessionBook = activeSessionBook
+
+        ReadingSessionScreen(
+            book = sessionBook,
+            elapsedSeconds = elapsedSeconds,
+            isRunning = isSessionRunning,
+
+            onPause = {
+                readingSessionViewModel.pauseSession()
+            },
+
+            onResume = {
+                readingSessionViewModel.resumeSession()
+            },
+
+            onFinish = { endPage ->
+
+                readingSessionViewModel.finishSession(
+                    endPage = endPage
+                ) {
+
+                    val newStatus =
+                        if (endPage >= sessionBook.totalPages) {
+                            ReadingStatus.FINISHED
+                        } else {
+                            ReadingStatus.READING
+                        }
+
+                    bookViewModel.updateBook(
+                        sessionBook.copy(
+                            currentPage = endPage,
+                            status = newStatus
+                        )
+                    )
+
+                    activeSessionBookId = null
+                }
+            },
+
+            onCancel = {
+                readingSessionViewModel.cancelSession()
+                activeSessionBookId = null
+            }
+        )
+
+    } else {
+
+
+        Scaffold(
+            containerColor = Color(0xFFFFF8EF),
+
+            bottomBar = {
+                NavigationBar {
+                    NavigationBarItem(
+                        selected = selectedItem == 0,
+                        onClick = {
+                            selectedItem = 0
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Filled.Home,
+                                contentDescription = "Home"
+                            )
+                        },
+                        label = {
+                            Text("Home")
+                        }
+                    )
+
+                    NavigationBarItem(
+                        selected = selectedItem == 1,
+                        onClick = {
+                            selectedItem = 1
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.MenuBook,
+                                contentDescription = "Books"
+
+                            )
+                        },
+                        label = {
+                            Text("Books")
+                        }
+                    )
+
+                    NavigationBarItem(
+                        selected = selectedItem == 2,
+                        onClick = {
+                            selectedItem = 2
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Filled.CollectionsBookmark,
+                                contentDescription = "Bookshelf"
+                            )
+                        },
+                        label = {
+                            Text("Bookshelf")
+                        }
+                    )
+
+                    NavigationBarItem(
+                        selected = selectedItem == 3,
+                        onClick = {
+                            selectedItem = 3
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Filled.BarChart,
+                                contentDescription = "Stats"
+                            )
+                        },
+                        label = {
+                            Text("Stats")
+                        }
+                    )
+
+                    NavigationBarItem(
+                        selected = selectedItem == 4,
+                        onClick = {
+                            selectedItem = 4
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Filled.Person,
+                                contentDescription = "Profile"
+                            )
+                        },
+                        label = {
+                            Text("Profile")
+                        }
+                    )
+                }
+            }
+        ) { innerPadding ->
+            Box(
+                modifier = Modifier.padding(innerPadding)
+            )
+            {
+                when (selectedItem) {
+                    0 -> HomeScreen(
+                        book = currentBook,
+                        onStartReading = { book ->
+
+                            activeSessionBookId = book.id
+
+                            readingSessionViewModel.startSession(
+                                book
+                            )
+
+                        })
+
+                    1 -> {
+                        if (selectedBook != null) {
+
+                            BookDetailsScreen(
+                                book = selectedBook,
+                                onBackClick = {
+                                    selectedBookId = null
+                                },
+                                onUpdateBook = { updatedBook ->
+                                    bookViewModel.updateBook(updatedBook)
+                                },
+                                onDeleteBook = { book ->
+                                    bookViewModel.deleteBook(book)
+                                    selectedBookId = null
+                                }
+                            )
+
+                        } else if (isAddingBook) {
+
+                            AddBookScreen(
+                                onBackClick = {
+                                    isAddingBook = false
+                                },
+                                onSaveBook = { newBook ->
+                                    bookViewModel.addBook(newBook)
+                                    isAddingBook = false
+                                }
+                            )
+
+                        } else {
+
+                            BookScreen(
+                                books = books,
+                                onAddBookClick = {
+                                    isAddingBook = true
+                                },
+                                onBookClick = { book ->
+                                    selectedBookId = book.id
+                                }
+                            )
+                        }
+                    }
+
+                    2 -> BookshelfScreen(
+                        books = books,
+                        decorations = decorations,
+                        bookPositions = bookPositions,
+
+                        onBookClick = { book ->
+                            selectedBookId = book.id
+                            selectedItem = 1
+                        },
+
+                        onAddDecoration = { type, shelfIndex, slotIndex ->
+                            bookshelfViewModel.addDecoration(
+                                type,
+                                shelfIndex,
+                                slotIndex
+                            )
+                        },
+
+                        onDeleteDecoration = { decoration ->
+                            bookshelfViewModel.deleteDecoration(decoration)
+                        },
+
+                        onMoveBook = { bookId, shelfIndex, slotIndex ->
+                            bookshelfViewModel.moveBook(
+                                bookId,
+                                shelfIndex,
+                                slotIndex
+                            )
+                        },
+                        onMoveDecoration =
+                            { decoration, shelfIndex, slotIndex ->
+
+                                bookshelfViewModel.moveDecoration(
+                                    decoration,
+                                    shelfIndex,
+                                    slotIndex
+                                )
+                            }
+                    )
+
+                    3 -> Text("Stats page")
+                    4 -> Text("Profile page")
+                }
+            }
+
+        }
+
+    }
+    }

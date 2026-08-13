@@ -1,0 +1,323 @@
+package com.example.readingbunny.ui.screens
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.readingbunny.model.Book
+import com.example.readingbunny.ui.theme.DarkBrown
+import com.example.readingbunny.ui.theme.SoftCream
+import com.example.readingbunny.ui.theme.Terracotta
+import com.example.readingbunny.ui.theme.WarmCream
+
+@Composable
+fun ReadingSessionScreen(
+    book: Book,
+    elapsedSeconds: Long,
+    isRunning: Boolean,
+    onPause: () -> Unit,
+    onResume: () -> Unit,
+    onFinish: (Int) -> Unit,
+    onCancel: () -> Unit
+) {
+
+    var isFinishing by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    var endPageText by rememberSaveable {
+        mutableStateOf(book.currentPage.toString())
+    }
+
+    val endPage = endPageText.toIntOrNull()
+
+    val hasPageError =
+        endPage != null &&
+                (
+                        endPage < book.currentPage ||
+                                endPage > book.totalPages
+                        )
+
+    val formattedTime =
+        formatReadingTime(elapsedSeconds)
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(WarmCream)
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Start
+        ) {
+
+            TextButton(
+                onClick = onCancel
+            ) {
+                Text("Close")
+            }
+        }
+
+        Spacer(
+            modifier = Modifier.height(32.dp)
+        )
+
+        Text(
+            text = book.title,
+            fontSize = 26.sp,
+            color = DarkBrown
+        )
+
+        Spacer(
+            modifier = Modifier.height(6.dp)
+        )
+
+        Text(
+            text = book.author,
+            fontSize = 16.sp,
+            color = DarkBrown.copy(alpha = 0.7f)
+        )
+
+        Spacer(
+            modifier = Modifier.height(48.dp)
+        )
+
+        Text(
+            text = formattedTime,
+            fontSize = 48.sp,
+            color = DarkBrown
+        )
+
+        Spacer(
+            modifier = Modifier.height(8.dp)
+        )
+
+        Text(
+            text = if (isRunning) {
+                "Reading time"
+            } else {
+                "Session paused"
+            },
+            fontSize = 15.sp,
+            color = DarkBrown.copy(alpha = 0.7f)
+        )
+
+        Spacer(
+            modifier = Modifier.height(32.dp)
+        )
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    color = SoftCream,
+                    shape = RoundedCornerShape(18.dp)
+                )
+                .padding(20.dp)
+        ) {
+
+            Column {
+
+                Text(
+                    text = "Started at page",
+                    fontSize = 14.sp,
+                    color = DarkBrown.copy(alpha = 0.7f)
+                )
+
+                Spacer(
+                    modifier = Modifier.height(4.dp)
+                )
+
+                Text(
+                    text = "${book.currentPage} / ${book.totalPages}",
+                    fontSize = 20.sp,
+                    color = DarkBrown
+                )
+            }
+        }
+
+        Spacer(
+            modifier = Modifier.height(32.dp)
+        )
+
+        if (!isFinishing) {
+
+            Button(
+                onClick = {
+                    if (isRunning) {
+                        onPause()
+                    } else {
+                        onResume()
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+
+                Text(
+                    text = if (isRunning) {
+                        "Pause"
+                    } else {
+                        "Resume"
+                    }
+                )
+            }
+
+            Spacer(
+                modifier = Modifier.height(12.dp)
+            )
+
+            Button(
+                onClick = {
+                    if (isRunning) {
+                        onPause()
+                    }
+
+                    endPageText =
+                        book.currentPage.toString()
+
+                    isFinishing = true
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+
+                Text("Stop session")
+            }
+
+        } else {
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = SoftCream,
+                        shape = RoundedCornerShape(18.dp)
+                    )
+                    .padding(20.dp)
+            ) {
+
+                Column {
+
+                    Text(
+                        text = "Where did you stop?",
+                        fontSize = 20.sp,
+                        color = DarkBrown
+                    )
+
+                    Spacer(
+                        modifier = Modifier.height(16.dp)
+                    )
+
+                    OutlinedTextField(
+                        value = endPageText,
+                        onValueChange = {
+                            endPageText = it
+                        },
+                        label = {
+                            Text("End page")
+                        },
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number
+                        ),
+                        isError = hasPageError,
+                        supportingText = {
+
+                            if (hasPageError) {
+                                Text(
+                                    "Page must be between " +
+                                            "${book.currentPage} and ${book.totalPages}"
+                                )
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Spacer(
+                        modifier = Modifier.height(16.dp)
+                    )
+
+                    Button(
+                        onClick = {
+                            val page =
+                                endPage ?: return@Button
+
+                            if (
+                                page >= book.currentPage &&
+                                page <= book.totalPages
+                            ) {
+                                onFinish(page)
+                            }
+                        },
+                        enabled =
+                            endPage != null &&
+                                    !hasPageError,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+
+                        Text("Save session")
+                    }
+
+                    Spacer(
+                        modifier = Modifier.height(8.dp)
+                    )
+
+                    TextButton(
+                        onClick = {
+                            isFinishing = false
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+
+                        Text("Continue reading")
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+private fun formatReadingTime(
+    totalSeconds: Long
+): String {
+
+    val hours =
+        totalSeconds / 3600
+
+    val minutes =
+        (totalSeconds % 3600) / 60
+
+    val seconds =
+        totalSeconds % 60
+
+    return String.format(
+        "%02d:%02d:%02d",
+        hours,
+        minutes,
+        seconds
+    )
+}
