@@ -41,8 +41,28 @@ private val DarkBrown = Color(0xFF382B27)
 @Composable
 fun HomeScreen(
     book: Book?,
-    onStartReading: (Book) -> Unit
+    onStartReading: (Book) -> Unit,
+    todayReadingSeconds: Long,
+    dailyGoalMinutes: Int,
 ) {
+
+    val todayReadingMinutes =
+        todayReadingSeconds / 60
+
+    val goalProgress =
+        if (dailyGoalMinutes > 0) {
+            (todayReadingMinutes.toFloat() / dailyGoalMinutes)
+                .coerceIn(0f, 1f)
+        } else {
+            0f
+        }
+
+    val remainingMinutes =
+        maxOf(
+            0L,
+            dailyGoalMinutes.toLong() - todayReadingMinutes
+        )
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -182,32 +202,61 @@ fun HomeScreen(
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = SoftSage)
+            colors = CardDefaults.cardColors(
+                containerColor = SoftCream
+            )
         ) {
-            Column(modifier = Modifier.padding(18.dp)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(18.dp)
+            ) {
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
+
                     Text(
-                        text = "Obiectivul de astăzi",
+                        text = "Today's goal",
                         fontWeight = FontWeight.SemiBold,
                         color = DarkBrown
                     )
 
                     Text(
-                        text = "12 / 20 min",
+                        text = "$todayReadingMinutes / $dailyGoalMinutes min",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
                         color = DarkBrown
                     )
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(
+                    modifier = Modifier.height(14.dp)
+                )
 
                 LinearProgressIndicator(
-                    progress = { 0.60f },
-                    modifier = Modifier.fillMaxWidth(),
+                    progress = { goalProgress },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(8.dp),
                     color = Terracotta,
                     trackColor = Color.White
+                )
+
+                Spacer(
+                    modifier = Modifier.height(10.dp)
+                )
+
+                Text(
+                    text = if (remainingMinutes > 0) {
+                        "$remainingMinutes min remaining"
+                    } else {
+                        "Daily goal completed! 📚"
+                    },
+                    fontSize = 13.sp,
+                    color = DarkBrown.copy(alpha = 0.7f)
                 )
             }
         }
@@ -219,8 +268,13 @@ fun HomeScreen(
     widthDp = 412,
     heightDp = 915
 )
+
 @Composable
 private fun HomeScreenPreview() {
-    HomeScreen(book = null,
-                onStartReading = {})
+    HomeScreen(
+        book = null,
+        onStartReading = {},
+        todayReadingSeconds = 0L,
+        dailyGoalMinutes = 30
+    )
 }

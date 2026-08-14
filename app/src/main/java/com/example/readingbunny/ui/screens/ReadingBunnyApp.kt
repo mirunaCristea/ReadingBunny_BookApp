@@ -96,6 +96,31 @@ fun ReadingBunnyApp() {
     val isSessionRunning by
     readingSessionViewModel.isRunning.collectAsState()
 
+    val readingSessions by
+    readingSessionViewModel.sessions.collectAsState(
+        initial = emptyList()
+    )
+
+    val today = java.time.LocalDate.now()
+
+    val todayReadingSeconds =
+        readingSessions
+            .filter { session ->
+
+                val sessionDate =
+                    java.time.Instant
+                        .ofEpochMilli(session.startedAt)
+                        .atZone(java.time.ZoneId.systemDefault())
+                        .toLocalDate()
+
+                sessionDate == today
+            }
+            .sumOf {
+                it.durationSeconds
+            }
+
+
+
     var activeSessionBookId by rememberSaveable {
         mutableStateOf<Int?>(null)
     }
@@ -250,6 +275,8 @@ fun ReadingBunnyApp() {
                 when (selectedItem) {
                     0 -> HomeScreen(
                         book = currentBook,
+                        todayReadingSeconds = todayReadingSeconds,
+                        dailyGoalMinutes = 30,
                         onStartReading = { book ->
 
                             activeSessionBookId = book.id
@@ -343,7 +370,10 @@ fun ReadingBunnyApp() {
                             }
                     )
 
-                    3 -> Text("Stats page")
+                    3 -> StatsScreen(
+                        sessions = readingSessions,
+                        books = books
+                    )
                     4 -> Text("Profile page")
                 }
             }

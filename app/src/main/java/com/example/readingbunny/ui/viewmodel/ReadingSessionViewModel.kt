@@ -7,6 +7,7 @@ import com.example.readingbunny.model.Book
 import com.example.readingbunny.model.ReadingSession
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -31,7 +32,8 @@ class ReadingSessionViewModel(
     val isRunning: StateFlow<Boolean> =
         _isRunning.asStateFlow()
 
-
+    val sessions: Flow<List<ReadingSession>> =
+        repository.getAllSessions()
     private var timerJob: Job? = null
 
     private var activeBookId: Int? = null

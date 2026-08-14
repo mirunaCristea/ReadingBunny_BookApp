@@ -15,10 +15,7 @@ class BookRepository(
 
     suspend fun updateBook(book: Book) = bookDao.updateBook(book)
 
-
     suspend fun deleteBook(book: Book) = bookDao.deleteBook(book)
-
-
 
 }
 
