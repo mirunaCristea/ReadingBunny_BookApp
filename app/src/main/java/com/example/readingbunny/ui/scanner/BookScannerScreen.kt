@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.google.mlkit.vision.barcode.BarcodeScanning
 
 @Composable
 fun BookScannerScreen(
@@ -163,15 +164,7 @@ private fun CameraPreview(
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val barcodeScanner = remember {
-
-        val options =
-            com.google.mlkit.vision.barcode.BarcodeScannerOptions.Builder()
-                .setBarcodeFormats(
-                    com.google.mlkit.vision.barcode.common.Barcode.FORMAT_EAN_13
-                )
-                .build()
-
-        com.google.mlkit.vision.barcode.BarcodeScanning.getClient(options)
+        BarcodeScanning.getClient()
     }
 
 
