@@ -20,6 +20,7 @@ val DarkBrown = Color(0xFF382B27)
 val ShelfWood = Color(0xFF8B5E3C)
 
 
+
 val BookSpineColors = listOf(
     Terracotta,
     Color(0xFF6F826A),

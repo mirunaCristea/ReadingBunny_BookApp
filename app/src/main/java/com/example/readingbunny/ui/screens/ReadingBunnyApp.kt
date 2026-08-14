@@ -26,6 +26,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.readingbunny.ReadingBunnyApplication
 import com.example.readingbunny.model.ReadingStatus
+import com.example.readingbunny.ui.viewmodel.BookSearchViewModel
+import com.example.readingbunny.ui.viewmodel.BookSearchViewModelFactory
 import com.example.readingbunny.ui.viewmodel.BookViewModel
 import com.example.readingbunny.ui.viewmodel.BookViewModelFactory
 import com.example.readingbunny.ui.viewmodel.BookshelfViewModel
@@ -129,6 +131,14 @@ fun ReadingBunnyApp() {
         books.firstOrNull {
             it.id == activeSessionBookId
         }
+
+
+
+    val bookSearchViewModel: BookSearchViewModel = viewModel(
+        factory = BookSearchViewModelFactory(
+            application.bookSearchRepository
+        )
+    )
 
     if (activeSessionBook != null) {
 
@@ -313,7 +323,8 @@ fun ReadingBunnyApp() {
                                 onSaveBook = { newBook ->
                                     bookViewModel.addBook(newBook)
                                     isAddingBook = false
-                                }
+                                },
+                                bookSearchViewModel = bookSearchViewModel
                             )
 
                         } else {

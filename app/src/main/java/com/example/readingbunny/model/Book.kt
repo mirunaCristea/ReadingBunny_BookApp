@@ -25,5 +25,8 @@ data class Book(
     val status: ReadingStatus,
     val ownership: BookOwnership,
     val currentPage: Int,
-    val totalPages: Int
+    val totalPages: Int,
+    val isbn: String? = null,
+    val coverUrl: String? = null,
+    val description: String? = null
 )

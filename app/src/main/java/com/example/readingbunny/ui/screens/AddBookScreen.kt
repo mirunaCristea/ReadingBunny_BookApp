@@ -12,13 +12,20 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
@@ -37,12 +44,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.readingbunny.model.Book
 import com.example.readingbunny.model.BookOwnership
+import com.example.readingbunny.model.BookSearchResult
 import com.example.readingbunny.model.ReadingStatus
+import com.example.readingbunny.ui.viewmodel.BookSearchViewModel
 
 private enum class AddBookMethod {
     SEARCH,
@@ -53,8 +64,16 @@ private enum class AddBookMethod {
 @Composable
 fun AddBookScreen(
     onBackClick: () -> Unit,
-    onSaveBook: (Book) -> Unit
+    onSaveBook: (Book) -> Unit,
+    bookSearchViewModel: BookSearchViewModel
+
 ) {
+    val searchUiState by bookSearchViewModel.uiState.collectAsStateWithLifecycle()
+
+    var searchQuery by rememberSaveable {
+        mutableStateOf("")
+    }
+
     var selectedMethod by rememberSaveable {
         mutableStateOf<AddBookMethod?>(null)
     }
@@ -183,7 +202,92 @@ fun AddBookScreen(
         } else {
             when (selectedMethod) {
                 AddBookMethod.SEARCH -> {
-                    Text("The book search will be built here.")
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = searchQuery,
+                            onValueChange = { newValue ->
+                                searchQuery = newValue
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            label = {
+                                Text("Search by title or author")
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = null
+                                )
+                            },
+                            trailingIcon = {
+                                IconButton(
+                                    onClick = {
+                                        bookSearchViewModel.searchBooks(searchQuery)
+                                    },
+                                    enabled = searchQuery.isNotBlank() &&
+                                            !searchUiState.isLoading
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                        contentDescription = "Search"
+                                    )
+                                }
+                            },
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(
+                                imeAction = ImeAction.Search
+                            ),
+                            keyboardActions = KeyboardActions(
+                                onSearch = {
+                                    bookSearchViewModel.searchBooks(searchQuery)
+                                }
+                            )
+                        )
+
+                        if (searchUiState.isLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.align(Alignment.CenterHorizontally)
+                            )
+                        }
+
+                        searchUiState.errorMessage?.let { message ->
+                            Text(
+                                text = message,
+                                color = Color.Red
+                            )
+                        }
+                            if (
+                                !searchUiState.isLoading &&
+                                searchUiState.errorMessage == null &&
+                                searchUiState.results.isNotEmpty()
+                            ) {
+                                Text(
+                                    text = "${searchUiState.results.size} results",
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF382B27)
+                                )
+
+                                LazyColumn(
+                                    modifier = Modifier.weight(1f),
+                                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    items(
+                                        items = searchUiState.results,
+                                        key = { book ->
+                                            book.externalId
+                                        }
+                                    ) { book ->
+                                        BookSearchResultCard(
+                                            book = book
+                                        )
+                                    }
+                                }
+                            }
+
+
+                    }
                 }
 
                 AddBookMethod.SCAN -> {
@@ -472,5 +576,52 @@ private fun BookOwnership.displayName(): String {
         BookOwnership.BORROWED -> "Borrowed"
         BookOwnership.WISHLIST -> "Wishlist"
 
+    }
+}
+
+@Composable
+private fun BookSearchResultCard(
+    book: BookSearchResult
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFFFFF3E7)
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Text(
+                text = book.title,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF382B27)
+            )
+
+            Text(
+                text = book.author,
+                fontSize = 14.sp,
+                color = Color(0xFF74645E)
+            )
+
+            book.totalPages?.let { pageCount ->
+                Text(
+                    text = "$pageCount pages",
+                    fontSize = 13.sp,
+                    color = Color(0xFF74645E)
+                )
+            }
+
+            book.isbn?.let { isbn ->
+                Text(
+                    text = "ISBN: $isbn",
+                    fontSize = 12.sp,
+                    color = Color(0xFF74645E)
+                )
+            }
+        }
     }
 }

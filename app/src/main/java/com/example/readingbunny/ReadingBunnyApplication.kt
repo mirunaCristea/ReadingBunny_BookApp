@@ -7,6 +7,9 @@ import com.example.readingbunny.data.repository.BookRepository
 import com.example.readingbunny.data.repository.ReadingSessionRepository
 import com.example.readingbunny.data.repository.ShelfBookPositionRepository
 import com.example.readingbunny.data.repository.ShelfDecorationRepository
+import com.example.readingbunny.data.remote.GoogleBooksApiClient
+import com.example.readingbunny.data.repository.BookSearchRepository
+import com.example.readingbunny.BuildConfig
 
 class ReadingBunnyApplication : Application() {
 
@@ -35,4 +38,12 @@ class ReadingBunnyApplication : Application() {
             database.readingSessionDao()
         )
     }
+
+    val bookSearchRepository by lazy {
+        BookSearchRepository(
+            api = GoogleBooksApiClient.api,
+            apiKey = BuildConfig.GOOGLE_BOOKS_API_KEY
+        )
+    }
+
 }

@@ -31,12 +31,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.readingbunny.model.Book
+import com.example.readingbunny.ui.theme.DarkBrown
+import com.example.readingbunny.ui.theme.SoftCream
+import com.example.readingbunny.ui.theme.SoftSage
+import com.example.readingbunny.ui.theme.Terracotta
+import com.example.readingbunny.ui.theme.WarmCream
 
-private val WarmCream = Color(0xFFFFF8EF)
-private val SoftCream = Color(0xFFF4E9DA)
-private val Terracotta = Color(0xFFB85C48)
-private val SoftSage = Color(0xFFDDE5D6)
-private val DarkBrown = Color(0xFF382B27)
 
 @Composable
 fun HomeScreen(

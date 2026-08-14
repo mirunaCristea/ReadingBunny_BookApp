@@ -4,6 +4,9 @@ import android.content.Context
 import androidx.room3.Database
 import androidx.room3.Room
 import androidx.room3.RoomDatabase
+import androidx.room3.migration.Migration
+import androidx.sqlite.SQLiteConnection
+import androidx.sqlite.execSQL
 import com.example.readingbunny.model.Book
 import com.example.readingbunny.model.ReadingSession
 import com.example.readingbunny.model.ShelfBookPosition
@@ -16,7 +19,7 @@ import com.example.readingbunny.model.ShelfDecoration
         ShelfBookPosition::class,
         ReadingSession::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 abstract class ReadingBunnyDatabase : RoomDatabase() {
@@ -29,6 +32,23 @@ abstract class ReadingBunnyDatabase : RoomDatabase() {
     abstract fun readingSessionDao(): ReadingSessionDao
     companion object {
 
+        private val MIGRATION_5_6 = object : Migration(5,6) {
+            override suspend fun migrate(
+                connection: SQLiteConnection
+            ) {
+                connection.execSQL(
+                    "ALTER TABLE `books` ADD COLUMN `isbn` TEXT"
+                )
+
+                connection.execSQL(
+                    "ALTER TABLE `books` ADD COLUMN `coverUrl` TEXT"
+                )
+
+                connection.execSQL(
+                    "ALTER TABLE `books` ADD COLUMN `description` TEXT"
+                )
+            }
+        }
         @Volatile
         private var INSTANCE: ReadingBunnyDatabase? = null
 
@@ -39,7 +59,9 @@ abstract class ReadingBunnyDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder<ReadingBunnyDatabase>(
                     context = context.applicationContext,
                     name = "reading_bunny_database"
-                ).build()
+                )
+                    .addMigrations(MIGRATION_5_6)
+                    .build()
 
                 INSTANCE = instance
 
