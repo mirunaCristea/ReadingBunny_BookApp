@@ -22,12 +22,11 @@ class BarcodeBookAnalyzer(
 
         frameCounter++
 
-        if (frameCounter % 30 == 0) {
-            Log.d(
-                "BarcodeAnalyzer",
-                "Analyzing camera frames..."
-            )
-        }
+
+        Log.d(
+            "BarcodeAnalyzer",
+            "Frame received: $frameCounter"
+        )
 
         val mediaImage = imageProxy.image
 

@@ -36,6 +36,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.mlkit.vision.barcode.BarcodeScanning
+import java.util.concurrent.Executors
 
 @Composable
 fun BookScannerScreen(
@@ -163,6 +164,11 @@ private fun CameraPreview(
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+
+    val cameraExecutor = remember {
+        Executors.newSingleThreadExecutor()
+    }
+
     val barcodeScanner = remember {
         BarcodeScanning.getClient()
     }
@@ -174,9 +180,10 @@ private fun CameraPreview(
     }
 
     DisposableEffect(Unit) {
-
         onDispose {
             cameraProvider?.unbindAll()
+            barcodeScanner.close()
+            cameraExecutor.shutdown()
         }
     }
 
@@ -220,16 +227,18 @@ private fun CameraPreview(
                             )
                             .build()
 
-                    if (mode == BookScannerMode.BARCODE) {
+                    Log.d(
+                        "BookScanner",
+                        "Attaching barcode analyzer"
+                    )
 
-                        imageAnalysis.setAnalyzer(
-                            ContextCompat.getMainExecutor(viewContext),
-                            BarcodeBookAnalyzer(
-                                scanner = barcodeScanner,
-                                onBarcodeDetected = onBarcodeDetected
-                            )
+                    imageAnalysis.setAnalyzer(
+                        cameraExecutor,
+                        BarcodeBookAnalyzer(
+                            scanner = barcodeScanner,
+                            onBarcodeDetected = onBarcodeDetected
                         )
-                    }
+                    )
 
                     provider.unbindAll()
 
@@ -238,6 +247,11 @@ private fun CameraPreview(
                         CameraSelector.DEFAULT_BACK_CAMERA,
                         preview,
                         imageAnalysis
+                    )
+
+                    Log.d(
+                        "BookScanner",
+                        "Preview + ImageAnalysis successfully bound"
                     )
 
 
