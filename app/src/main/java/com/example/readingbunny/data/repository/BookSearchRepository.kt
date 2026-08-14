@@ -2,6 +2,9 @@ package com.example.readingbunny.data.repository
 
 import com.example.readingbunny.data.remote.GoogleBooksApi
 import com.example.readingbunny.model.BookSearchResult
+import kotlinx.coroutines.delay
+import retrofit2.HttpException
+import java.io.IOException
 
 class BookSearchRepository(
     private val api: GoogleBooksApi,
@@ -16,10 +19,12 @@ class BookSearchRepository(
             return emptyList()
         }
 
-        val response = api.searchBooks(
-            query = query.trim(),
-            apiKey = apiKey
-        )
+        val response = retryTransientRequest {
+            api.searchBooks(
+                query = query.trim(),
+                apiKey = apiKey
+            )
+        }
 
         return response.items
             .orEmpty()
@@ -71,5 +76,38 @@ class BookSearchRepository(
                     description = volumeInfo.description
                 )
             }
+    }
+}
+
+private suspend fun <T> retryTransientRequest(
+    maxRetries: Int = 2,
+    initialDelayMillis: Long = 500L,
+    request: suspend () -> T
+): T {
+    var retryCount = 0
+    var retryDelay = initialDelayMillis
+
+    while (true) {
+        try {
+            return request()
+        } catch (exception: HttpException) {
+            val isTemporaryError =
+                exception.code() == 502 ||
+                        exception.code() == 503 ||
+                        exception.code() == 504
+
+            if (!isTemporaryError || retryCount >= maxRetries) {
+                throw exception
+            }
+        } catch (exception: IOException) {
+            if (retryCount >= maxRetries) {
+                throw exception
+            }
+        }
+
+        delay(retryDelay)
+
+        retryCount++
+        retryDelay *= 2
     }
 }

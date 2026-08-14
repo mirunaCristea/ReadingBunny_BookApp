@@ -45,7 +45,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.readingbunny.model.Book
 import com.example.readingbunny.model.ReadingStatus
-
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import coil3.compose.AsyncImage
 
 
 
@@ -235,18 +237,25 @@ fun BookCard(book: Book, onClick: () -> Unit) {
                 modifier = Modifier
                     .width(82.dp)
                     .height(118.dp)
-                    .background(
-                        color =  Color(0xFFB85C48),
-                        shape = RoundedCornerShape(12.dp)
-                    ),
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color(0xFFB85C48)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.MenuBook,
-                    contentDescription = "Book cover",
-                    tint= Color.White,
-                    modifier = Modifier.size(36.dp)
-                )
+                if (!book.coverUrl.isNullOrBlank()) {
+                    AsyncImage(
+                        model = book.coverUrl,
+                        contentDescription = "Cover ${book.title}",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.MenuBook,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(38.dp)
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.width(16.dp))
