@@ -1,5 +1,6 @@
 package com.example.readingbunny.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -57,6 +58,9 @@ import com.example.readingbunny.ui.viewmodel.BookSearchViewModel
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import coil3.compose.AsyncImage
+import com.example.readingbunny.ui.scanner.BookScannerMode
+import com.example.readingbunny.ui.scanner.BookScannerScreen
+
 private enum class AddBookMethod {
     SEARCH,
     SCAN,
@@ -79,6 +83,10 @@ fun AddBookScreen(
     var selectedMethod by rememberSaveable {
         mutableStateOf<AddBookMethod?>(null)
     }
+    var scannerMode by rememberSaveable {
+        mutableStateOf(BookScannerMode.BARCODE)
+    }
+
     var bookTitle by rememberSaveable {
         mutableStateOf("")
     }
@@ -314,7 +322,21 @@ fun AddBookScreen(
                 }
 
                 AddBookMethod.SCAN -> {
-                    Text("The camera and scanner will be built here.")
+
+                    BookScannerScreen(
+                        mode = scannerMode,
+                        onModeChange = { newMode ->
+                            scannerMode = newMode
+                        },
+
+                        onBarcodeDetected = { barcode ->
+                            Log.d(
+                                "BookScanner",
+                                "Detected barcode: $barcode"
+                            )
+                        },
+                        modifier = Modifier.weight(1f)
+                    )
                 }
 
                 AddBookMethod.MANUAL -> {
