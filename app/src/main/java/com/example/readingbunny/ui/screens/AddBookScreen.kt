@@ -329,6 +329,29 @@ fun AddBookScreen(
                             scannerMode = newMode
                         },
 
+                        onSpineTextRecognized = { text ->
+
+
+                            val searchText = text
+                                .lines()
+                                .map { line ->
+                                    line.trim()
+                                }
+                                .filter { line ->
+                                    line.length >= 2
+                                }
+                                .joinToString(" ")
+
+                            searchQuery = searchText
+
+                            bookSearchViewModel.searchBooks(
+                                searchText
+                            )
+
+                            selectedMethod = AddBookMethod.SEARCH
+
+                        },
+
                         onBarcodeDetected = { barcode ->
 
                             searchQuery = barcode
@@ -340,7 +363,11 @@ fun AddBookScreen(
                             selectedMethod = AddBookMethod.SEARCH
                         },
                         modifier = Modifier.weight(1f)
+
+
+
                     )
+
                 }
 
                 AddBookMethod.MANUAL -> {

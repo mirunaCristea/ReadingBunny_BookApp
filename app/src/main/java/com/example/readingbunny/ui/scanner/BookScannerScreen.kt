@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageCapture
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
@@ -15,9 +16,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Text
@@ -39,13 +38,20 @@ import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import java.util.concurrent.Executors
+import androidx.compose.runtime.key
+import com.google.mlkit.vision.text.TextRecognition
+import com.google.mlkit.vision.text.latin.TextRecognizerOptions
+import androidx.camera.core.ImageCaptureException
+import androidx.camera.core.ImageProxy
 
 @Composable
 fun BookScannerScreen(
     mode: BookScannerMode,
     onModeChange: (BookScannerMode) -> Unit,
     onBarcodeDetected: (String) -> Unit,
-    modifier: Modifier = Modifier
+    onSpineTextRecognized: (String) -> Unit,
+    modifier: Modifier = Modifier,
+
 ) {
     val context = LocalContext.current
 
@@ -86,13 +92,16 @@ fun BookScannerScreen(
 
         if (hasCameraPermission) {
 
-            CameraPreview(
-                mode = mode,
-                onBarcodeDetected = onBarcodeDetected,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-            )
+            key(mode) {
+                CameraPreview(
+                    mode = mode,
+                    onBarcodeDetected = onBarcodeDetected,
+                    onSpineTextRecognized = onSpineTextRecognized,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                )
+            }
 
         } else {
 
@@ -162,6 +171,7 @@ private fun ScannerModeSelector(
 private fun CameraPreview(
     mode: BookScannerMode,
     onBarcodeDetected: (String) -> Unit,
+    onSpineTextRecognized: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -182,6 +192,21 @@ private fun CameraPreview(
         BarcodeScanning.getClient(options)
     }
 
+    val spineTextRecognizer = remember {
+
+        SpineTextRecognizer(
+            recognizer = TextRecognition.getClient(
+                TextRecognizerOptions.DEFAULT_OPTIONS
+            ),
+            callbackExecutor = ContextCompat.getMainExecutor(context)
+        )
+    }
+
+    var imageCapture by remember {
+        mutableStateOf<ImageCapture?>(null)
+    }
+
+
 
     var cameraProvider by remember {
         mutableStateOf<ProcessCameraProvider?>(null)
@@ -190,92 +215,168 @@ private fun CameraPreview(
     DisposableEffect(Unit) {
         onDispose {
             cameraProvider?.unbindAll()
+
             barcodeScanner.close()
+            spineTextRecognizer.close()
+
             cameraExecutor.shutdown()
         }
     }
 
-    AndroidView(
-        modifier = modifier,
-        factory = { viewContext ->
+    Box(
+        modifier=modifier
+    ) {
 
-            val previewView = PreviewView(viewContext).apply {
-                scaleType = PreviewView.ScaleType.FILL_CENTER
-                implementationMode = PreviewView.ImplementationMode.COMPATIBLE
-            }
+        AndroidView(
+            modifier = Modifier.fillMaxSize(),
+            factory = { viewContext ->
 
-            val cameraProviderFuture =
-                ProcessCameraProvider.getInstance(viewContext)
+                val previewView = PreviewView(viewContext).apply {
+                    scaleType = PreviewView.ScaleType.FILL_CENTER
+                    implementationMode = PreviewView.ImplementationMode.COMPATIBLE
+                }
 
-            cameraProviderFuture.addListener({
+                val cameraProviderFuture =
+                    ProcessCameraProvider.getInstance(viewContext)
 
-                try {
+                cameraProviderFuture.addListener({
 
-                    val provider =
-                        cameraProviderFuture.get()
+                    try {
 
-                    cameraProvider = provider
+                        val provider =
+                            cameraProviderFuture.get()
 
-                    val preview =
-                        Preview.Builder()
-                            .build()
-                            .also { cameraPreview ->
+                        cameraProvider = provider
 
-                                cameraPreview.surfaceProvider =
-                                    previewView.surfaceProvider
+                        val preview =
+                            Preview.Builder()
+                                .build()
+                                .also { cameraPreview ->
+
+                                    cameraPreview.surfaceProvider =
+                                        previewView.surfaceProvider
+                                }
+
+                        provider.unbindAll()
+
+                        when (mode) {
+
+                            BookScannerMode.BARCODE -> {
+
+                                val imageAnalysis =
+                                    androidx.camera.core.ImageAnalysis.Builder()
+                                        .setBackpressureStrategy(
+                                            androidx.camera.core.ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST
+                                        )
+                                        .build()
+
+                                imageAnalysis.setAnalyzer(
+                                    cameraExecutor,
+                                    BarcodeBookAnalyzer(
+                                        scanner = barcodeScanner,
+                                        onBarcodeDetected = onBarcodeDetected
+                                    )
+                                )
+
+                                provider.bindToLifecycle(
+                                    lifecycleOwner,
+                                    CameraSelector.DEFAULT_BACK_CAMERA,
+                                    preview,
+                                    imageAnalysis
+                                )
+
+                                Log.d(
+                                    "BookScanner",
+                                    "BARCODE mode: Preview + ImageAnalysis bound"
+                                )
                             }
 
 
+                            BookScannerMode.SPINE -> {
+
+                                val capture = ImageCapture.Builder()
+                                    .setCaptureMode(
+                                        ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY
+                                    )
+                                    .build()
+
+                                imageCapture = capture
+
+                                provider.bindToLifecycle(
+                                    lifecycleOwner,
+                                    CameraSelector.DEFAULT_BACK_CAMERA,
+                                    preview,
+                                    capture
+                                )
+
+                                Log.d(
+                                    "BookScanner",
+                                    "SPINE mode: Preview + ImageCapture bound"
+                                )
+                            }
+                        }
 
 
-                    val imageAnalysis =
-                        androidx.camera.core.ImageAnalysis.Builder()
-                            .setBackpressureStrategy(
-                                androidx.camera.core.ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST
-                            )
-                            .build()
+                    } catch (exception: Exception) {
 
-                    Log.d(
-                        "BookScanner",
-                        "Attaching barcode analyzer"
-                    )
-
-                    imageAnalysis.setAnalyzer(
-                        cameraExecutor,
-                        BarcodeBookAnalyzer(
-                            scanner = barcodeScanner,
-                            onBarcodeDetected = onBarcodeDetected
+                        Log.e(
+                            "BookScanner",
+                            "Could not start camera",
+                            exception
                         )
+                    }
+
+                }, ContextCompat.getMainExecutor(viewContext))
+
+                previewView
+            }
+        )
+
+        if (mode == BookScannerMode.SPINE) {
+
+            Button(
+                onClick = {
+
+                    val capture = imageCapture
+                        ?: return@Button
+
+                    capture.takePicture(
+                        cameraExecutor,
+                        object : ImageCapture.OnImageCapturedCallback() {
+
+                            override fun onCaptureSuccess(
+                                image: ImageProxy
+                            ) {
+
+                                spineTextRecognizer.recognize(
+                                    imageProxy = image,
+                                    onTextRecognized = onSpineTextRecognized
+                                )
+                            }
+
+                            override fun onError(
+                                exception: ImageCaptureException
+                            ) {
+
+                                Log.e(
+                                    "SpineScanner",
+                                    "Spine capture failed",
+                                    exception
+                                )
+                            }
+                        }
                     )
-
-                    provider.unbindAll()
-
-                    provider.bindToLifecycle(
-                        lifecycleOwner,
-                        CameraSelector.DEFAULT_BACK_CAMERA,
-                        preview,
-                        imageAnalysis
-                    )
-
-                    Log.d(
-                        "BookScanner",
-                        "Preview + ImageAnalysis successfully bound"
-                    )
-
-
-
-                } catch (exception: Exception) {
-
-                    Log.e(
-                        "BookScanner",
-                        "Could not start camera",
-                        exception
-                    )
-                }
-
-            }, ContextCompat.getMainExecutor(viewContext))
-
-            previewView
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(20.dp),
+                enabled = imageCapture != null
+            ) {
+                Text("Capture spine")
+            }
         }
-    )
+
+    }
+
+
 }
