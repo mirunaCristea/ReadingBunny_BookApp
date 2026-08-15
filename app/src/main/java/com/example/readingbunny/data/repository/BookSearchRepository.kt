@@ -1,6 +1,7 @@
 package com.example.readingbunny.data.repository
 
 import com.example.readingbunny.data.remote.GoogleBooksApi
+import com.example.readingbunny.data.remote.OpenLibraryApi
 import com.example.readingbunny.model.BookSearchResult
 import kotlinx.coroutines.delay
 import retrofit2.HttpException
@@ -8,7 +9,8 @@ import java.io.IOException
 
 class BookSearchRepository(
     private val api: GoogleBooksApi,
-    private val apiKey: String
+    private val apiKey: String,
+    private val openLibraryApi: OpenLibraryApi,
 ) {
 
     suspend fun searchBooks(
@@ -76,6 +78,69 @@ class BookSearchRepository(
                     description = volumeInfo.description
                 )
             }
+    }
+
+    suspend fun searchBookByIsbn(
+        isbn: String
+    ): List<BookSearchResult> {
+
+        val cleanIsbn = isbn.trim()
+
+        if (cleanIsbn.isBlank()) {
+            return emptyList()
+        }
+
+        val googleResults =
+            searchBooks("isbn:$cleanIsbn")
+
+        if (googleResults.isNotEmpty()) {
+            return googleResults
+        }
+
+        return searchOpenLibraryByIsbn(cleanIsbn)
+    }
+
+    private suspend fun searchOpenLibraryByIsbn(
+        isbn: String
+    ): List<BookSearchResult> {
+
+        val response = openLibraryApi.searchBooks(
+            query = "isbn:$isbn"
+        )
+
+        return response.docs.mapNotNull { book ->
+
+            val title = book.title?.trim().orEmpty()
+
+            if (title.isBlank()) {
+                return@mapNotNull null
+            }
+
+            val author =
+                book.authors
+                    ?.joinToString(", ")
+                    ?: "Unknown author"
+
+            val matchedIsbn =
+                book.isbn
+                    ?.firstOrNull { it == isbn }
+                    ?: isbn
+
+            val coverUrl =
+                book.coverId?.let { coverId ->
+                    "https://covers.openlibrary.org/b/id/$coverId-M.jpg"
+                }
+
+            BookSearchResult(
+                externalId = "openlibrary:${book.key}",
+                title = title,
+                author = author,
+                totalPages = book.numberOfPages,
+                isbn = matchedIsbn,
+                coverUrl = coverUrl,
+                description = null
+            )
+        }
     }
 }
 

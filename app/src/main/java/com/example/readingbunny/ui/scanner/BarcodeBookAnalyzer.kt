@@ -15,18 +15,12 @@ class BarcodeBookAnalyzer(
 ) : ImageAnalysis.Analyzer {
 
     private var lastDetectedValue: String? = null
-    private var frameCounter = 0
 
     @OptIn(ExperimentalGetImage::class)
     override fun analyze(imageProxy: ImageProxy) {
 
-        frameCounter++
 
 
-        Log.d(
-            "BarcodeAnalyzer",
-            "Frame received: $frameCounter"
-        )
 
         val mediaImage = imageProxy.image
 
@@ -43,29 +37,18 @@ class BarcodeBookAnalyzer(
         scanner.process(inputImage)
             .addOnSuccessListener { barcodes ->
 
-                barcodes.forEach { barcode ->
-
-                    Log.d(
-                        "BarcodeAnalyzer",
-                        "Detected format=${barcode.format}, value=${barcode.rawValue}"
-                    )
-                }
-
-                val isbn =
-                    barcodes
-                        .mapNotNull { barcode ->
-                            barcode.rawValue
-                                ?.filter { character ->
-                                    character.isDigit()
-                                }
-                        }
-                        .firstOrNull { value ->
-                            value.length == 13 &&
-                                    (
-                                            value.startsWith("978") ||
-                                                    value.startsWith("979")
-                                            )
-                        }
+                val isbn = barcodes
+                    .firstOrNull { barcode ->
+                        barcode.format == Barcode.FORMAT_EAN_13
+                    }
+                    ?.rawValue
+                    ?.takeIf { value ->
+                        value.length == 13 &&
+                                (
+                                        value.startsWith("978") ||
+                                                value.startsWith("979")
+                                        )
+                    }
 
                 if (
                     isbn != null &&

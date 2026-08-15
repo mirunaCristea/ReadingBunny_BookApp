@@ -10,6 +10,7 @@ import com.example.readingbunny.data.repository.ShelfDecorationRepository
 import com.example.readingbunny.data.remote.GoogleBooksApiClient
 import com.example.readingbunny.data.repository.BookSearchRepository
 import com.example.readingbunny.BuildConfig
+import com.example.readingbunny.data.remote.OpenLibraryApiClient
 
 class ReadingBunnyApplication : Application() {
 
@@ -42,6 +43,7 @@ class ReadingBunnyApplication : Application() {
     val bookSearchRepository by lazy {
         BookSearchRepository(
             api = GoogleBooksApiClient.api,
+            openLibraryApi = OpenLibraryApiClient.api,
             apiKey = BuildConfig.GOOGLE_BOOKS_API_KEY
         )
     }

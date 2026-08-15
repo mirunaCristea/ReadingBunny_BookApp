@@ -330,10 +330,14 @@ fun AddBookScreen(
                         },
 
                         onBarcodeDetected = { barcode ->
-                            Log.d(
-                                "BookScanner",
-                                "Detected barcode: $barcode"
+
+                            searchQuery = barcode
+
+                            bookSearchViewModel.searchBookByIsbn(
+                                barcode
                             )
+
+                            selectedMethod = AddBookMethod.SEARCH
                         },
                         modifier = Modifier.weight(1f)
                     )

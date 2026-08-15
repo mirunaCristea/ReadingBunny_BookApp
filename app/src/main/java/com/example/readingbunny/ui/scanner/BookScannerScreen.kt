@@ -35,7 +35,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
+import com.google.mlkit.vision.barcode.common.Barcode
 import java.util.concurrent.Executors
 
 @Composable
@@ -170,9 +172,15 @@ private fun CameraPreview(
     }
 
     val barcodeScanner = remember {
-        BarcodeScanning.getClient()
-    }
 
+        val options = BarcodeScannerOptions.Builder()
+            .setBarcodeFormats(
+                Barcode.FORMAT_EAN_13
+            )
+            .build()
+
+        BarcodeScanning.getClient(options)
+    }
 
 
     var cameraProvider by remember {

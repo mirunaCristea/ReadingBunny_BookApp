@@ -69,4 +69,54 @@ class BookSearchViewModel(
             }
         }
     }
+
+
+    fun searchBookByIsbn(isbn: String) {
+
+        val cleanIsbn = isbn.trim()
+
+        if (cleanIsbn.isBlank()) {
+            return
+        }
+
+        viewModelScope.launch {
+
+            _uiState.update {
+                it.copy(
+                    isLoading = true,
+                    errorMessage = null
+                )
+            }
+
+            try {
+
+                val results =
+                    repository.searchBookByIsbn(cleanIsbn)
+
+                _uiState.update {
+                    it.copy(
+                        results = results,
+                        isLoading = false
+                    )
+                }
+
+            } catch (exception: Exception) {
+
+                Log.e(
+                    "BookSearch",
+                    "ISBN search failed",
+                    exception
+                )
+
+                _uiState.update {
+                    it.copy(
+                        results = emptyList(),
+                        isLoading = false,
+                        errorMessage =
+                            exception.message ?: "Book lookup failed"
+                    )
+                }
+            }
+        }
+    }
 }
