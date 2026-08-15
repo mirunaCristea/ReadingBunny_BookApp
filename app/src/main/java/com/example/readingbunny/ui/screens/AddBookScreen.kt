@@ -344,7 +344,7 @@ fun AddBookScreen(
 
                             searchQuery = searchText
 
-                            bookSearchViewModel.searchBooks(
+                            bookSearchViewModel.searchBooksWithFallback(
                                 searchText
                             )
 

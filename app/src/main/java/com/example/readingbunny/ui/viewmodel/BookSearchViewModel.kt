@@ -119,4 +119,58 @@ class BookSearchViewModel(
             }
         }
     }
+
+
+    fun searchBooksWithFallback(query: String) {
+
+        val cleanQuery = query.trim()
+
+        if (cleanQuery.isBlank()) {
+            _uiState.value = BookSearchUiState()
+            return
+        }
+
+        viewModelScope.launch {
+
+            _uiState.update {
+                it.copy(
+                    isLoading = true,
+                    errorMessage = null
+                )
+            }
+
+            try {
+
+                val results =
+                    repository.searchBooksWithFallback(
+                        cleanQuery
+                    )
+
+                _uiState.update {
+                    it.copy(
+                        results = results,
+                        isLoading = false
+                    )
+                }
+
+            } catch (exception: Exception) {
+
+                Log.e(
+                    "BookSearch",
+                    "Fallback search failed",
+                    exception
+                )
+
+                _uiState.update {
+                    it.copy(
+                        results = emptyList(),
+                        isLoading = false,
+                        errorMessage =
+                            exception.message
+                                ?: "Book search failed"
+                    )
+                }
+            }
+        }
+    }
 }

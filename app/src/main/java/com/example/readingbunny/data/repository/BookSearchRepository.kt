@@ -97,20 +97,28 @@ class BookSearchRepository(
             return googleResults
         }
 
-        return searchOpenLibraryByIsbn(cleanIsbn)
+        return searchOpenLibrary(
+            query = "isbn:$cleanIsbn",
+            fallbackIsbn = cleanIsbn
+        )
     }
 
-    private suspend fun searchOpenLibraryByIsbn(
-        isbn: String
+    private suspend fun searchOpenLibrary(
+        query: String,
+        fallbackIsbn: String? = null
     ): List<BookSearchResult> {
 
-        val response = openLibraryApi.searchBooks(
-            query = "isbn:$isbn"
-        )
+        val response = retryTransientRequest {
+            openLibraryApi.searchBooks(
+                query = query
+            )
+        }
 
         return response.docs.mapNotNull { book ->
 
-            val title = book.title?.trim().orEmpty()
+            val title = book.title
+                ?.trim()
+                .orEmpty()
 
             if (title.isBlank()) {
                 return@mapNotNull null
@@ -121,10 +129,14 @@ class BookSearchRepository(
                     ?.joinToString(", ")
                     ?: "Unknown author"
 
-            val matchedIsbn =
-                book.isbn
-                    ?.firstOrNull { it == isbn }
-                    ?: isbn
+            val isbn =
+                fallbackIsbn
+                    ?: book.isbn
+                        ?.firstOrNull { value ->
+                            value.length == 13
+                        }
+                    ?: book.isbn
+                        ?.firstOrNull()
 
             val coverUrl =
                 book.coverId?.let { coverId ->
@@ -136,43 +148,63 @@ class BookSearchRepository(
                 title = title,
                 author = author,
                 totalPages = book.numberOfPages,
-                isbn = matchedIsbn,
+                isbn = isbn,
                 coverUrl = coverUrl,
                 description = null
             )
         }
     }
-}
 
-private suspend fun <T> retryTransientRequest(
-    maxRetries: Int = 2,
-    initialDelayMillis: Long = 500L,
-    request: suspend () -> T
-): T {
-    var retryCount = 0
-    var retryDelay = initialDelayMillis
+    suspend fun searchBooksWithFallback(
+        query: String
+    ): List<BookSearchResult> {
 
-    while (true) {
-        try {
-            return request()
-        } catch (exception: HttpException) {
-            val isTemporaryError =
-                exception.code() == 502 ||
-                        exception.code() == 503 ||
-                        exception.code() == 504
+        val cleanQuery = query.trim()
 
-            if (!isTemporaryError || retryCount >= maxRetries) {
-                throw exception
-            }
-        } catch (exception: IOException) {
-            if (retryCount >= maxRetries) {
-                throw exception
-            }
+        if (cleanQuery.isBlank()) {
+            return emptyList()
         }
 
-        delay(retryDelay)
+        val googleResults = searchBooks(cleanQuery)
 
-        retryCount++
-        retryDelay *= 2
+        if (googleResults.isNotEmpty()) {
+            return googleResults
+        }
+
+        return searchOpenLibrary(cleanQuery)
+    }
+
+
+    private suspend fun <T> retryTransientRequest(
+        maxRetries: Int = 2,
+        initialDelayMillis: Long = 500L,
+        request: suspend () -> T
+    ): T {
+        var retryCount = 0
+        var retryDelay = initialDelayMillis
+
+        while (true) {
+            try {
+                return request()
+            } catch (exception: HttpException) {
+                val isTemporaryError =
+                    exception.code() == 502 ||
+                            exception.code() == 503 ||
+                            exception.code() == 504
+
+                if (!isTemporaryError || retryCount >= maxRetries) {
+                    throw exception
+                }
+            } catch (exception: IOException) {
+                if (retryCount >= maxRetries) {
+                    throw exception
+                }
+            }
+
+            delay(retryDelay)
+
+            retryCount++
+            retryDelay *= 2
+        }
     }
 }
