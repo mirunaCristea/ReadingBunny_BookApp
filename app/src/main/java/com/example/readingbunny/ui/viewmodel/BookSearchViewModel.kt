@@ -14,7 +14,8 @@ import android.util.Log
 data class BookSearchUiState(
     val results: List<BookSearchResult> = emptyList(),
     val isLoading: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val hasSearched: Boolean = false
 )
 
 class BookSearchViewModel(
@@ -36,7 +37,8 @@ class BookSearchViewModel(
             _uiState.update {
                 it.copy(
                     isLoading = true,
-                    errorMessage = null
+                    errorMessage = null,
+                    hasSearched = true
                 )
             }
 
@@ -84,7 +86,8 @@ class BookSearchViewModel(
             _uiState.update {
                 it.copy(
                     isLoading = true,
-                    errorMessage = null
+                    errorMessage = null,
+                    hasSearched = true
                 )
             }
 
@@ -135,7 +138,8 @@ class BookSearchViewModel(
             _uiState.update {
                 it.copy(
                     isLoading = true,
-                    errorMessage = null
+                    errorMessage = null,
+                    hasSearched = true
                 )
             }
 

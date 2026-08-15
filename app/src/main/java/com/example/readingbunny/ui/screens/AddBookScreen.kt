@@ -141,6 +141,9 @@ fun AddBookScreen(
                 selectedStatus != null &&
                 selectedOwnership != null
 
+    var scannerMessage by rememberSaveable {
+        mutableStateOf<String?>(null)
+    }
 
     Column(
         modifier = Modifier
@@ -316,6 +319,50 @@ fun AddBookScreen(
                                     }
                                 }
                             }
+                        if (
+                            searchUiState.hasSearched &&
+                            !searchUiState.isLoading &&
+                            searchUiState.errorMessage == null &&
+                            searchUiState.results.isEmpty()
+                        ) {
+
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 24.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+
+                                Text(
+                                    text = "We couldn't identify this book.",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 18.sp,
+                                    color = Color(0xFF382B27)
+                                )
+
+                                Text(
+                                    text = "Try scanning it again or search for it manually.",
+                                    color = Color(0xFF74645E)
+                                )
+
+                                Button(
+                                    onClick = {
+                                        selectedMethod = AddBookMethod.SCAN
+                                    }
+                                ) {
+                                    Text("Scan again")
+                                }
+
+                                Button(
+                                    onClick = {
+                                        selectedMethod = AddBookMethod.MANUAL
+                                    }
+                                ) {
+                                    Text("Add manually")
+                                }
+                            }
+                        }
 
 
                     }
@@ -342,14 +389,30 @@ fun AddBookScreen(
                                 }
                                 .joinToString(" ")
 
-                            searchQuery = searchText
-
-                            bookSearchViewModel.searchBooksWithFallback(
+                            val recognizedWords =
                                 searchText
-                            )
+                                    .split(" ")
+                                    .filter { word ->
+                                        word.length >= 2
+                                    }
 
-                            selectedMethod = AddBookMethod.SEARCH
+                            if (recognizedWords.size < 2) {
 
+                                scannerMessage =
+                                    "I couldn't read enough text. Try taking another photo."
+
+                            } else {
+
+                                scannerMessage = null
+
+                                searchQuery = searchText
+
+                                bookSearchViewModel.searchBooksWithFallback(
+                                    searchText
+                                )
+
+                                selectedMethod = AddBookMethod.SEARCH
+                            }
                         },
 
                         onBarcodeDetected = { barcode ->
@@ -367,6 +430,15 @@ fun AddBookScreen(
 
 
                     )
+
+                    scannerMessage?.let { message ->
+
+                        Text(
+                            text = message,
+                            color = Color(0xFFB85C48),
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                    }
 
                 }
 
