@@ -11,15 +11,17 @@ import com.example.readingbunny.model.Book
 import com.example.readingbunny.model.ReadingSession
 import com.example.readingbunny.model.ShelfBookPosition
 import com.example.readingbunny.model.ShelfDecoration
+import com.example.readingbunny.model.ReadingJournalEntry
 
 @Database(
     entities = [
         Book::class,
         ShelfDecoration::class,
         ShelfBookPosition::class,
-        ReadingSession::class
+        ReadingSession::class,
+        ReadingJournalEntry::class
     ],
-    version = 6,
+    version = 7,
     exportSchema = false
 )
 abstract class ReadingBunnyDatabase : RoomDatabase() {
@@ -30,6 +32,8 @@ abstract class ReadingBunnyDatabase : RoomDatabase() {
     abstract fun shelfBookPositionDao(): ShelfBookPositionDao
 
     abstract fun readingSessionDao(): ReadingSessionDao
+
+    abstract fun readingJournalDao(): ReadingJournalDao
     companion object {
 
         private val MIGRATION_5_6 = object : Migration(5,6) {
@@ -48,7 +52,31 @@ abstract class ReadingBunnyDatabase : RoomDatabase() {
                     "ALTER TABLE `books` ADD COLUMN `description` TEXT"
                 )
             }
+
+
         }
+
+        private val MIGRATION_6_7 =
+            object : Migration(6, 7) {
+
+                override suspend fun migrate(
+                    connection: SQLiteConnection
+                ) {
+
+                    connection.execSQL(
+                        """
+                CREATE TABLE IF NOT EXISTS `reading_journal_entries` (
+                    `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    `bookId` INTEGER NOT NULL,
+                    `type` TEXT NOT NULL,
+                    `content` TEXT NOT NULL,
+                    `page` INTEGER,
+                    `createdAt` INTEGER NOT NULL
+                )
+                """.trimIndent()
+                    )
+                }
+            }
         @Volatile
         private var INSTANCE: ReadingBunnyDatabase? = null
 
@@ -60,7 +88,10 @@ abstract class ReadingBunnyDatabase : RoomDatabase() {
                     context = context.applicationContext,
                     name = "reading_bunny_database"
                 )
-                    .addMigrations(MIGRATION_5_6)
+                    .addMigrations(
+                        MIGRATION_5_6,
+                        MIGRATION_6_7
+                    )
                     .build()
 
                 INSTANCE = instance

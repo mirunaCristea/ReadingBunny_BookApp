@@ -13,6 +13,7 @@ import com.example.readingbunny.BuildConfig
 import com.example.readingbunny.data.remote.OpenLibraryApiClient
 import com.example.readingbunny.data.preferences.UserPreferencesRepository
 import com.example.readingbunny.data.backup.BackupRepository
+import com.example.readingbunny.data.repository.ReadingJournalRepository
 
 class ReadingBunnyApplication : Application() {
 
@@ -61,6 +62,14 @@ class ReadingBunnyApplication : Application() {
             database = database,
             userPreferencesRepository =
                 userPreferencesRepository
+        )
+    }
+
+    val readingJournalRepository:
+            ReadingJournalRepository by lazy {
+
+        ReadingJournalRepository(
+            database.readingJournalDao()
         )
     }
 
