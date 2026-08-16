@@ -12,6 +12,7 @@ import com.example.readingbunny.data.repository.BookSearchRepository
 import com.example.readingbunny.BuildConfig
 import com.example.readingbunny.data.remote.OpenLibraryApiClient
 import com.example.readingbunny.data.preferences.UserPreferencesRepository
+import com.example.readingbunny.data.backup.BackupRepository
 
 class ReadingBunnyApplication : Application() {
 
@@ -51,6 +52,10 @@ class ReadingBunnyApplication : Application() {
 
     val userPreferencesRepository: UserPreferencesRepository by lazy {
         UserPreferencesRepository(this)
+    }
+
+    val backupRepository: BackupRepository by lazy {
+        BackupRepository(this)
     }
 
 }
