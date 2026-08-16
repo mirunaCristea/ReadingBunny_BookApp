@@ -236,13 +236,7 @@ fun ProfileScreen(
 
                 Text("Export backup")
 
-                backupMessage?.let { message ->
 
-                    Text(
-                        text = message,
-                        fontSize = 13.sp,
-                        color = Color(0xFF74645E)
-                    )
 
 
                 }
@@ -273,7 +267,7 @@ fun ProfileScreen(
 
         }
     }
-}
+
 @Composable
 private fun ProfileStatCard(
     value: String,
