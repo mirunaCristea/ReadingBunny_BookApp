@@ -200,6 +200,18 @@ fun ReadingBunnyApp() {
 
     } else {
 
+        val currentlyReadingBooks =
+            books.count { book ->
+                book.status == ReadingStatus.READING
+            }
+
+        val finishedBooks =
+            books.count { book ->
+                book.status == ReadingStatus.FINISHED
+            }
+
+
+
 
         Scaffold(
             containerColor = Color(0xFFFFF8EF),
@@ -398,6 +410,9 @@ fun ReadingBunnyApp() {
                     )
                     4 -> ProfileScreen(
                         dailyGoalMinutes = dailyGoalMinutes,
+                        totalBooks = books.size,
+                        currentlyReadingBooks = currentlyReadingBooks,
+                        finishedBooks = finishedBooks,
                         onDailyGoalChange = { minutes ->
 
                             profileViewModel.setDailyGoalMinutes(

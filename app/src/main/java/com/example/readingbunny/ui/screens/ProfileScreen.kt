@@ -13,10 +13,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.Color
 
 @Composable
 fun ProfileScreen(
     dailyGoalMinutes: Int,
+    totalBooks: Int,
+    currentlyReadingBooks: Int,
+    finishedBooks: Int,
     onDailyGoalChange: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -71,5 +77,93 @@ fun ProfileScreen(
                 )
             }
         }
+
+        Text(
+            text = "My library",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+
+            ProfileStatCard(
+                value = totalBooks.toString(),
+                label = "Books",
+                modifier = Modifier.weight(1f)
+            )
+
+            ProfileStatCard(
+                value = currentlyReadingBooks.toString(),
+                label = "Reading",
+                modifier = Modifier.weight(1f)
+            )
+
+            ProfileStatCard(
+                value = finishedBooks.toString(),
+                label = "Finished",
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        Text(
+            text = "Settings",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    color = Color(0xFFFFF3E7),
+                    shape = RoundedCornerShape(18.dp)
+                )
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+
+            Text(
+                text = "Data & backup",
+                fontWeight = FontWeight.Bold
+            )
+
+            Text(
+                text = "Export or restore your ReadingBunny data",
+                fontSize = 13.sp,
+                color = Color(0xFF74645E)
+            )
+        }
+    }
+}
+@Composable
+private fun ProfileStatCard(
+    value: String,
+    label: String,
+    modifier: Modifier = Modifier
+) {
+
+    Column(
+        modifier = modifier
+            .background(
+                color = Color(0xFFFFF3E7),
+                shape = RoundedCornerShape(16.dp)
+            )
+            .padding(14.dp)
+    ) {
+
+        Text(
+            text = value,
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Text(
+            text = label,
+            fontSize = 13.sp,
+            color = Color(0xFF74645E)
+        )
     }
 }
