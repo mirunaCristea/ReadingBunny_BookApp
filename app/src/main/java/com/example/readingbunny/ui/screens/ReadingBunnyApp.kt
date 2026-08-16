@@ -28,6 +28,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.readingbunny.ReadingBunnyApplication
+import com.example.readingbunny.model.JournalEntryType
+import com.example.readingbunny.model.ReadingJournalEntry
 import com.example.readingbunny.model.ReadingStatus
 import com.example.readingbunny.ui.viewmodel.BookSearchViewModel
 import com.example.readingbunny.ui.viewmodel.BookSearchViewModelFactory
@@ -40,6 +42,8 @@ import com.example.readingbunny.ui.viewmodel.ReadingSessionViewModelFactory
 import com.example.readingbunny.ui.viewmodel.ProfileViewModel
 import com.example.readingbunny.ui.viewmodel.ProfileViewModelFactory
 import kotlinx.coroutines.launch
+import com.example.readingbunny.ui.viewmodel.ReadingJournalViewModel
+import com.example.readingbunny.ui.viewmodel.ReadingJournalViewModelFactory
 
 @Composable
 fun ReadingBunnyApp() {
@@ -78,7 +82,14 @@ fun ReadingBunnyApp() {
         initial = emptyList()
     )
 
+    val readingJournalViewModel:
+            ReadingJournalViewModel = viewModel(
 
+        factory =
+            ReadingJournalViewModelFactory(
+                application.readingJournalRepository
+            )
+    )
 
     var selectedBookId by rememberSaveable {
         mutableStateOf<Int?>(null)
@@ -87,6 +98,15 @@ fun ReadingBunnyApp() {
     val selectedBook = books.firstOrNull { book ->
         book.id == selectedBookId
     }
+
+    val journalEntries by
+    readingJournalViewModel
+        .entriesForBook(
+            selectedBookId ?: -1
+        )
+        .collectAsState(
+            initial = emptyList()
+        )
 
     val currentBook = books.firstOrNull() { book ->
         book.status == ReadingStatus.READING
@@ -336,6 +356,7 @@ fun ReadingBunnyApp() {
 
                             BookDetailsScreen(
                                 book = selectedBook,
+                                journalEntries = journalEntries,
                                 onBackClick = {
                                     selectedBookId = null
                                 },
@@ -345,7 +366,27 @@ fun ReadingBunnyApp() {
                                 onDeleteBook = { book ->
                                     bookViewModel.deleteBook(book)
                                     selectedBookId = null
+                                },
+                                onAddJournalEntry = {
+                                        type,
+                                        content,
+                                        page ->
+
+                                    readingJournalViewModel.addEntry(
+                                        bookId = selectedBook.id,
+                                        type = type,
+                                        content = content,
+                                        page = page
+                                    )
+                                },
+
+                                onDeleteJournalEntry = { entry ->
+
+                                    readingJournalViewModel.deleteEntry(
+                                        entry
+                                    )
                                 }
+
                             )
 
                         } else if (isAddingBook) {
