@@ -1,5 +1,6 @@
 package com.example.readingbunny.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -18,6 +19,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -36,6 +39,7 @@ import com.example.readingbunny.ui.viewmodel.ReadingSessionViewModel
 import com.example.readingbunny.ui.viewmodel.ReadingSessionViewModelFactory
 import com.example.readingbunny.ui.viewmodel.ProfileViewModel
 import com.example.readingbunny.ui.viewmodel.ProfileViewModelFactory
+import kotlinx.coroutines.launch
 
 @Composable
 fun ReadingBunnyApp() {
@@ -113,6 +117,13 @@ fun ReadingBunnyApp() {
 
     val dailyGoalMinutes by
     profileViewModel.dailyGoalMinutes.collectAsState()
+
+    val coroutineScope =
+        rememberCoroutineScope()
+
+    var backupMessage by remember {
+        mutableStateOf<String?>(null)
+    }
 
     val today = java.time.LocalDate.now()
 
@@ -413,12 +424,54 @@ fun ReadingBunnyApp() {
                         totalBooks = books.size,
                         currentlyReadingBooks = currentlyReadingBooks,
                         finishedBooks = finishedBooks,
+
                         onDailyGoalChange = { minutes ->
 
                             profileViewModel.setDailyGoalMinutes(
                                 minutes
                             )
-                        }
+                        },
+
+                        onExportBackup = { uri ->
+
+                            backupMessage = null
+
+                            coroutineScope.launch {
+
+                                try {
+
+                                    application.backupRepository
+                                        .exportBackup(
+                                            uri = uri,
+                                            books = books,
+                                            readingSessions =
+                                                readingSessions,
+                                            shelfDecorations =
+                                                decorations,
+                                            shelfBookPositions =
+                                                bookPositions,
+                                            dailyGoalMinutes =
+                                                dailyGoalMinutes
+                                        )
+
+                                    backupMessage =
+                                        "Backup exported successfully."
+
+                                } catch (exception: Exception) {
+
+                                    Log.e(
+                                        "Backup",
+                                        "Backup export failed",
+                                        exception
+                                    )
+
+                                    backupMessage =
+                                        "Could not export backup."
+                                }
+                            }
+                        },
+
+                        backupMessage = backupMessage
                     )
                 }
             }

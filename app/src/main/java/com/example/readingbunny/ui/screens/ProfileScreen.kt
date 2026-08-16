@@ -1,5 +1,8 @@
 package com.example.readingbunny.ui.screens
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,7 +17,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 
 @Composable
@@ -24,12 +31,29 @@ fun ProfileScreen(
     currentlyReadingBooks: Int,
     finishedBooks: Int,
     onDailyGoalChange: (Int) -> Unit,
+    onExportBackup: (Uri) -> Unit,
+    backupMessage: String?,
     modifier: Modifier = Modifier
 ) {
+    val exportBackupLauncher =
+        rememberLauncherForActivityResult(
+            contract =
+                ActivityResultContracts.CreateDocument(
+                    "application/json"
+                )
+        ) { uri ->
+
+            if (uri != null) {
+                onExportBackup(uri)
+            }
+        }
 
     Column(
         modifier = modifier
             .fillMaxSize()
+            .verticalScroll(
+                rememberScrollState()
+            )
             .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
@@ -135,6 +159,28 @@ fun ProfileScreen(
                 fontSize = 13.sp,
                 color = Color(0xFF74645E)
             )
+            Button(
+                onClick = {
+
+                    exportBackupLauncher.launch(
+                        "readingbunny-backup.json"
+                    )
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+
+                Text("Export backup")
+
+                backupMessage?.let { message ->
+
+                    Text(
+                        text = message,
+                        fontSize = 13.sp,
+                        color = Color(0xFF74645E)
+                    )
+                }
+            }
+
         }
     }
 }
