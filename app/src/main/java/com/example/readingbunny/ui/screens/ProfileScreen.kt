@@ -21,8 +21,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
+import androidx.compose.material3.AlertDialog
 
 @Composable
 fun ProfileScreen(
@@ -33,8 +39,22 @@ fun ProfileScreen(
     onDailyGoalChange: (Int) -> Unit,
     onExportBackup: (Uri) -> Unit,
     backupMessage: String?,
+    onRestoreBackup: (Uri) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var pendingRestoreUri by remember {
+        mutableStateOf<Uri?>(null)
+    }
+    val restoreBackupLauncher =
+        rememberLauncherForActivityResult(
+            contract =
+                ActivityResultContracts.OpenDocument()
+        ) { uri ->
+
+            if (uri != null) {
+                pendingRestoreUri = uri
+            }
+        }
     val exportBackupLauncher =
         rememberLauncherForActivityResult(
             contract =
@@ -47,6 +67,51 @@ fun ProfileScreen(
                 onExportBackup(uri)
             }
         }
+
+    pendingRestoreUri?.let { uri ->
+
+        AlertDialog(
+            onDismissRequest = {
+                pendingRestoreUri = null
+            },
+
+            title = {
+                Text("Restore backup?")
+            },
+
+            text = {
+                Text(
+                    "Your current books, reading sessions, " +
+                            "shelf layout and reading goal will be replaced."
+                )
+            },
+
+            confirmButton = {
+
+                Button(
+                    onClick = {
+
+                        pendingRestoreUri = null
+
+                        onRestoreBackup(uri)
+                    }
+                ) {
+                    Text("Restore")
+                }
+            },
+
+            dismissButton = {
+
+                TextButton(
+                    onClick = {
+                        pendingRestoreUri = null
+                    }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
 
     Column(
         modifier = modifier
@@ -178,7 +243,32 @@ fun ProfileScreen(
                         fontSize = 13.sp,
                         color = Color(0xFF74645E)
                     )
+
+
                 }
+            }
+            OutlinedButton(
+                onClick = {
+
+                    restoreBackupLauncher.launch(
+                        arrayOf(
+                            "application/json"
+                        )
+                    )
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+
+                Text("Restore backup")
+            }
+
+            backupMessage?.let { message ->
+
+                Text(
+                    text = message,
+                    fontSize = 13.sp,
+                    color = Color(0xFF74645E)
+                )
             }
 
         }

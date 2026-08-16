@@ -457,6 +457,10 @@ fun ReadingBunnyApp() {
                                     backupMessage =
                                         "Backup exported successfully."
 
+
+
+
+
                                 } catch (exception: Exception) {
 
                                     Log.e(
@@ -467,6 +471,38 @@ fun ReadingBunnyApp() {
 
                                     backupMessage =
                                         "Could not export backup."
+                                }
+
+
+
+                            }
+                        },
+
+                        onRestoreBackup = { uri ->
+
+                            backupMessage = null
+
+                            coroutineScope.launch {
+
+                                try {
+
+                                    application.backupRepository
+                                        .restoreBackup(uri)
+
+                                    backupMessage =
+                                        "Backup restored successfully."
+
+                                } catch (exception: Exception) {
+
+                                    Log.e(
+                                        "Backup",
+                                        "Backup restore failed",
+                                        exception
+                                    )
+
+                                    backupMessage =
+                                        exception.message
+                                            ?: "Could not restore backup."
                                 }
                             }
                         },

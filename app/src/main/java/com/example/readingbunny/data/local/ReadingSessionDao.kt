@@ -25,4 +25,7 @@ interface ReadingSessionDao {
     fun getSessionsForBook(
         bookId: Int
     ): Flow<List<ReadingSession>>
+
+    @Query("DELETE FROM reading_sessions")
+    suspend fun deleteAllSessions()
 }

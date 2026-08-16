@@ -55,7 +55,15 @@ class ReadingBunnyApplication : Application() {
     }
 
     val backupRepository: BackupRepository by lazy {
-        BackupRepository(this)
+
+        BackupRepository(
+            context = this,
+            database = database,
+            userPreferencesRepository =
+                userPreferencesRepository
+        )
     }
+
+
 
 }

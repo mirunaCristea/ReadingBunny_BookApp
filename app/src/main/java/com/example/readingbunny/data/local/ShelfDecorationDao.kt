@@ -26,4 +26,7 @@ interface ShelfDecorationDao {
 
     @Update
     suspend fun updateDecoration(decoration: ShelfDecoration)
+
+    @Query("DELETE FROM shelf_decorations")
+    suspend fun deleteAllDecorations()
 }
