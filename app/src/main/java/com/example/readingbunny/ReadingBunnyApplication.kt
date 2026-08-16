@@ -11,6 +11,7 @@ import com.example.readingbunny.data.remote.GoogleBooksApiClient
 import com.example.readingbunny.data.repository.BookSearchRepository
 import com.example.readingbunny.BuildConfig
 import com.example.readingbunny.data.remote.OpenLibraryApiClient
+import com.example.readingbunny.data.preferences.UserPreferencesRepository
 
 class ReadingBunnyApplication : Application() {
 
@@ -46,6 +47,10 @@ class ReadingBunnyApplication : Application() {
             openLibraryApi = OpenLibraryApiClient.api,
             apiKey = BuildConfig.GOOGLE_BOOKS_API_KEY
         )
+    }
+
+    val userPreferencesRepository: UserPreferencesRepository by lazy {
+        UserPreferencesRepository(this)
     }
 
 }

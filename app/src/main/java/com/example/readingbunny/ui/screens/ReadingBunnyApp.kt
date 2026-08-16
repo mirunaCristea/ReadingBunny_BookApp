@@ -34,6 +34,8 @@ import com.example.readingbunny.ui.viewmodel.BookshelfViewModel
 import com.example.readingbunny.ui.viewmodel.BookshelfViewModelFactory
 import com.example.readingbunny.ui.viewmodel.ReadingSessionViewModel
 import com.example.readingbunny.ui.viewmodel.ReadingSessionViewModelFactory
+import com.example.readingbunny.ui.viewmodel.ProfileViewModel
+import com.example.readingbunny.ui.viewmodel.ProfileViewModelFactory
 
 @Composable
 fun ReadingBunnyApp() {
@@ -102,6 +104,15 @@ fun ReadingBunnyApp() {
     readingSessionViewModel.sessions.collectAsState(
         initial = emptyList()
     )
+
+    val profileViewModel: ProfileViewModel = viewModel(
+        factory = ProfileViewModelFactory(
+            application.userPreferencesRepository
+        )
+    )
+
+    val dailyGoalMinutes by
+    profileViewModel.dailyGoalMinutes.collectAsState()
 
     val today = java.time.LocalDate.now()
 
@@ -286,7 +297,7 @@ fun ReadingBunnyApp() {
                     0 -> HomeScreen(
                         book = currentBook,
                         todayReadingSeconds = todayReadingSeconds,
-                        dailyGoalMinutes = 30,
+                        dailyGoalMinutes = dailyGoalMinutes,
                         onStartReading = { book ->
 
                             activeSessionBookId = book.id
@@ -385,7 +396,15 @@ fun ReadingBunnyApp() {
                         sessions = readingSessions,
                         books = books
                     )
-                    4 -> Text("Profile page")
+                    4 -> ProfileScreen(
+                        dailyGoalMinutes = dailyGoalMinutes,
+                        onDailyGoalChange = { minutes ->
+
+                            profileViewModel.setDailyGoalMinutes(
+                                minutes
+                            )
+                        }
+                    )
                 }
             }
 
