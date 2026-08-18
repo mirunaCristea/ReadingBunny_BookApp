@@ -108,6 +108,13 @@ fun ReadingBunnyApp() {
             initial = emptyList()
         )
 
+    val allJournalEntries by
+    readingJournalViewModel
+        .allEntries
+        .collectAsState(
+            initial = emptyList()
+        )
+
     val currentBook = books.firstOrNull() { book ->
         book.status == ReadingStatus.READING
     }
@@ -491,6 +498,8 @@ fun ReadingBunnyApp() {
                                                 decorations,
                                             shelfBookPositions =
                                                 bookPositions,
+                                            readingJournalEntries =
+                                                allJournalEntries,
                                             dailyGoalMinutes =
                                                 dailyGoalMinutes
                                         )

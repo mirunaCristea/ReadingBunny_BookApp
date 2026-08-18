@@ -12,6 +12,9 @@ class ReadingJournalViewModel(
     private val repository: ReadingJournalRepository
 ) : ViewModel() {
 
+    val allEntries =
+        repository.allEntries
+
     fun entriesForBook(
         bookId: Int
     ): Flow<List<ReadingJournalEntry>> {

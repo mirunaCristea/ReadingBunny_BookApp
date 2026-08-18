@@ -15,6 +15,7 @@ import com.google.gson.GsonBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.IOException
+import com.example.readingbunny.model.ReadingJournalEntry
 
 class BackupRepository(
     private val context: Context,
@@ -33,6 +34,7 @@ class BackupRepository(
         readingSessions: List<ReadingSession>,
         shelfDecorations: List<ShelfDecoration>,
         shelfBookPositions: List<ShelfBookPosition>,
+        readingJournalEntries: List<ReadingJournalEntry>,
         dailyGoalMinutes: Int
     ) {
 
@@ -42,6 +44,7 @@ class BackupRepository(
             readingSessions = readingSessions,
             shelfDecorations = shelfDecorations,
             shelfBookPositions = shelfBookPositions,
+            readingJournalEntries = readingJournalEntries,
             dailyGoalMinutes = dailyGoalMinutes
         )
 
@@ -155,6 +158,10 @@ class BackupRepository(
         userPreferencesRepository.setDailyGoalMinutes(
             backup.dailyGoalMinutes
         )
+
+        val journalEntries =
+            backup.readingJournalEntries
+                .orEmpty()
     }
 
     private fun validateBackup(
