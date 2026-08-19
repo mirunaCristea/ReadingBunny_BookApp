@@ -29,7 +29,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
 import com.example.readingbunny.ui.theme.CardCream
+import com.example.readingbunny.ui.theme.DarkBrown
 import com.example.readingbunny.ui.theme.MutedBrown
 
 @Composable
@@ -127,8 +129,8 @@ fun ProfileScreen(
 
         Text(
             text = "Profile",
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold
+            style = MaterialTheme.typography.headlineMedium,
+            color = DarkBrown
         )
 
         Text(

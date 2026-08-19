@@ -65,6 +65,7 @@ import com.example.readingbunny.ui.theme.DarkBrown
 import com.example.readingbunny.ui.theme.MutedBrown
 import com.example.readingbunny.ui.theme.Terracotta
 import androidx.activity.compose.BackHandler
+import androidx.compose.material3.MaterialTheme
 
 private enum class AddBookMethod {
     SEARCH,
@@ -186,8 +187,7 @@ fun AddBookScreen(
                     AddBookMethod.MANUAL -> "Add manually"
                     null -> "Add a book"
                 },
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.headlineMedium,
                 color = DarkBrown
             )
         }
@@ -281,14 +281,23 @@ fun AddBookScreen(
                         )
 
                         if (searchUiState.isLoading) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.align(Alignment.CenterHorizontally)
-                            )
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                CircularProgressIndicator()
+
+                                Text(
+                                    text = "Searching for books...",
+                                    color = MutedBrown
+                                )
+                            }
                         }
 
-                        searchUiState.errorMessage?.let { message ->
+                        searchUiState.errorMessage?.let {
                             Text(
-                                text = message,
+                                text = "Could not search for books. Please try again.",
                                 color = Color.Red
                             )
                         }

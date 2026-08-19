@@ -46,7 +46,9 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import com.example.readingbunny.model.ReadingStatus
 import androidx.compose.foundation.shape.GenericShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.draw.clip
+import com.example.readingbunny.ui.theme.DarkBrown
 
 @Composable
 fun BookshelfScreen(
@@ -160,7 +162,8 @@ fun BookshelfScreen(
 
             Text(
                 text = "My bookshelf",
-                fontSize = 26.sp
+                style = MaterialTheme.typography.headlineMedium,
+                color = DarkBrown
             )
 
             Button(
