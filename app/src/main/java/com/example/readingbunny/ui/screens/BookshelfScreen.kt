@@ -38,6 +38,11 @@ import com.example.readingbunny.model.ShelfDecoration
 import com.example.readingbunny.ui.theme.BookSpineColors
 import com.example.readingbunny.ui.theme.ShelfWood
 import com.example.readingbunny.ui.theme.SoftCream
+import androidx.compose.foundation.Image
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import com.example.readingbunny.R
+
 
 @Composable
 fun BookshelfScreen(
@@ -210,10 +215,25 @@ fun BookshelfScreen(
                             )
                     ) {
 
-                        Text(
-                            text = "${decoration.emoji} ${decoration.displayName}",
-                            fontSize = 13.sp
-                        )
+                        Row(
+                            verticalAlignment =
+                                Alignment.CenterVertically,
+                            horizontalArrangement =
+                                Arrangement.spacedBy(6.dp)
+                        ) {
+
+                            DecorationArtwork(
+                                decoration = decoration,
+                                modifier = Modifier
+                                    .width(24.dp)
+                                    .height(24.dp)
+                            )
+
+                            Text(
+                                text = decoration.displayName,
+                                fontSize = 13.sp
+                            )
+                        }
                     }
                 }
             }
@@ -404,6 +424,8 @@ fun BookshelfScreen(
                                             }
 
                                         )
+
+
                                     }
 
                                     isDecorating &&
@@ -473,9 +495,11 @@ fun DecorationItem(
         contentAlignment = Alignment.BottomCenter
     ) {
 
-        Text(
-            text = decoration.emoji,
-            fontSize = 30.sp
+        DecorationArtwork(
+            decoration = decoration,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(2.dp)
         )
     }
 }
@@ -538,6 +562,56 @@ fun BookSpine(
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center,
             fontSize = 14.sp
+        )
+    }
+}
+
+private fun DecorationType.drawableRes(): Int? {
+    return when (this) {
+        DecorationType.PLANT ->
+            R.drawable.decoration_plant_waterfall
+
+        DecorationType.CANDLE ->
+            R.drawable.decoration_candle
+
+        DecorationType.LAMP ->
+            R.drawable.decoration_lamp
+
+        DecorationType.PUMPKIN ->
+            R.drawable.decoration_pumpkin
+
+        DecorationType.FRAME,
+        DecorationType.TEA_CUP ->
+            null
+    }
+}
+
+@Composable
+private fun DecorationArtwork(
+    decoration: DecorationType,
+    modifier: Modifier = Modifier
+) {
+
+    val drawableRes =
+        decoration.drawableRes()
+
+    if (drawableRes != null) {
+
+        Image(
+            painter = painterResource(
+                id = drawableRes
+            ),
+            contentDescription =
+                decoration.displayName,
+            modifier = modifier,
+            contentScale = ContentScale.Fit
+        )
+
+    } else {
+
+        Text(
+            text = decoration.emoji,
+            fontSize = 30.sp
         )
     }
 }
