@@ -10,7 +10,9 @@ enum class DecorationType(
     PLANT("Plant", "🌱"),
     CANDLE("Candle", "🕯️"),
     LAMP("Lamp", "💡"),
-    FRAME("Frame", "🖼️")
+    FRAME("Frame", "🖼️"),
+    PUMPKIN("Pumpkin", "🎃"),
+    TEA_CUP("Tea Cup", "☕")
 }
 
 @Entity(tableName = "shelf_decorations")
