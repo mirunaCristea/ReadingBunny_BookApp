@@ -117,6 +117,10 @@ class BackupRepository(
             )
         }
 
+        val journalEntries =
+            backup.readingJournalEntries
+                .orEmpty()
+
         database.withWriteTransaction {
 
             val bookDao =
@@ -131,7 +135,11 @@ class BackupRepository(
             val positionDao =
                 database.shelfBookPositionDao()
 
+            val journalDao =
+                database.readingJournalDao()
+
             // Delete child/related data first.
+            journalDao.deleteAllEntries()
             sessionDao.deleteAllSessions()
             positionDao.deleteAllPositions()
             decorationDao.deleteAllDecorations()
@@ -153,22 +161,24 @@ class BackupRepository(
             backup.shelfBookPositions.forEach { position ->
                 positionDao.savePosition(position)
             }
+
+            journalEntries.forEach { entry ->
+                journalDao.insertEntry(entry)
+            }
         }
 
         userPreferencesRepository.setDailyGoalMinutes(
             backup.dailyGoalMinutes
         )
 
-        val journalEntries =
-            backup.readingJournalEntries
-                .orEmpty()
+
     }
 
     private fun validateBackup(
         backup: ReadingBunnyBackup
     ) {
 
-        if (backup.backupVersion != 1) {
+        if (backup.backupVersion !in 1..2) {
             throw IllegalArgumentException(
                 "Unsupported backup version"
             )
@@ -224,5 +234,21 @@ class BackupRepository(
                 "Shelf position refers to a missing book"
             )
         }
+
+        val journalEntries =
+            backup.readingJournalEntries
+                .orEmpty()
+
+        val hasInvalidJournalEntry =
+            journalEntries.any { entry ->
+                entry.bookId !in bookIds
+            }
+
+        if (hasInvalidJournalEntry) {
+            throw IllegalArgumentException(
+                "Journal entry refers to a missing book"
+            )
+        }
+
     }
 }
