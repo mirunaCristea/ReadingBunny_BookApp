@@ -159,7 +159,7 @@ fun BookshelfScreen(
         ) {
 
             Text(
-                text = "My Bookshelf",
+                text = "My bookshelf",
                 fontSize = 26.sp
             )
 

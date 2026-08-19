@@ -210,7 +210,7 @@ fun HomeScreen(
                             containerColor = Terracotta
                         )
                     ) {
-                        Text("Start Reading")
+                        Text("Start reading")
                     }
                 }
             }

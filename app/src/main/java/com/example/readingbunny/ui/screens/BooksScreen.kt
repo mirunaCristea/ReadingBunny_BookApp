@@ -100,7 +100,7 @@ fun BookScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "My Books",
+                text = "My books",
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 color = DarkBrown

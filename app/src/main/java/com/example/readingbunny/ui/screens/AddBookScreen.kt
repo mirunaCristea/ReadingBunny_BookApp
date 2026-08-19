@@ -64,6 +64,7 @@ import com.example.readingbunny.ui.theme.CardCream
 import com.example.readingbunny.ui.theme.DarkBrown
 import com.example.readingbunny.ui.theme.MutedBrown
 import com.example.readingbunny.ui.theme.Terracotta
+import androidx.activity.compose.BackHandler
 
 private enum class AddBookMethod {
     SEARCH,
@@ -87,6 +88,16 @@ fun AddBookScreen(
     var selectedMethod by rememberSaveable {
         mutableStateOf<AddBookMethod?>(null)
     }
+    val handleBack: () -> Unit = {
+        if (selectedMethod == null) {
+            onBackClick()
+        } else {
+            selectedMethod = null
+        }
+    }
+    BackHandler(
+        onBack = handleBack
+    )
     var scannerMode by rememberSaveable {
         mutableStateOf(BookScannerMode.BARCODE)
     }
@@ -160,13 +171,7 @@ fun AddBookScreen(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             IconButton(
-                onClick = {
-                    if (selectedMethod == null) {
-                        onBackClick()
-                    } else {
-                        selectedMethod = null
-                    }
-                }
+                    onClick = handleBack
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
