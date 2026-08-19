@@ -48,7 +48,8 @@ import com.example.readingbunny.model.ReadingStatus
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import coil3.compose.AsyncImage
-
+import com.example.readingbunny.ui.theme.DarkBrown
+import com.example.readingbunny.ui.theme.Terracotta
 
 
 @Composable
@@ -100,13 +101,13 @@ fun BookScreen(
                 text = "My Books",
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF382B27)
+                color = DarkBrown
             )
 
             FilledIconButton(
                 onClick =onAddBookClick,
                 colors = IconButtonDefaults.filledIconButtonColors(
-                    containerColor = Color(0xFFB85C48)
+                    containerColor = Terracotta
                 )
             ) {
                 Icon(
@@ -238,7 +239,7 @@ fun BookCard(book: Book, onClick: () -> Unit) {
                     .width(82.dp)
                     .height(118.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(Color(0xFFB85C48)),
+                    .background(Terracotta),
                 contentAlignment = Alignment.Center
             ) {
                 if (!book.coverUrl.isNullOrBlank()) {
