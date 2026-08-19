@@ -60,6 +60,10 @@ import androidx.compose.ui.layout.ContentScale
 import coil3.compose.AsyncImage
 import com.example.readingbunny.ui.scanner.BookScannerMode
 import com.example.readingbunny.ui.scanner.BookScannerScreen
+import com.example.readingbunny.ui.theme.CardCream
+import com.example.readingbunny.ui.theme.DarkBrown
+import com.example.readingbunny.ui.theme.MutedBrown
+import com.example.readingbunny.ui.theme.Terracotta
 
 private enum class AddBookMethod {
     SEARCH,
@@ -172,14 +176,14 @@ fun AddBookScreen(
 
             Text(
                 text = when (selectedMethod) {
-                    AddBookMethod.SEARCH -> "Search for a Book"
-                    AddBookMethod.SCAN -> "Scan a Book"
-                    AddBookMethod.MANUAL -> "Add Manually"
-                    null -> "Add a Book"
+                    AddBookMethod.SEARCH -> "Search for a book"
+                    AddBookMethod.SCAN -> "Scan a book"
+                    AddBookMethod.MANUAL -> "Add manually"
+                    null -> "Add a book"
                 },
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF382B27)
+                color = DarkBrown
             )
         }
 
@@ -189,7 +193,7 @@ fun AddBookScreen(
             Text(
                 text = "How would you like to add it?",
                 fontSize = 16.sp,
-                color = Color(0xFF74645E)
+                color = MutedBrown
             )
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -291,7 +295,7 @@ fun AddBookScreen(
                                 Text(
                                     text = "${searchUiState.results.size} results",
                                     fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF382B27)
+                                    color = DarkBrown
                                 )
 
                                 LazyColumn(
@@ -338,12 +342,12 @@ fun AddBookScreen(
                                     text = "We couldn't identify this book.",
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 18.sp,
-                                    color = Color(0xFF382B27)
+                                    color = DarkBrown
                                 )
 
                                 Text(
                                     text = "Try scanning it again or search for it manually.",
-                                    color = Color(0xFF74645E)
+                                    color = MutedBrown
                                 )
 
                                 Button(
@@ -435,7 +439,7 @@ fun AddBookScreen(
 
                         Text(
                             text = message,
-                            color = Color(0xFFB85C48),
+                            color = Terracotta,
                             modifier = Modifier.padding(top = 8.dp)
                         )
                     }
@@ -635,7 +639,7 @@ fun AddBookScreen(
                             modifier = Modifier.fillMaxWidth(),
                             enabled = isFormValid
                         ) {
-                            Text("Save Book")
+                            Text("Save book")
                         }
                     }
 
@@ -662,7 +666,7 @@ private fun AddBookOptionCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFFFF3E7)
+            containerColor = DarkBrown
         )
     ) {
         Row(
@@ -675,7 +679,7 @@ private fun AddBookOptionCard(
                 modifier = Modifier
                     .size(52.dp)
                     .background(
-                        color = Color(0xFFB85C48),
+                        color = Terracotta,
                         shape = RoundedCornerShape(16.dp)
                     ),
                 contentAlignment = Alignment.Center
@@ -696,7 +700,7 @@ private fun AddBookOptionCard(
                     text = title,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF382B27)
+                    color = DarkBrown
                 )
 
                 Spacer(modifier = Modifier.height(4.dp))
@@ -704,7 +708,7 @@ private fun AddBookOptionCard(
                 Text(
                     text = description,
                     fontSize = 14.sp,
-                    color = Color(0xFF74645E)
+                    color = MutedBrown
                 )
             }
         }
@@ -741,7 +745,7 @@ private fun BookSearchResultCard(
             .clickable(onClick=onClick),
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFFFF3E7)
+            containerColor = CardCream
         )
     ) {
         Row(
@@ -786,14 +790,14 @@ private fun BookSearchResultCard(
                 Text(
                     text = book.author,
                     fontSize = 14.sp,
-                    color = Color(0xFF74645E)
+                    color = MutedBrown
                 )
 
                 book.totalPages?.let { pageCount ->
                     Text(
                         text = "$pageCount pages",
                         fontSize = 13.sp,
-                        color = Color(0xFF74645E)
+                        color = MutedBrown
                     )
                 }
 
@@ -801,7 +805,7 @@ private fun BookSearchResultCard(
                     Text(
                         text = "ISBN: $isbn",
                         fontSize = 12.sp,
-                        color = Color(0xFF74645E)
+                        color = MutedBrown
                     )
                 }
             }
