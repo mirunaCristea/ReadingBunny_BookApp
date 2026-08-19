@@ -619,7 +619,8 @@ private fun DecorationType.drawableRes(): Int? {
         DecorationType.PUMPKIN ->
             R.drawable.decoration_pumpkin
 
-        DecorationType.FRAME,
+        DecorationType.FRAME ->
+            null
 
         DecorationType.TEA_CUP ->
             R.drawable.decoration_tea
