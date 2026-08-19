@@ -149,64 +149,35 @@ fun BookshelfScreen(
             .padding(20.dp)
     ) {
 
-        LazyRow(
+        Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
 
-            items(
-                items = DecorationType.entries
-            ) { decoration ->
+            Text(
+                text = "My Bookshelf",
+                fontSize = 26.sp
+            )
 
-                val isSelected =
-                    selectedDecoration == decoration
+            Button(
+                onClick = {
+                    isDecorating = !isDecorating
 
-                Box(
-                    modifier = Modifier
-                        .width(90.dp)
-                        .background(
-                            color = if (isSelected) {
-                                ShelfWood
-                            } else {
-                                SoftCream
-                            },
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                        .clickable {
-                            selectedDecoration = decoration
-                            selectedBookId = null
-                            selectedPlacedDecorationId = null
-                        }
-                        .padding(
-                            horizontal = 8.dp,
-                            vertical = 8.dp
-                        )
-                ) {
-
-                    Column(
-                        horizontalAlignment =
-                            Alignment.CenterHorizontally,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-
-                        DecorationArtwork(
-                            decoration = decoration,
-                            modifier = Modifier
-                                .width(32.dp)
-                                .height(32.dp)
-                        )
-
-                        Spacer(
-                            modifier = Modifier.height(4.dp)
-                        )
-
-                        Text(
-                            text = decoration.displayName,
-                            fontSize = 12.sp,
-                            maxLines = 1
-                        )
+                    if (!isDecorating) {
+                        selectedDecoration = null
+                        selectedBookId = null
+                        selectedPlacedDecorationId = null
                     }
                 }
+            ) {
+                Text(
+                    text = if (isDecorating) {
+                        "Done"
+                    } else {
+                        "Decorate"
+                    }
+                )
             }
         }
 
@@ -214,18 +185,21 @@ fun BookshelfScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Row(
+            LazyRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
 
-                DecorationType.entries.forEach { decoration ->
+                items(
+                    items = DecorationType.entries
+                ) { decoration ->
 
                     val isSelected =
                         selectedDecoration == decoration
 
                     Box(
                         modifier = Modifier
+                            .width(90.dp)
                             .background(
                                 color = if (isSelected) {
                                     ShelfWood
@@ -240,28 +214,32 @@ fun BookshelfScreen(
                                 selectedPlacedDecorationId = null
                             }
                             .padding(
-                                horizontal = 10.dp,
+                                horizontal = 8.dp,
                                 vertical = 8.dp
                             )
                     ) {
 
-                        Row(
-                            verticalAlignment =
-                                Alignment.CenterVertically,
-                            horizontalArrangement =
-                                Arrangement.spacedBy(6.dp)
+                        Column(
+                            horizontalAlignment =
+                                Alignment.CenterHorizontally,
+                            modifier = Modifier.fillMaxWidth()
                         ) {
 
                             DecorationArtwork(
                                 decoration = decoration,
                                 modifier = Modifier
-                                    .width(24.dp)
-                                    .height(24.dp)
+                                    .width(32.dp)
+                                    .height(32.dp)
+                            )
+
+                            Spacer(
+                                modifier = Modifier.height(4.dp)
                             )
 
                             Text(
                                 text = decoration.displayName,
-                                fontSize = 13.sp
+                                fontSize = 12.sp,
+                                maxLines = 1
                             )
                         }
                     }
