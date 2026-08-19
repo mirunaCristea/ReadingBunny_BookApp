@@ -19,6 +19,9 @@ val DarkBrown = Color(0xFF382B27)
 
 val ShelfWood = Color(0xFF8B5E3C)
 
+val MutedBrown = Color(0xFF74645E)
+val CardCream = Color(0xFFFFF3E7)
+val ProgressTrack = Color(0xFFE8D8CC)
 
 
 val BookSpineColors = listOf(

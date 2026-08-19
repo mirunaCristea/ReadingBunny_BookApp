@@ -29,6 +29,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.AlertDialog
+import com.example.readingbunny.ui.theme.CardCream
+import com.example.readingbunny.ui.theme.MutedBrown
 
 @Composable
 fun ProfileScreen(
@@ -207,7 +209,7 @@ fun ProfileScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(
-                    color = Color(0xFFFFF3E7),
+                    color = CardCream,
                     shape = RoundedCornerShape(18.dp)
                 )
                 .padding(16.dp),
@@ -222,7 +224,7 @@ fun ProfileScreen(
             Text(
                 text = "Export or restore your ReadingBunny data",
                 fontSize = 13.sp,
-                color = Color(0xFF74645E)
+                color = MutedBrown
             )
             Button(
                 onClick = {
@@ -259,7 +261,7 @@ fun ProfileScreen(
                 Text(
                     text = message,
                     fontSize = 13.sp,
-                    color = Color(0xFF74645E)
+                    color = MutedBrown
                 )
             }
         }
@@ -277,7 +279,7 @@ private fun ProfileStatCard(
     Column(
         modifier = modifier
             .background(
-                color = Color(0xFFFFF3E7),
+                color = CardCream,
                 shape = RoundedCornerShape(16.dp)
             )
             .padding(14.dp)
@@ -292,7 +294,7 @@ private fun ProfileStatCard(
         Text(
             text = label,
             fontSize = 13.sp,
-            color = Color(0xFF74645E)
+            color = MutedBrown
         )
     }
 }

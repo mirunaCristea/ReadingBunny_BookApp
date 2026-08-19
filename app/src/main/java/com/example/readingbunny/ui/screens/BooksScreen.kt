@@ -50,7 +50,9 @@ import androidx.compose.ui.layout.ContentScale
 import coil3.compose.AsyncImage
 import com.example.readingbunny.ui.theme.DarkBrown
 import com.example.readingbunny.ui.theme.Terracotta
-
+import com.example.readingbunny.ui.theme.MutedBrown
+import com.example.readingbunny.ui.theme.CardCream
+import com.example.readingbunny.ui.theme.ProgressTrack
 
 @Composable
 fun BookScreen(
@@ -187,7 +189,7 @@ fun BookScreen(
                     } else {
                         "No books found"
                     },
-                    color = Color(0xFF74645E)
+                    color = MutedBrown
                 )
             }
         } else {
@@ -226,7 +228,7 @@ fun BookCard(book: Book, onClick: () -> Unit) {
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFFFF3E7)
+            containerColor = CardCream
 
         ),
         onClick = onClick
@@ -277,7 +279,7 @@ fun BookCard(book: Book, onClick: () -> Unit) {
 
                 Text(
                     text = book.author,
-                    color = Color(0xFF74645E)
+                    color = MutedBrown
                 )
 
                 Spacer(modifier = Modifier.height(14.dp))
@@ -288,7 +290,7 @@ fun BookCard(book: Book, onClick: () -> Unit) {
                         .fillMaxWidth()
                         .height(7.dp),
                     color = Terracotta,
-                    trackColor = Color(0xFFE8D8CC)
+                    trackColor = ProgressTrack
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -296,7 +298,7 @@ fun BookCard(book: Book, onClick: () -> Unit) {
                 Text(
                     text = "${book.currentPage} / ${book.totalPages} pages · ${(progress * 100).toInt()}%",
                     fontSize = 13.sp,
-                    color = Color(0xFF74645E)
+                    color = MutedBrown
                 )
             }
         }
