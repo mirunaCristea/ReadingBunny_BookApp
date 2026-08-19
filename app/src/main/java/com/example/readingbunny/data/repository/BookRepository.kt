@@ -2,7 +2,6 @@
 package com.example.readingbunny.data.repository
 import androidx.room3.withWriteTransaction
 import kotlinx.coroutines.flow.Flow
-import com.example.readingbunny.data.local.BookDao
 import com.example.readingbunny.data.local.ReadingBunnyDatabase
 import com.example.readingbunny.model.Book
 
