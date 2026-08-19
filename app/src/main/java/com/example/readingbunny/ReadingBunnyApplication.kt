@@ -22,7 +22,7 @@ class ReadingBunnyApplication : Application() {
     }
 
     val repository: BookRepository by lazy {
-        BookRepository(database.bookDao())
+        BookRepository(database)
     }
 
     val decorationRepository: ShelfDecorationRepository by lazy {
