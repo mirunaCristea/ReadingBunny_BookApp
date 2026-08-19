@@ -45,6 +45,8 @@ import com.example.readingbunny.R
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import com.example.readingbunny.model.ReadingStatus
+import androidx.compose.foundation.shape.GenericShape
+import androidx.compose.ui.draw.clip
 
 @Composable
 fun BookshelfScreen(
@@ -567,6 +569,15 @@ fun BookSpine(
             book.id % BookSpineColors.size
         ]
 
+    val bookmarkShape = GenericShape { size, _ ->
+        moveTo(0f, 0f)
+        lineTo(size.width, 0f)
+        lineTo(size.width, size.height)
+        lineTo(size.width / 2f, size.height * 0.72f)
+        lineTo(0f, size.height)
+        close()
+    }
+
     Box(
         modifier = Modifier
             .width(52.dp)
@@ -611,14 +622,12 @@ fun BookSpine(
                     .padding(end = 6.dp)
                     .width(11.dp)
                     .height(24.dp)
+                    .clip(bookmarkShape)
                     .background(
-                        color = SoftCream,
-                        shape = RoundedCornerShape(
-                            bottomStart = 3.dp,
-                            bottomEnd = 3.dp
+                        color = SoftCream
                         )
                     )
-            )
+
         }
     }
 }
