@@ -44,6 +44,7 @@ import androidx.compose.ui.res.painterResource
 import com.example.readingbunny.R
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import com.example.readingbunny.model.ReadingStatus
 
 @Composable
 fun BookshelfScreen(
@@ -602,6 +603,23 @@ fun BookSpine(
             textAlign = TextAlign.Center,
             fontSize = 14.sp
         )
+
+        if (book.status == ReadingStatus.WANT_TO_READ) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(end = 6.dp)
+                    .width(11.dp)
+                    .height(24.dp)
+                    .background(
+                        color = SoftCream,
+                        shape = RoundedCornerShape(
+                            bottomStart = 3.dp,
+                            bottomEnd = 3.dp
+                        )
+                    )
+            )
+        }
     }
 }
 
