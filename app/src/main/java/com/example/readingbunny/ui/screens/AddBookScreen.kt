@@ -1,6 +1,8 @@
 package com.example.readingbunny.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,7 +22,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -54,6 +55,11 @@ import com.example.readingbunny.model.BookOwnership
 import com.example.readingbunny.model.BookSearchResult
 import com.example.readingbunny.model.ReadingStatus
 import com.example.readingbunny.ui.viewmodel.BookSearchViewModel
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import coil3.compose.AsyncImage
+import com.example.readingbunny.ui.scanner.BookScannerMode
+import com.example.readingbunny.ui.scanner.BookScannerScreen
 
 private enum class AddBookMethod {
     SEARCH,
@@ -77,6 +83,10 @@ fun AddBookScreen(
     var selectedMethod by rememberSaveable {
         mutableStateOf<AddBookMethod?>(null)
     }
+    var scannerMode by rememberSaveable {
+        mutableStateOf(BookScannerMode.BARCODE)
+    }
+
     var bookTitle by rememberSaveable {
         mutableStateOf("")
     }
@@ -87,6 +97,18 @@ fun AddBookScreen(
 
     var bookTotalPages by rememberSaveable {
         mutableStateOf("")
+    }
+
+    var selectedIsbn by rememberSaveable {
+        mutableStateOf<String?>(null)
+    }
+
+    var selectedCoverUrl by rememberSaveable {
+        mutableStateOf<String?>(null)
+    }
+
+    var selectedDescription by rememberSaveable {
+        mutableStateOf<String?>(null)
     }
 
     val totalPages = bookTotalPages.toIntOrNull()
@@ -119,6 +141,9 @@ fun AddBookScreen(
                 selectedStatus != null &&
                 selectedOwnership != null
 
+    var scannerMessage by rememberSaveable {
+        mutableStateOf<String?>(null)
+    }
 
     Column(
         modifier = Modifier
@@ -280,18 +305,141 @@ fun AddBookScreen(
                                         }
                                     ) { book ->
                                         BookSearchResultCard(
-                                            book = book
+                                            book = book,
+                                            onClick = {
+                                                bookTitle = book.title
+                                                bookAuthor = book.author
+                                                bookTotalPages = book.totalPages?.toString().orEmpty()
+                                                selectedIsbn = book.isbn
+                                                selectedCoverUrl = book.coverUrl
+                                                selectedDescription = book.description
+                                                selectedMethod = AddBookMethod.MANUAL
+                                            }
                                         )
                                     }
                                 }
                             }
+                        if (
+                            searchUiState.hasSearched &&
+                            !searchUiState.isLoading &&
+                            searchUiState.errorMessage == null &&
+                            searchUiState.results.isEmpty()
+                        ) {
+
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 24.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+
+                                Text(
+                                    text = "We couldn't identify this book.",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 18.sp,
+                                    color = Color(0xFF382B27)
+                                )
+
+                                Text(
+                                    text = "Try scanning it again or search for it manually.",
+                                    color = Color(0xFF74645E)
+                                )
+
+                                Button(
+                                    onClick = {
+                                        selectedMethod = AddBookMethod.SCAN
+                                    }
+                                ) {
+                                    Text("Scan again")
+                                }
+
+                                Button(
+                                    onClick = {
+                                        selectedMethod = AddBookMethod.MANUAL
+                                    }
+                                ) {
+                                    Text("Add manually")
+                                }
+                            }
+                        }
 
 
                     }
                 }
 
                 AddBookMethod.SCAN -> {
-                    Text("The camera and scanner will be built here.")
+
+                    BookScannerScreen(
+                        mode = scannerMode,
+                        onModeChange = { newMode ->
+                            scannerMode = newMode
+                        },
+
+                        onSpineTextRecognized = { text ->
+
+
+                            val searchText = text
+                                .lines()
+                                .map { line ->
+                                    line.trim()
+                                }
+                                .filter { line ->
+                                    line.length >= 2
+                                }
+                                .joinToString(" ")
+
+                            val recognizedWords =
+                                searchText
+                                    .split(" ")
+                                    .filter { word ->
+                                        word.length >= 2
+                                    }
+
+                            if (recognizedWords.size < 2) {
+
+                                scannerMessage =
+                                    "I couldn't read enough text. Try taking another photo."
+
+                            } else {
+
+                                scannerMessage = null
+
+                                searchQuery = searchText
+
+                                bookSearchViewModel.searchBooksWithFallback(
+                                    searchText
+                                )
+
+                                selectedMethod = AddBookMethod.SEARCH
+                            }
+                        },
+
+                        onBarcodeDetected = { barcode ->
+
+                            searchQuery = barcode
+
+                            bookSearchViewModel.searchBookByIsbn(
+                                barcode
+                            )
+
+                            selectedMethod = AddBookMethod.SEARCH
+                        },
+                        modifier = Modifier.weight(1f)
+
+
+
+                    )
+
+                    scannerMessage?.let { message ->
+
+                        Text(
+                            text = message,
+                            color = Color(0xFFB85C48),
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                    }
+
                 }
 
                 AddBookMethod.MANUAL -> {
@@ -476,7 +624,10 @@ fun AddBookScreen(
                                     status = status,
                                     currentPage = 0,
                                     totalPages = pages,
-                                    ownership = ownership
+                                    ownership = ownership,
+                                    isbn = selectedIsbn,
+                                    coverUrl =selectedCoverUrl,
+                                    description = selectedDescription
                                     )
 
                                 onSaveBook(newBook)
@@ -581,46 +732,78 @@ private fun BookOwnership.displayName(): String {
 
 @Composable
 private fun BookSearchResultCard(
-    book: BookSearchResult
+    book: BookSearchResult,
+    onClick: () -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick=onClick),
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color(0xFFFFF3E7)
         )
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
+        Row(
+            modifier = Modifier.padding(14.dp),
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = book.title,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF382B27)
-            )
-
-            Text(
-                text = book.author,
-                fontSize = 14.sp,
-                color = Color(0xFF74645E)
-            )
-
-            book.totalPages?.let { pageCount ->
-                Text(
-                    text = "$pageCount pages",
-                    fontSize = 13.sp,
-                    color = Color(0xFF74645E)
-                )
+            Box(
+                modifier = Modifier
+                    .width(72.dp)
+                    .height(104.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(Color(0xFFE8D8C8)),
+                contentAlignment = Alignment.Center
+            ) {
+                if (!book.coverUrl.isNullOrBlank()) {
+                    AsyncImage(
+                        model = book.coverUrl,
+                        contentDescription = "Cover of ${book.title}",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Text(
+                        text = "📚",
+                        fontSize = 28.sp
+                    )
+                }
             }
 
-            book.isbn?.let { isbn ->
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
                 Text(
-                    text = "ISBN: $isbn",
-                    fontSize = 12.sp,
+                    text = book.title,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF382B27)
+                )
+
+                Text(
+                    text = book.author,
+                    fontSize = 14.sp,
                     color = Color(0xFF74645E)
                 )
+
+                book.totalPages?.let { pageCount ->
+                    Text(
+                        text = "$pageCount pages",
+                        fontSize = 13.sp,
+                        color = Color(0xFF74645E)
+                    )
+                }
+
+                book.isbn?.let { isbn ->
+                    Text(
+                        text = "ISBN: $isbn",
+                        fontSize = 12.sp,
+                        color = Color(0xFF74645E)
+                    )
+                }
             }
         }
     }

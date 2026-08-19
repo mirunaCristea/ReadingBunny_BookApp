@@ -18,4 +18,8 @@ interface ShelfBookPositionDao {
 
     @Query("DELETE FROM shelf_book_positions WHERE bookId = :bookId")
     suspend fun deletePosition(bookId: Int)
+
+    @Query("DELETE FROM shelf_book_positions")
+    suspend fun deleteAllPositions()
+
 }

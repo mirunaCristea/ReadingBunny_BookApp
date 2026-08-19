@@ -14,7 +14,8 @@ import android.util.Log
 data class BookSearchUiState(
     val results: List<BookSearchResult> = emptyList(),
     val isLoading: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val hasSearched: Boolean = false
 )
 
 class BookSearchViewModel(
@@ -36,7 +37,8 @@ class BookSearchViewModel(
             _uiState.update {
                 it.copy(
                     isLoading = true,
-                    errorMessage = null
+                    errorMessage = null,
+                    hasSearched = true
                 )
             }
 
@@ -64,6 +66,112 @@ class BookSearchViewModel(
                         errorMessage = exception.message
                             ?: exception::class.simpleName
                             ?: "Unknown error"
+                    )
+                }
+            }
+        }
+    }
+
+
+    fun searchBookByIsbn(isbn: String) {
+
+        val cleanIsbn = isbn.trim()
+
+        if (cleanIsbn.isBlank()) {
+            return
+        }
+
+        viewModelScope.launch {
+
+            _uiState.update {
+                it.copy(
+                    isLoading = true,
+                    errorMessage = null,
+                    hasSearched = true
+                )
+            }
+
+            try {
+
+                val results =
+                    repository.searchBookByIsbn(cleanIsbn)
+
+                _uiState.update {
+                    it.copy(
+                        results = results,
+                        isLoading = false
+                    )
+                }
+
+            } catch (exception: Exception) {
+
+                Log.e(
+                    "BookSearch",
+                    "ISBN search failed",
+                    exception
+                )
+
+                _uiState.update {
+                    it.copy(
+                        results = emptyList(),
+                        isLoading = false,
+                        errorMessage =
+                            exception.message ?: "Book lookup failed"
+                    )
+                }
+            }
+        }
+    }
+
+
+    fun searchBooksWithFallback(query: String) {
+
+        val cleanQuery = query.trim()
+
+        if (cleanQuery.isBlank()) {
+            _uiState.value = BookSearchUiState()
+            return
+        }
+
+        viewModelScope.launch {
+
+            _uiState.update {
+                it.copy(
+                    isLoading = true,
+                    errorMessage = null,
+                    hasSearched = true
+                )
+            }
+
+            try {
+
+                val results =
+                    repository.searchBooksWithFallback(
+                        cleanQuery
+                    )
+
+                _uiState.update {
+                    it.copy(
+                        results = results,
+                        isLoading = false
+                    )
+                }
+
+            } catch (exception: Exception) {
+
+                Log.e(
+                    "BookSearch",
+                    "Fallback search failed",
+                    exception
+                )
+
+                _uiState.update {
+                    it.copy(
+                        results = emptyList(),
+                        isLoading = false,
+                        errorMessage =
+                            exception.message
+                                ?: "Book search failed"
                     )
                 }
             }

@@ -1,5 +1,6 @@
 package com.example.readingbunny.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -18,6 +19,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -25,6 +28,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.readingbunny.ReadingBunnyApplication
+import com.example.readingbunny.model.JournalEntryType
+import com.example.readingbunny.model.ReadingJournalEntry
 import com.example.readingbunny.model.ReadingStatus
 import com.example.readingbunny.ui.viewmodel.BookSearchViewModel
 import com.example.readingbunny.ui.viewmodel.BookSearchViewModelFactory
@@ -34,6 +39,11 @@ import com.example.readingbunny.ui.viewmodel.BookshelfViewModel
 import com.example.readingbunny.ui.viewmodel.BookshelfViewModelFactory
 import com.example.readingbunny.ui.viewmodel.ReadingSessionViewModel
 import com.example.readingbunny.ui.viewmodel.ReadingSessionViewModelFactory
+import com.example.readingbunny.ui.viewmodel.ProfileViewModel
+import com.example.readingbunny.ui.viewmodel.ProfileViewModelFactory
+import kotlinx.coroutines.launch
+import com.example.readingbunny.ui.viewmodel.ReadingJournalViewModel
+import com.example.readingbunny.ui.viewmodel.ReadingJournalViewModelFactory
 
 @Composable
 fun ReadingBunnyApp() {
@@ -72,7 +82,14 @@ fun ReadingBunnyApp() {
         initial = emptyList()
     )
 
+    val readingJournalViewModel:
+            ReadingJournalViewModel = viewModel(
 
+        factory =
+            ReadingJournalViewModelFactory(
+                application.readingJournalRepository
+            )
+    )
 
     var selectedBookId by rememberSaveable {
         mutableStateOf<Int?>(null)
@@ -81,6 +98,22 @@ fun ReadingBunnyApp() {
     val selectedBook = books.firstOrNull { book ->
         book.id == selectedBookId
     }
+
+    val journalEntries by
+    readingJournalViewModel
+        .entriesForBook(
+            selectedBookId ?: -1
+        )
+        .collectAsState(
+            initial = emptyList()
+        )
+
+    val allJournalEntries by
+    readingJournalViewModel
+        .allEntries
+        .collectAsState(
+            initial = emptyList()
+        )
 
     val currentBook = books.firstOrNull() { book ->
         book.status == ReadingStatus.READING
@@ -102,6 +135,22 @@ fun ReadingBunnyApp() {
     readingSessionViewModel.sessions.collectAsState(
         initial = emptyList()
     )
+
+    val profileViewModel: ProfileViewModel = viewModel(
+        factory = ProfileViewModelFactory(
+            application.userPreferencesRepository
+        )
+    )
+
+    val dailyGoalMinutes by
+    profileViewModel.dailyGoalMinutes.collectAsState()
+
+    val coroutineScope =
+        rememberCoroutineScope()
+
+    var backupMessage by remember {
+        mutableStateOf<String?>(null)
+    }
 
     val today = java.time.LocalDate.now()
 
@@ -188,6 +237,18 @@ fun ReadingBunnyApp() {
         )
 
     } else {
+
+        val currentlyReadingBooks =
+            books.count { book ->
+                book.status == ReadingStatus.READING
+            }
+
+        val finishedBooks =
+            books.count { book ->
+                book.status == ReadingStatus.FINISHED
+            }
+
+
 
 
         Scaffold(
@@ -286,7 +347,7 @@ fun ReadingBunnyApp() {
                     0 -> HomeScreen(
                         book = currentBook,
                         todayReadingSeconds = todayReadingSeconds,
-                        dailyGoalMinutes = 30,
+                        dailyGoalMinutes = dailyGoalMinutes,
                         onStartReading = { book ->
 
                             activeSessionBookId = book.id
@@ -302,6 +363,7 @@ fun ReadingBunnyApp() {
 
                             BookDetailsScreen(
                                 book = selectedBook,
+                                journalEntries = journalEntries,
                                 onBackClick = {
                                     selectedBookId = null
                                 },
@@ -311,7 +373,27 @@ fun ReadingBunnyApp() {
                                 onDeleteBook = { book ->
                                     bookViewModel.deleteBook(book)
                                     selectedBookId = null
+                                },
+                                onAddJournalEntry = {
+                                        type,
+                                        content,
+                                        page ->
+
+                                    readingJournalViewModel.addEntry(
+                                        bookId = selectedBook.id,
+                                        type = type,
+                                        content = content,
+                                        page = page
+                                    )
+                                },
+
+                                onDeleteJournalEntry = { entry ->
+
+                                    readingJournalViewModel.deleteEntry(
+                                        entry
+                                    )
                                 }
+
                             )
 
                         } else if (isAddingBook) {
@@ -385,7 +467,98 @@ fun ReadingBunnyApp() {
                         sessions = readingSessions,
                         books = books
                     )
-                    4 -> Text("Profile page")
+                    4 -> ProfileScreen(
+                        dailyGoalMinutes = dailyGoalMinutes,
+                        totalBooks = books.size,
+                        currentlyReadingBooks = currentlyReadingBooks,
+                        finishedBooks = finishedBooks,
+
+                        onDailyGoalChange = { minutes ->
+
+                            profileViewModel.setDailyGoalMinutes(
+                                minutes
+                            )
+                        },
+
+                        onExportBackup = { uri ->
+
+                            backupMessage = null
+
+                            coroutineScope.launch {
+
+                                try {
+
+                                    application.backupRepository
+                                        .exportBackup(
+                                            uri = uri,
+                                            books = books,
+                                            readingSessions =
+                                                readingSessions,
+                                            shelfDecorations =
+                                                decorations,
+                                            shelfBookPositions =
+                                                bookPositions,
+                                            readingJournalEntries =
+                                                allJournalEntries,
+                                            dailyGoalMinutes =
+                                                dailyGoalMinutes
+                                        )
+
+                                    backupMessage =
+                                        "Backup exported successfully."
+
+
+
+
+
+                                } catch (exception: Exception) {
+
+                                    Log.e(
+                                        "Backup",
+                                        "Backup export failed",
+                                        exception
+                                    )
+
+                                    backupMessage =
+                                        "Could not export backup."
+                                }
+
+
+
+                            }
+                        },
+
+                        onRestoreBackup = { uri ->
+
+                            backupMessage = null
+
+                            coroutineScope.launch {
+
+                                try {
+
+                                    application.backupRepository
+                                        .restoreBackup(uri)
+
+                                    backupMessage =
+                                        "Backup restored successfully."
+
+                                } catch (exception: Exception) {
+
+                                    Log.e(
+                                        "Backup",
+                                        "Backup restore failed",
+                                        exception
+                                    )
+
+                                    backupMessage =
+                                        exception.message
+                                            ?: "Could not restore backup."
+                                }
+                            }
+                        },
+
+                        backupMessage = backupMessage
+                    )
                 }
             }
 
