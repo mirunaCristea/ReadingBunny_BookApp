@@ -24,13 +24,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.readingbunny.ReadingBunnyApplication
-import com.example.readingbunny.model.JournalEntryType
-import com.example.readingbunny.model.ReadingJournalEntry
 import com.example.readingbunny.model.ReadingStatus
+import com.example.readingbunny.ui.theme.WarmCream
 import com.example.readingbunny.ui.viewmodel.BookSearchViewModel
 import com.example.readingbunny.ui.viewmodel.BookSearchViewModelFactory
 import com.example.readingbunny.ui.viewmodel.BookViewModel
@@ -252,7 +250,7 @@ fun ReadingBunnyApp() {
 
 
         Scaffold(
-            containerColor = Color(0xFFFFF8EF),
+            containerColor = WarmCream,
 
             bottomBar = {
                 NavigationBar {
@@ -515,12 +513,12 @@ fun ReadingBunnyApp() {
 
                                     Log.e(
                                         "Backup",
-                                        "Backup export failed",
+                                        "Backup restore failed",
                                         exception
                                     )
 
                                     backupMessage =
-                                        "Could not export backup."
+                                        "Could not restore backup. Please check the backup file and try again."
                                 }
 
 

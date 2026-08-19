@@ -105,12 +105,12 @@ fun HomeScreen(
         }
 
         Text(
-            text = "Un colț liniștit pentru fiecare poveste.",
+            text = "A quiet corner for every story.",
             color = DarkBrown.copy(alpha = 0.7f)
         )
 
         Text(
-            text = "Citesc acum",
+            text = "Currently reading",
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.SemiBold,
             color = DarkBrown
@@ -187,9 +187,9 @@ fun HomeScreen(
 
                     Text(
                         text = if (book != null ) {
-                            "${book.currentPage} din ${book.totalPages} pages · ${(progress * 100).toInt()} % "
+                            "${book.currentPage} / ${book.totalPages} pages · ${(progress * 100).toInt()}% "
                             } else {
-                            "0% progress"
+                            "No reading progress yet"
                         },
                         fontSize = 12.sp,
                         color = DarkBrown.copy(alpha = 0.7f)
