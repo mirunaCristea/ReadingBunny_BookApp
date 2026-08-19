@@ -42,7 +42,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import com.example.readingbunny.R
-
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 
 @Composable
 fun BookshelfScreen(
@@ -148,35 +149,64 @@ fun BookshelfScreen(
             .padding(20.dp)
     ) {
 
-        Row(
+        LazyRow(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
 
-            Text(
-                text = "My Bookshelf",
-                fontSize = 26.sp
-            )
+            items(
+                items = DecorationType.entries
+            ) { decoration ->
 
-            Button(
-                onClick = {
-                    isDecorating = !isDecorating
+                val isSelected =
+                    selectedDecoration == decoration
 
-                    if (!isDecorating) {
-                        selectedDecoration = null
-                        selectedBookId = null
-                        selectedPlacedDecorationId = null
+                Box(
+                    modifier = Modifier
+                        .width(90.dp)
+                        .background(
+                            color = if (isSelected) {
+                                ShelfWood
+                            } else {
+                                SoftCream
+                            },
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                        .clickable {
+                            selectedDecoration = decoration
+                            selectedBookId = null
+                            selectedPlacedDecorationId = null
+                        }
+                        .padding(
+                            horizontal = 8.dp,
+                            vertical = 8.dp
+                        )
+                ) {
+
+                    Column(
+                        horizontalAlignment =
+                            Alignment.CenterHorizontally,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+
+                        DecorationArtwork(
+                            decoration = decoration,
+                            modifier = Modifier
+                                .width(32.dp)
+                                .height(32.dp)
+                        )
+
+                        Spacer(
+                            modifier = Modifier.height(4.dp)
+                        )
+
+                        Text(
+                            text = decoration.displayName,
+                            fontSize = 12.sp,
+                            maxLines = 1
+                        )
                     }
                 }
-            ) {
-                Text(
-                    text = if (isDecorating) {
-                        "Done"
-                    } else {
-                        "Decorate"
-                    }
-                )
             }
         }
 
