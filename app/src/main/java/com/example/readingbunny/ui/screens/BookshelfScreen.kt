@@ -489,8 +489,8 @@ fun DecorationItem(
 
     Box(
         modifier = Modifier
-            .width(48.dp)
-            .height(70.dp)
+            .width(52.dp)
+            .height(85.dp)
             .border(
                 width = if (isSelected) 2.dp else 0.dp,
                 color = SoftCream,
@@ -503,11 +503,42 @@ fun DecorationItem(
         contentAlignment = Alignment.BottomCenter
     ) {
 
+        val artworkModifier =
+            when (decoration) {
+                DecorationType.PLANT ->
+                    Modifier
+                        .width(52.dp)
+                        .height(80.dp)
+
+                DecorationType.CANDLE ->
+                    Modifier
+                        .width(34.dp)
+                        .height(72.dp)
+
+                DecorationType.LAMP ->
+                    Modifier
+                        .width(50.dp)
+                        .height(72.dp)
+
+                DecorationType.PUMPKIN ->
+                    Modifier
+                        .width(50.dp)
+                        .height(50.dp)
+
+                DecorationType.FRAME ->
+                    Modifier
+                        .width(46.dp)
+                        .height(55.dp)
+
+                DecorationType.TEA_CUP ->
+                    Modifier
+                        .width(56.dp)
+                        .height(52.dp)
+            }
+
         DecorationArtwork(
             decoration = decoration,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(2.dp)
+            modifier = artworkModifier
         )
     }
 }
@@ -589,8 +620,9 @@ private fun DecorationType.drawableRes(): Int? {
             R.drawable.decoration_pumpkin
 
         DecorationType.FRAME,
+
         DecorationType.TEA_CUP ->
-            null
+            R.drawable.decoration_tea
     }
 }
 
