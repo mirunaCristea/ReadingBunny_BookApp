@@ -187,7 +187,7 @@ fun HomeScreen(
 
                     Text(
                         text = if (book != null ) {
-                            "${book.currentPage} din ${book.totalPages} pagini · ${(progress * 100).toInt()} % "
+                            "${book.currentPage} din ${book.totalPages} pages · ${(progress * 100).toInt()} % "
                             } else {
                             "0% progress"
                         },

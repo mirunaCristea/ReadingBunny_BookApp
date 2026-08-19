@@ -182,7 +182,11 @@ fun BookScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "No books found",
+                    text = if (books.isEmpty()) {
+                        "Your library is empty"
+                    } else {
+                        "No books found"
+                    },
                     color = Color(0xFF74645E)
                 )
             }
@@ -268,7 +272,7 @@ fun BookCard(book: Book, onClick: () -> Unit) {
                     text = book.title,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF382B27)
+                    color = DarkBrown
                 )
 
                 Text(
@@ -283,7 +287,7 @@ fun BookCard(book: Book, onClick: () -> Unit) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(7.dp),
-                    color = Color(0xFFB85C48),
+                    color = Terracotta,
                     trackColor = Color(0xFFE8D8CC)
                 )
 

@@ -237,10 +237,8 @@ fun ProfileScreen(
                 Text("Export backup")
 
 
-
-
-                }
             }
+
             OutlinedButton(
                 onClick = {
 
@@ -264,6 +262,7 @@ fun ProfileScreen(
                     color = Color(0xFF74645E)
                 )
             }
+        }
 
         }
     }
