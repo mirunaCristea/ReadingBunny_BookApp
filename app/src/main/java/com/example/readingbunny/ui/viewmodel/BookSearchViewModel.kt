@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import android.util.Log
+import retrofit2.HttpException
+import java.io.IOException
 
 data class BookSearchUiState(
     val results: List<BookSearchResult> = emptyList(),
@@ -63,9 +65,7 @@ class BookSearchViewModel(
                     it.copy(
                         results = emptyList(),
                         isLoading = false,
-                        errorMessage = exception.message
-                            ?: exception::class.simpleName
-                            ?: "Unknown error"
+                        errorMessage = exception.toFriendlySearchMessage()
                     )
                 }
             }
@@ -116,7 +116,7 @@ class BookSearchViewModel(
                         results = emptyList(),
                         isLoading = false,
                         errorMessage =
-                            exception.message ?: "Book lookup failed"
+                            exception.toFriendlySearchMessage()
                     )
                 }
             }
@@ -170,11 +170,34 @@ class BookSearchViewModel(
                         results = emptyList(),
                         isLoading = false,
                         errorMessage =
-                            exception.message
-                                ?: "Book search failed"
+                            exception.toFriendlySearchMessage()
                     )
                 }
             }
         }
+    }
+}
+
+
+private fun Exception.toFriendlySearchMessage(): String {
+    return when (this) {
+        is IOException ->
+            "Could not connect. Please check your internet connection and try again."
+
+        is HttpException -> {
+            when (code()) {
+                502, 503, 504 ->
+                    "The book search service is temporarily unavailable. Please try again in a moment."
+
+                429 ->
+                    "Too many search requests. Please wait a moment and try again."
+
+                else ->
+                    "Could not search for books. Please try again."
+            }
+        }
+
+        else ->
+            "Could not search for books. Please try again."
     }
 }
