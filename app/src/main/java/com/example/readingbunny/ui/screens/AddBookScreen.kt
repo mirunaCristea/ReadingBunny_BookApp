@@ -294,9 +294,9 @@ fun AddBookScreen(
                             }
                         }
 
-                        searchUiState.errorMessage?.let {
+                        searchUiState.errorMessage?.let { message ->
                             Text(
-                                text = "Could not search for books. Please try again.",
+                                text = message,
                                 color = MaterialTheme.colorScheme.error
                             )
                         }
