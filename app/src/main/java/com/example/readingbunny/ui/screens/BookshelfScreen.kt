@@ -1,5 +1,6 @@
 package com.example.readingbunny.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,8 +15,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,30 +30,23 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.readingbunny.R
 import com.example.readingbunny.model.Book
 import com.example.readingbunny.model.DecorationType
+import com.example.readingbunny.model.ReadingStatus
 import com.example.readingbunny.model.ShelfBookPosition
 import com.example.readingbunny.model.ShelfDecoration
 import com.example.readingbunny.ui.theme.BookSpineColors
 import com.example.readingbunny.ui.theme.ShelfWood
-import com.example.readingbunny.ui.theme.SoftCream
-import androidx.compose.foundation.Image
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import com.example.readingbunny.R
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import com.example.readingbunny.model.ReadingStatus
-import androidx.compose.foundation.shape.GenericShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.ui.draw.clip
-import com.example.readingbunny.ui.theme.DarkBrown
 
 @Composable
 fun BookshelfScreen(
@@ -61,7 +59,6 @@ fun BookshelfScreen(
     onMoveBook: (Int, Int, Int) -> Unit,
     onMoveDecoration: (ShelfDecoration, Int, Int) -> Unit
 ) {
-
     var isDecorating by rememberSaveable {
         mutableStateOf(false)
     }
@@ -82,7 +79,6 @@ fun BookshelfScreen(
         decorations.firstOrNull {
             it.id == selectedPlacedDecorationId
         }
-
 
     val highestUsedShelf = maxOf(
         decorations.maxOfOrNull { it.shelfIndex } ?: -1,
@@ -122,13 +118,10 @@ fun BookshelfScreen(
             book.id !in effectiveBookPositions
         }
         .forEach { book ->
-
-
             var foundPosition: Pair<Int, Int>? = null
 
             for (shelfIndex in 0 until shelfCount) {
                 for (slotIndex in 0 until 6) {
-
                     val position = shelfIndex to slotIndex
 
                     if (position !in usedSlots) {
@@ -151,19 +144,18 @@ fun BookshelfScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
             .padding(20.dp)
     ) {
-
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-
             Text(
                 text = "My bookshelf",
                 style = MaterialTheme.typography.headlineMedium,
-                color = DarkBrown
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             Button(
@@ -188,18 +180,15 @@ fun BookshelfScreen(
         }
 
         if (isDecorating) {
-
             Spacer(modifier = Modifier.height(16.dp))
 
             LazyRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-
                 items(
                     items = DecorationType.entries
                 ) { decoration ->
-
                     val isSelected =
                         selectedDecoration == decoration
 
@@ -210,7 +199,7 @@ fun BookshelfScreen(
                                 color = if (isSelected) {
                                     ShelfWood
                                 } else {
-                                    SoftCream
+                                    MaterialTheme.colorScheme.surfaceVariant
                                 },
                                 shape = RoundedCornerShape(12.dp)
                             )
@@ -224,13 +213,10 @@ fun BookshelfScreen(
                                 vertical = 8.dp
                             )
                     ) {
-
                         Column(
-                            horizontalAlignment =
-                                Alignment.CenterHorizontally,
+                            horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier.fillMaxWidth()
                         ) {
-
                             DecorationArtwork(
                                 decoration = decoration,
                                 modifier = Modifier
@@ -244,7 +230,12 @@ fun BookshelfScreen(
 
                             Text(
                                 text = decoration.displayName,
-                                fontSize = 12.sp,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = if (isSelected) {
+                                    MaterialTheme.colorScheme.onPrimary
+                                } else {
+                                    MaterialTheme.colorScheme.onSurface
+                                },
                                 maxLines = 1
                             )
                         }
@@ -268,7 +259,8 @@ fun BookshelfScreen(
                     else ->
                         "Choose a decoration or tap a book to move it"
                 },
-                fontSize = 13.sp
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -280,7 +272,6 @@ fun BookshelfScreen(
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-
                     Button(
                         onClick = {
                             selectedBookId = null
@@ -312,20 +303,17 @@ fun BookshelfScreen(
         LazyColumn(
             modifier = Modifier.fillMaxSize()
         ) {
-
             items(shelfCount) { shelfIndex ->
-
-
-
                 val shelfDecorations =
                     decorations.filter { decoration ->
                         decoration.shelfIndex == shelfIndex
                     }
+
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(
-                            color = SoftCream,
+                            color = MaterialTheme.colorScheme.surfaceVariant,
                             shape = RoundedCornerShape(20.dp)
                         )
                         .padding(
@@ -334,7 +322,6 @@ fun BookshelfScreen(
                             top = 18.dp
                         )
                 ) {
-
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -343,15 +330,15 @@ fun BookshelfScreen(
                         horizontalArrangement = Arrangement.spacedBy(5.dp)
                     ) {
                         repeat(6) { slotIndex ->
-
                             val book = books.firstOrNull { currentBook ->
                                 effectiveBookPositions[currentBook.id] ==
                                         (shelfIndex to slotIndex)
                             }
 
-                            val decoration = shelfDecorations.firstOrNull { decoration ->
-                                decoration.slotIndex == slotIndex
-                            }
+                            val decoration =
+                                shelfDecorations.firstOrNull { decoration ->
+                                    decoration.slotIndex == slotIndex
+                                }
 
                             val isEmpty =
                                 book == null && decoration == null
@@ -363,10 +350,8 @@ fun BookshelfScreen(
                                     .clickable(
                                         enabled = isDecorating && isEmpty
                                     ) {
-
                                         when {
                                             selectedBookId != null -> {
-
                                                 onMoveBook(
                                                     selectedBookId!!,
                                                     shelfIndex,
@@ -384,10 +369,9 @@ fun BookshelfScreen(
                                                 )
 
                                                 selectedPlacedDecorationId = null
-
                                             }
-                                            selectedDecoration != null -> {
 
+                                            selectedDecoration != null -> {
                                                 onAddDecoration(
                                                     selectedDecoration!!,
                                                     shelfIndex,
@@ -398,24 +382,20 @@ fun BookshelfScreen(
                                     },
                                 contentAlignment = Alignment.BottomCenter
                             ) {
-
                                 when {
-
                                     book != null -> {
-
                                         BookSpine(
                                             book = book,
-                                            isSelected = selectedBookId == book.id,
+                                            isSelected =
+                                                selectedBookId == book.id,
                                             onClick = {
-
                                                 if (isDecorating) {
-
                                                     selectedBookId = book.id
 
                                                     selectedDecoration = null
-                                                    selectedPlacedDecorationId = null
+                                                    selectedPlacedDecorationId =
+                                                        null
                                                 } else {
-
                                                     onBookClick(book)
                                                 }
                                             }
@@ -423,33 +403,35 @@ fun BookshelfScreen(
                                     }
 
                                     decoration != null -> {
-
                                         DecorationItem(
                                             decoration = decoration.type,
                                             isDecorating = isDecorating,
                                             isSelected =
-                                            selectedPlacedDecorationId == decoration.id,
+                                                selectedPlacedDecorationId ==
+                                                        decoration.id,
                                             onClick = {
-
-                                                selectedPlacedDecorationId = decoration.id
+                                                selectedPlacedDecorationId =
+                                                    decoration.id
 
                                                 selectedBookId = null
                                                 selectedDecoration = null
                                             }
-
                                         )
-
-
                                     }
 
                                     isDecorating &&
-                                            (selectedDecoration != null ||
-                                                    selectedBookId != null ||
-                                                    selectedPlacedDecorationId != null ) -> {
-
+                                            (
+                                                    selectedDecoration != null ||
+                                                            selectedBookId != null ||
+                                                            selectedPlacedDecorationId != null
+                                                    ) -> {
                                         Text(
                                             text = "+",
-                                            fontSize = 22.sp
+                                            fontSize = 22.sp,
+                                            color =
+                                                MaterialTheme
+                                                    .colorScheme
+                                                    .onSurfaceVariant
                                         )
                                     }
                                 }
@@ -484,7 +466,6 @@ fun BookshelfScreen(
     }
 }
 
-
 @Composable
 fun DecorationItem(
     decoration: DecorationType,
@@ -492,14 +473,13 @@ fun DecorationItem(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-
     Box(
         modifier = Modifier
             .width(52.dp)
             .height(85.dp)
             .border(
                 width = if (isSelected) 2.dp else 0.dp,
-                color = SoftCream,
+                color = MaterialTheme.colorScheme.surfaceVariant,
                 shape = RoundedCornerShape(10.dp)
             )
             .clickable(
@@ -508,7 +488,6 @@ fun DecorationItem(
             ),
         contentAlignment = Alignment.BottomCenter
     ) {
-
         val artworkModifier =
             when (decoration) {
                 DecorationType.PLANT ->
@@ -549,14 +528,12 @@ fun DecorationItem(
     }
 }
 
-
 @Composable
 fun BookSpine(
     book: Book,
     isSelected: Boolean = false,
     onClick: () -> Unit
 ) {
-
     val heights = listOf(
         125.dp,
         140.dp,
@@ -605,7 +582,6 @@ fun BookSpine(
             ),
         contentAlignment = Alignment.Center
     ) {
-
         Text(
             text = book.title,
             modifier = Modifier
@@ -615,7 +591,8 @@ fun BookSpine(
             softWrap = false,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center,
-            fontSize = 14.sp
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.onPrimary
         )
 
         if (book.status == ReadingStatus.WANT_TO_READ) {
@@ -627,10 +604,9 @@ fun BookSpine(
                     .height(24.dp)
                     .clip(bookmarkShape)
                     .background(
-                        color = SoftCream
-                        )
+                        color = MaterialTheme.colorScheme.surfaceVariant
                     )
-
+            )
         }
     }
 }
@@ -662,12 +638,10 @@ private fun DecorationArtwork(
     decoration: DecorationType,
     modifier: Modifier = Modifier
 ) {
-
     val drawableRes =
         decoration.drawableRes()
 
     if (drawableRes != null) {
-
         Image(
             painter = painterResource(
                 id = drawableRes
@@ -677,9 +651,7 @@ private fun DecorationArtwork(
             modifier = modifier,
             contentScale = ContentScale.Fit
         )
-
     } else {
-
         Text(
             text = decoration.emoji,
             fontSize = 30.sp
