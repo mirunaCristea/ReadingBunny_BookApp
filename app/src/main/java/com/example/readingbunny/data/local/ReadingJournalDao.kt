@@ -47,4 +47,11 @@ interface ReadingJournalDao {
         "DELETE FROM reading_journal_entries"
     )
     suspend fun deleteAllEntries()
+
+    @Query(
+        "DELETE FROM reading_journal_entries WHERE bookId = :bookId"
+    )
+    suspend fun deleteEntriesForBook(
+        bookId: Int
+    )
 }

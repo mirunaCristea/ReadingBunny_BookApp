@@ -29,4 +29,25 @@ data class Book(
     val isbn: String? = null,
     val coverUrl: String? = null,
     val description: String? = null
-)
+){
+    private fun ReadingStatus.displayName(): String {
+        return when (this) {
+            ReadingStatus.READING -> "Currently Reading"
+            ReadingStatus.WANT_TO_READ -> "Want to Read"
+            ReadingStatus.FINISHED -> "Finished"
+            ReadingStatus.DNF -> "Did Not Finish"
+            ReadingStatus.UNREAD -> "Unread"
+        }
+    }
+
+    private fun BookOwnership.displayName(): String {
+        return when (this) {
+            BookOwnership.WISHLIST -> "Wishlist"
+            BookOwnership.BORROWED -> "Borrowed"
+            BookOwnership.OWNED -> "Owned"
+
+
+        }
+    }
+
+}
