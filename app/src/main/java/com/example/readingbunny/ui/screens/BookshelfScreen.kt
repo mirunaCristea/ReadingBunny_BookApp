@@ -178,6 +178,15 @@ fun BookshelfScreen(
                 )
             }
         }
+        if (books.isEmpty() && !isDecorating) {
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = "Your bookshelf is waiting for its first book.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
 
         if (isDecorating) {
             Spacer(modifier = Modifier.height(16.dp))

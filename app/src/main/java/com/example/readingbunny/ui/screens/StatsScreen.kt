@@ -1,6 +1,5 @@
 package com.example.readingbunny.ui.screens
 
-import android.R.attr.padding
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -8,12 +7,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -24,10 +24,7 @@ import com.example.readingbunny.model.Book
 import com.example.readingbunny.model.ReadingAchievement
 import com.example.readingbunny.model.ReadingSession
 import com.example.readingbunny.model.ReadingStatus
-import com.example.readingbunny.ui.theme.DarkBrown
 import com.example.readingbunny.ui.theme.ShelfWood
-import com.example.readingbunny.ui.theme.SoftCream
-import com.example.readingbunny.ui.theme.WarmCream
 import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
@@ -39,12 +36,12 @@ private data class DayReadingActivity(
     val date: LocalDate,
     val readingSeconds: Long
 )
+
 @Composable
 fun StatsScreen(
     sessions: List<ReadingSession>,
     books: List<Book>
 ) {
-
     val today = LocalDate.now()
 
     val sessionDates =
@@ -78,13 +75,11 @@ fun StatsScreen(
 
     val weekDays =
         (0L..6L).map { dayOffset ->
-
             val date =
                 startOfWeek.plusDays(dayOffset)
 
             val sessionsForDay =
                 sessions.filter { session ->
-
                     val sessionDate =
                         Instant
                             .ofEpochMilli(session.startedAt)
@@ -95,8 +90,8 @@ fun StatsScreen(
                 }
 
             val seconds =
-                sessionsForDay.sumOf {
-                    it.durationSeconds
+                sessionsForDay.sumOf { session ->
+                    session.durationSeconds
                 }
 
             DayReadingActivity(
@@ -110,7 +105,6 @@ fun StatsScreen(
 
     val weeklySessions =
         sessions.filter { session ->
-
             val sessionDate =
                 Instant
                     .ofEpochMilli(session.startedAt)
@@ -122,8 +116,8 @@ fun StatsScreen(
         }
 
     val totalSeconds =
-        weeklySessions.sumOf {
-            it.durationSeconds
+        weeklySessions.sumOf { session ->
+            session.durationSeconds
         }
 
     val pagesRead =
@@ -147,24 +141,22 @@ fun StatsScreen(
 
     val recentSessions =
         sessions
-            .sortedByDescending {
-                it.startedAt
+            .sortedByDescending { session ->
+                session.startedAt
             }
             .take(5)
 
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .background(WarmCream)
+            .background(MaterialTheme.colorScheme.background)
             .padding(20.dp)
     ) {
-
         item {
-
             Text(
-                text = "Reading Journey",
-                fontSize = 28.sp,
-                color = DarkBrown
+                text = "Reading journey",
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             Spacer(
@@ -173,8 +165,8 @@ fun StatsScreen(
 
             Text(
                 text = "This week",
-                fontSize = 15.sp,
-                color = DarkBrown.copy(alpha = 0.65f)
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Spacer(
@@ -185,16 +177,15 @@ fun StatsScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(
-                        color = SoftCream,
+                        color = MaterialTheme.colorScheme.surfaceVariant,
                         shape = RoundedCornerShape(18.dp)
                     )
                     .padding(18.dp)
             ) {
-
                 Text(
                     text = "🔥 $currentStreak day streak",
-                    fontSize = 22.sp,
-                    color = DarkBrown
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Spacer(
@@ -207,8 +198,8 @@ fun StatsScreen(
                     } else {
                         "Read today to start a new streak."
                     },
-                    fontSize = 13.sp,
-                    color = DarkBrown.copy(alpha = 0.65f)
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
@@ -218,10 +209,8 @@ fun StatsScreen(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement =
-                    Arrangement.spacedBy(10.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-
                 StatCard(
                     modifier = Modifier.weight(1f),
                     value = formatReadingDuration(
@@ -243,10 +232,8 @@ fun StatsScreen(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement =
-                    Arrangement.spacedBy(10.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-
                 StatCard(
                     modifier = Modifier.weight(1f),
                     value = weeklySessions.size.toString(),
@@ -266,8 +253,8 @@ fun StatsScreen(
 
             Text(
                 text = "This week's activity",
-                fontSize = 22.sp,
-                color = DarkBrown
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             Spacer(
@@ -278,14 +265,15 @@ fun StatsScreen(
                 days = weekDays,
                 today = today
             )
+
             Spacer(
                 modifier = Modifier.height(30.dp)
             )
 
             Text(
                 text = "Milestones",
-                fontSize = 22.sp,
-                color = DarkBrown
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             Spacer(
@@ -295,9 +283,7 @@ fun StatsScreen(
             Column(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-
                 achievements.forEach { achievement ->
-
                     AchievementCard(
                         achievement = achievement
                     )
@@ -310,8 +296,8 @@ fun StatsScreen(
 
             Text(
                 text = "Recent activity",
-                fontSize = 22.sp,
-                color = DarkBrown
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             Spacer(
@@ -320,21 +306,15 @@ fun StatsScreen(
         }
 
         if (recentSessions.isEmpty()) {
-
             item {
-
                 Text(
                     text = "No reading sessions yet.",
-                    color = DarkBrown.copy(
-                        alpha = 0.65f
-                    )
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-
         } else {
-
             items(recentSessions) { session ->
-
                 val book =
                     books.firstOrNull {
                         it.id == session.bookId
@@ -342,8 +322,7 @@ fun StatsScreen(
 
                 ReadingSessionCard(
                     session = session,
-                    bookTitle =
-                        book?.title ?: "Unknown book"
+                    bookTitle = book?.title ?: "Unknown book"
                 )
 
                 Spacer(
@@ -359,45 +338,49 @@ private fun WeekActivityRow(
     days: List<DayReadingActivity>,
     today: LocalDate
 ) {
-
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-
         days.forEach { day ->
-
             val hasRead =
                 day.readingSeconds > 0
 
             val isToday =
                 day.date == today
 
+            val backgroundColor =
+                if (hasRead) {
+                    ShelfWood
+                } else {
+                    MaterialTheme.colorScheme.surfaceVariant
+                }
+
+            val textColor =
+                if (hasRead) {
+                    MaterialTheme.colorScheme.onPrimary
+                } else {
+                    MaterialTheme.colorScheme.onSurface
+                }
+
             Column(
                 modifier = Modifier
                     .weight(1f)
                     .background(
-                        color = if (hasRead) {
-                            ShelfWood
-                        } else {
-                            SoftCream
-                        },
+                        color = backgroundColor,
                         shape = RoundedCornerShape(14.dp)
                     )
                     .padding(
                         vertical = 10.dp
                     ),
-                horizontalAlignment =
-                    Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-
                 Text(
-                    text =
-                        day.date.dayOfWeek
-                            .name
-                            .take(1),
+                    text = day.date.dayOfWeek
+                        .name
+                        .take(1),
                     fontSize = 12.sp,
-                    color = DarkBrown
+                    color = textColor
                 )
 
                 Spacer(
@@ -410,11 +393,11 @@ private fun WeekActivityRow(
                     } else {
                         "·"
                     },
-                    fontSize = 17.sp
+                    fontSize = 17.sp,
+                    color = textColor
                 )
 
                 if (isToday) {
-
                     Spacer(
                         modifier = Modifier.height(4.dp)
                     )
@@ -422,9 +405,11 @@ private fun WeekActivityRow(
                     Text(
                         text = "Today",
                         fontSize = 9.sp,
-                        color = DarkBrown.copy(
-                            alpha = 0.65f
-                        )
+                        color = if (hasRead) {
+                            MaterialTheme.colorScheme.onPrimary
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        }
                     )
                 }
             }
@@ -437,30 +422,29 @@ private fun StatCard(
     modifier: Modifier = Modifier,
     value: String,
     label: String
-
-){
+) {
     Column(
-        modifier=modifier
+        modifier = modifier
             .background(
-                color = SoftCream,
+                color = MaterialTheme.colorScheme.surfaceVariant,
                 shape = RoundedCornerShape(18.dp)
             )
             .padding(16.dp)
     ) {
         Text(
             text = value,
-            fontSize = 24.sp,
-            color = DarkBrown
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurface
         )
 
-        Spacer (
+        Spacer(
             modifier = Modifier.height(4.dp)
         )
 
         Text(
             text = label,
-            fontSize = 13.sp,
-            color = DarkBrown.copy(alpha = 0.65f)
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -470,7 +454,6 @@ private fun ReadingSessionCard(
     session: ReadingSession,
     bookTitle: String
 ) {
-
     val date =
         Instant
             .ofEpochMilli(session.startedAt)
@@ -492,16 +475,15 @@ private fun ReadingSessionCard(
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                color = SoftCream,
+                color = MaterialTheme.colorScheme.surfaceVariant,
                 shape = RoundedCornerShape(16.dp)
             )
             .padding(16.dp)
     ) {
-
         Text(
             text = bookTitle,
-            fontSize = 17.sp,
-            color = DarkBrown
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface
         )
 
         Spacer(
@@ -510,8 +492,8 @@ private fun ReadingSessionCard(
 
         Text(
             text = date.format(formatter),
-            fontSize = 13.sp,
-            color = DarkBrown.copy(alpha = 0.6f)
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
         Spacer(
@@ -522,8 +504,8 @@ private fun ReadingSessionCard(
             text =
                 "${formatReadingDuration(session.durationSeconds)} · " +
                         "$pages pages",
-            fontSize = 14.sp,
-            color = DarkBrown
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }
@@ -531,7 +513,6 @@ private fun ReadingSessionCard(
 private fun formatReadingDuration(
     seconds: Long
 ): String {
-
     val hours =
         seconds / 3600
 
@@ -539,7 +520,6 @@ private fun formatReadingDuration(
         (seconds % 3600) / 60
 
     return when {
-
         hours > 0 ->
             "${hours}h ${minutes}m"
 
@@ -555,7 +535,6 @@ private fun calculateCurrentStreak(
     sessionDates: Set<LocalDate>,
     today: LocalDate
 ): Int {
-
     if (sessionDates.isEmpty()) {
         return 0
     }
@@ -570,7 +549,6 @@ private fun calculateCurrentStreak(
     var streak = 0
 
     while (currentDate in sessionDates) {
-
         streak++
 
         currentDate =
@@ -585,7 +563,6 @@ private fun buildAchievements(
     books: List<Book>,
     currentStreak: Int
 ): List<ReadingAchievement> {
-
     val totalPagesRead =
         sessions.sumOf { session ->
             maxOf(
@@ -595,17 +572,16 @@ private fun buildAchievements(
         }
 
     val totalReadingSeconds =
-        sessions.sumOf {
-            it.durationSeconds
+        sessions.sumOf { session ->
+            session.durationSeconds
         }
 
     val hasFinishedBook =
-        books.any {
-            it.status == ReadingStatus.FINISHED
+        books.any { book ->
+            book.status == ReadingStatus.FINISHED
         }
 
     return listOf(
-
         ReadingAchievement(
             title = "First Chapter",
             description = "Complete your first reading session",
@@ -643,23 +619,20 @@ private fun buildAchievements(
     )
 }
 
-
 @Composable
 private fun AchievementCard(
     achievement: ReadingAchievement
 ) {
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                color = SoftCream,
+                color = MaterialTheme.colorScheme.surfaceVariant,
                 shape = RoundedCornerShape(16.dp)
             )
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-
         Text(
             text = achievement.emoji,
             fontSize = 30.sp
@@ -672,11 +645,10 @@ private fun AchievementCard(
         Column(
             modifier = Modifier.weight(1f)
         ) {
-
             Text(
                 text = achievement.title,
-                fontSize = 17.sp,
-                color = DarkBrown.copy(
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface.copy(
                     alpha =
                         if (achievement.isUnlocked) {
                             1f
@@ -692,10 +664,8 @@ private fun AchievementCard(
 
             Text(
                 text = achievement.description,
-                fontSize = 13.sp,
-                color = DarkBrown.copy(
-                    alpha = 0.55f
-                )
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
 
@@ -706,7 +676,8 @@ private fun AchievementCard(
                 } else {
                     "🔒"
                 },
-            fontSize = 20.sp
+            fontSize = 20.sp,
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }
