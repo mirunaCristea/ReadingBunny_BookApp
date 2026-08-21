@@ -21,7 +21,7 @@ import com.example.readingbunny.model.ReadingJournalEntry
         ReadingSession::class,
         ReadingJournalEntry::class
     ],
-    version = 7,
+    version = 8,
     exportSchema = false
 )
 abstract class ReadingBunnyDatabase : RoomDatabase() {
@@ -77,6 +77,18 @@ abstract class ReadingBunnyDatabase : RoomDatabase() {
                     )
                 }
             }
+            
+        private val MIGRATION_7_8 =
+            object : Migration(7, 8) {
+
+            override suspend fun migrate(
+                connection: SQLiteConnection
+            ) {
+                connection.execSQL(
+                    "ALTER TABLE `books` ADD COLUMN `largeCoverUrl` TEXT"
+                )
+            }
+        }
         @Volatile
         private var INSTANCE: ReadingBunnyDatabase? = null
 
@@ -90,7 +102,8 @@ abstract class ReadingBunnyDatabase : RoomDatabase() {
                 )
                     .addMigrations(
                         MIGRATION_5_6,
-                        MIGRATION_6_7
+                        MIGRATION_6_7,
+                        MIGRATION_7_8,
                     )
                     .build()
 

@@ -7,5 +7,6 @@ data class BookSearchResult(
     val totalPages: Int?,
     val isbn: String?,
     val coverUrl: String?,
+    val largeCoverUrl: String?,
     val description: String?
 )

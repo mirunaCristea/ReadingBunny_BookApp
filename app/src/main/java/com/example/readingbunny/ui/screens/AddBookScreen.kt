@@ -120,6 +120,10 @@ fun AddBookScreen(
         mutableStateOf<String?>(null)
     }
 
+    var selectedLargeCoverUrl by rememberSaveable {
+        mutableStateOf<String?>(null)
+    }
+    
     var selectedDescription by rememberSaveable {
         mutableStateOf<String?>(null)
     }
@@ -312,33 +316,32 @@ fun AddBookScreen(
                                 color = MaterialTheme.colorScheme.onBackground
                             )
 
-                            LazyColumn(
-                                modifier = Modifier.weight(1f),
-                                verticalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                items(
-                                    items = searchUiState.results,
-                                    key = { book ->
-                                        book.externalId
-                                    }
-                                ) { book ->
-                                    BookSearchResultCard(
-                                        book = book,
-                                        onClick = {
-                                            bookTitle = book.title
-                                            bookAuthor = book.author
-                                            bookTotalPages =
-                                                book.totalPages?.toString().orEmpty()
-                                            selectedIsbn = book.isbn
-                                            selectedCoverUrl = book.coverUrl
-                                            selectedDescription = book.description
-                                            selectedMethod = AddBookMethod.MANUAL
+                                LazyColumn(
+                                    modifier = Modifier.weight(1f),
+                                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    items(
+                                        items = searchUiState.results,
+                                        key = { book ->
+                                            book.externalId
                                         }
-                                    )
+                                    ) { book ->
+                                        BookSearchResultCard(
+                                            book = book,
+                                            onClick = {
+                                                bookTitle = book.title
+                                                bookAuthor = book.author
+                                                bookTotalPages = book.totalPages?.toString().orEmpty()
+                                                selectedIsbn = book.isbn
+                                                selectedCoverUrl = book.coverUrl
+                                                selectedLargeCoverUrl = book.largeCoverUrl
+                                                selectedDescription = book.description
+                                                selectedMethod = AddBookMethod.MANUAL
+                                            }
+                                        )
+                                    }
                                 }
                             }
-                        }
-
                         if (
                             searchUiState.hasSearched &&
                             !searchUiState.isLoading &&
@@ -625,7 +628,8 @@ fun AddBookScreen(
                                     totalPages = pages,
                                     ownership = ownership,
                                     isbn = selectedIsbn,
-                                    coverUrl = selectedCoverUrl,
+                                    coverUrl =selectedCoverUrl,
+                                    largeCoverUrl= selectedLargeCoverUrl,
                                     description = selectedDescription
                                 )
 

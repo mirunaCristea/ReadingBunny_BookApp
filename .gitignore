@@ -13,3 +13,10 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+
+cmdline-tools
+emulator
+licenses
+platform-tools
+system-images
