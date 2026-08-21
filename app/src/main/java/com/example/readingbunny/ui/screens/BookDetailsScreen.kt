@@ -148,6 +148,7 @@ fun BookDetailsScreen(
             )
 
             ReadingJournalSection(
+                bookId = book.id,
                 journalEntries = journalEntries,
                 totalPages = book.totalPages,
                 onAddJournalEntry = onAddJournalEntry,
@@ -177,6 +178,7 @@ fun BookDetailsScreen(
 
         if (isEditSectionVisible) {
             BookSettingDialog(
+                bookId = book.id,
                 coverUrl = book.largeCoverUrl ?: book.coverUrl,
                 title = book.title,
                 author = book.author,
@@ -569,6 +571,7 @@ private fun BookInfoSection(
 
 @Composable
 private fun ReadingJournalSection(
+    bookId: Int,
     journalEntries: List<ReadingJournalEntry>,
     totalPages: Int,
     onAddJournalEntry: (
@@ -578,15 +581,15 @@ private fun ReadingJournalSection(
     ) -> Unit,
     onDeleteJournalEntry: (ReadingJournalEntry) -> Unit,
 ) {
-    var journalText by rememberSaveable {
+    var journalText by rememberSaveable(bookId) {
         mutableStateOf("")
     }
 
-    var journalPageText by rememberSaveable {
+    var journalPageText by rememberSaveable(bookId) {
         mutableStateOf("")
     }
 
-    var selectedJournalType by rememberSaveable {
+    var selectedJournalType by rememberSaveable(bookId) {
         mutableStateOf(JournalEntryType.NOTE)
     }
 
@@ -965,6 +968,7 @@ private fun JournalEntryCard(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun BookSettingDialog(
+    bookId: Int,
     coverUrl: String?,
     title: String,
     author: String,
@@ -980,35 +984,35 @@ private fun BookSettingDialog(
     onCurrentPageChange: (Int) -> Unit = {},
     onTotalPagesChange: (Int) -> Unit = {},
 ) {
-    var currentTitleText by rememberSaveable {
+    var currentTitleText by rememberSaveable(bookId) {
         mutableStateOf(title)
     }
 
-    var currentAuthorText by rememberSaveable {
+    var currentAuthorText by rememberSaveable(bookId) {
         mutableStateOf(author)
     }
 
-    var currentPageText by rememberSaveable {
+    var currentPageText by rememberSaveable(bookId) {
         mutableStateOf(currentPage.toString())
     }
 
-    var totalPagesText by rememberSaveable {
+    var totalPagesText by rememberSaveable(bookId) {
         mutableStateOf(totalPages.toString())
     }
 
-    var selectedStatus by rememberSaveable {
+    var selectedStatus by rememberSaveable(bookId) {
         mutableStateOf(status)
     }
 
-    var selectedOwnership by rememberSaveable {
+    var selectedOwnership by rememberSaveable(bookId) {
         mutableStateOf(ownership)
     }
 
-    var isStatusMenuExpanded by rememberSaveable {
+    var isStatusMenuExpanded by rememberSaveable(bookId) {
         mutableStateOf(false)
     }
 
-    var isOwnershipMenuExpanded by rememberSaveable {
+    var isOwnershipMenuExpanded by rememberSaveable(bookId) {
         mutableStateOf(false)
     }
 
