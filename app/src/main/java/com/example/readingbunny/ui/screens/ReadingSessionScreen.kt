@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.readingbunny.model.Book
+import androidx.compose.material3.AlertDialog
 
 @Composable
 fun ReadingSessionScreen(
@@ -39,6 +40,10 @@ fun ReadingSessionScreen(
     onCancel: () -> Unit
 ) {
     var isFinishing by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    var showDiscardDialog by rememberSaveable {
         mutableStateOf(false)
     }
 
@@ -60,6 +65,39 @@ fun ReadingSessionScreen(
     val formattedTime =
         formatReadingTime(elapsedSeconds)
 
+
+    if (showDiscardDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showDiscardDialog = false
+            },
+            title = {
+                Text("Discard session?")
+            },
+            text = {
+                Text("If you close now, this reading session will be lost.")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDiscardDialog = false
+                        onCancel()
+                    }
+                ) {
+                    Text("Discard session")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showDiscardDialog = false
+                    }
+                ) {
+                    Text("Keep reading")
+                }
+            }
+        )
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -72,7 +110,9 @@ fun ReadingSessionScreen(
             horizontalArrangement = Arrangement.Start
         ) {
             TextButton(
-                onClick = onCancel
+                onClick = {
+                    showDiscardDialog = true
+                }
             ) {
                 Text("Close")
             }
