@@ -1325,15 +1325,32 @@ private fun BookSettingDialog(
                                 val newTotalPages =
                                     value.toIntOrNull()
 
+                                val typedCurrentPage =
+                                    currentPageText.toIntOrNull()
+
+                                val currentPageLowerBound =
+                                    typedCurrentPage ?: currentPage
+
                                 if (
                                     newTotalPages != null &&
                                     newTotalPages > 0 &&
                                     newTotalPages >=
-                                    currentPage
+                                    currentPageLowerBound
                                 ) {
                                     onTotalPagesChange(
                                         newTotalPages
                                     )
+
+                                    if (
+                                        typedCurrentPage != null &&
+                                        typedCurrentPage >= 0
+                                        )
+                                    {
+                                        onCurrentPageChange(
+                                            typedCurrentPage
+                                        )
+                                    }
+
                                 }
                             }
                         },
