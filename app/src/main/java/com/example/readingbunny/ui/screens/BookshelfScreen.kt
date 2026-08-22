@@ -47,6 +47,15 @@ import com.example.readingbunny.model.ShelfBookPosition
 import com.example.readingbunny.model.ShelfDecoration
 import com.example.readingbunny.ui.theme.BookSpineColors
 import com.example.readingbunny.ui.theme.ShelfWood
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.zIndex
+
 
 @Composable
 fun BookshelfScreen(
@@ -73,6 +82,22 @@ fun BookshelfScreen(
 
     var selectedPlacedDecorationId by rememberSaveable {
         mutableStateOf<Int?>(null)
+    }
+
+    var draggingBookId by remember {
+        mutableStateOf<Int?>(null)
+    }
+
+    var dragOffset by remember {
+        mutableStateOf(Offset.Zero)
+    }
+
+    var dragStartCenter by remember {
+        mutableStateOf<Offset?>(null)
+    }
+
+    val slotBounds = remember {
+        mutableMapOf<Pair<Int, Int>, Rect>()
     }
 
     val selectedPlacedDecoration =
@@ -112,6 +137,8 @@ fun BookshelfScreen(
         effectiveBookPositions[position.bookId] =
             position.shelfIndex to position.slotIndex
     }
+
+
 
     books
         .filter { book ->
@@ -356,6 +383,10 @@ fun BookshelfScreen(
                                 modifier = Modifier
                                     .width(52.dp)
                                     .height(170.dp)
+                                    .onGloballyPositioned { coordinates ->
+                                        slotBounds[shelfIndex to slotIndex] =
+                                            coordinates.boundsInRoot()
+                                    }
                                     .clickable(
                                         enabled = isDecorating && isEmpty
                                     ) {
@@ -393,10 +424,69 @@ fun BookshelfScreen(
                             ) {
                                 when {
                                     book != null -> {
+
+                                        val isDragging =
+                                            draggingBookId == book.id
+
                                         BookSpine(
                                             book = book,
                                             isSelected =
                                                 selectedBookId == book.id,
+                                            modifier = Modifier
+                                                .zIndex(
+                                                    if (isDragging) 1f else 0f
+                                                )
+                                                .graphicsLayer {
+                                                    if(isDragging) {
+                                                        translationX = dragOffset.x
+                                                        translationY = dragOffset.y
+                                                        scaleX = 1.05f
+                                                        scaleY = 1.05f
+                                                        alpha = 0.9f
+                                                    }
+                                                }
+                                                .pointerInput(
+                                                    isDecorating,
+                                                    book.id,
+                                                    bookPositions,
+                                                    decorations
+                                                ) {
+                                                    if (isDecorating) {
+                                                        detectDragGesturesAfterLongPress(
+                                                            onDragStart = {
+                                                                draggingBookId = book.id
+                                                                dragOffset = Offset.Zero
+
+                                                                dragStartCenter =
+                                                                    slotBounds[
+                                                                        shelfIndex to slotIndex
+                                                                    ]?.center
+
+                                                                selectedBookId = null
+                                                                selectedDecoration = null
+                                                                selectedPlacedDecorationId = null
+                                                            },
+
+                                                            onDrag = { change, dragAmount ->
+                                                                change.consume()
+
+                                                                dragOffset += dragAmount
+                                                            },
+
+                                                            onDragCancel = {
+                                                                draggingBookId = null
+                                                                dragOffset = Offset.Zero
+                                                                dragStartCenter = null
+                                                            },
+
+                                                            onDragEnd = {
+                                                                draggingBookId = null
+                                                                dragOffset = Offset.Zero
+                                                                dragStartCenter = null
+                                                            }
+                                                        )
+                                                    }
+                                                },
                                             onClick = {
                                                 if (isDecorating) {
                                                     selectedBookId = book.id
@@ -408,6 +498,8 @@ fun BookshelfScreen(
                                                     onBookClick(book)
                                                 }
                                             }
+
+
                                         )
                                     }
 
@@ -541,6 +633,7 @@ fun DecorationItem(
 fun BookSpine(
     book: Book,
     isSelected: Boolean = false,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
     val heights = listOf(
@@ -568,7 +661,7 @@ fun BookSpine(
     }
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .width(52.dp)
             .height(spineHeight)
             .background(
