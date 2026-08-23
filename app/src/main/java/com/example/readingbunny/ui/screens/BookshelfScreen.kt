@@ -2,7 +2,6 @@ package com.example.readingbunny.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -47,6 +46,15 @@ import com.example.readingbunny.model.ShelfBookPosition
 import com.example.readingbunny.model.ShelfDecoration
 import com.example.readingbunny.ui.theme.BookSpineColors
 import com.example.readingbunny.ui.theme.ShelfWood
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.zIndex
+
 
 @Composable
 fun BookshelfScreen(
@@ -67,10 +75,6 @@ fun BookshelfScreen(
         mutableStateOf<DecorationType?>(null)
     }
 
-    var selectedBookId by rememberSaveable {
-        mutableStateOf<Int?>(null)
-    }
-
     var selectedPlacedDecorationId by rememberSaveable {
         mutableStateOf<Int?>(null)
     }
@@ -79,6 +83,26 @@ fun BookshelfScreen(
         decorations.firstOrNull {
             it.id == selectedPlacedDecorationId
         }
+
+    var draggingBookId by remember {
+        mutableStateOf<Int?>(null)
+    }
+
+    var draggingDecorationId by remember {
+        mutableStateOf<Int?>(null)
+    }
+
+    var dragOffset by remember {
+        mutableStateOf(Offset.Zero)
+    }
+
+    var dragStartCenter by remember {
+        mutableStateOf<Offset?>(null)
+    }
+
+    val slotBounds = remember {
+        mutableMapOf<Pair<Int, Int>, Rect>()
+    }
 
     val highestUsedShelf = maxOf(
         decorations.maxOfOrNull { it.shelfIndex } ?: -1,
@@ -122,7 +146,8 @@ fun BookshelfScreen(
 
             for (shelfIndex in 0 until shelfCount) {
                 for (slotIndex in 0 until 6) {
-                    val position = shelfIndex to slotIndex
+                    val position =
+                        shelfIndex to slotIndex
 
                     if (position !in usedSlots) {
                         foundPosition = position
@@ -136,26 +161,47 @@ fun BookshelfScreen(
             }
 
             if (foundPosition != null) {
-                effectiveBookPositions[book.id] = foundPosition
+                effectiveBookPositions[book.id] =
+                    foundPosition
+
                 usedSlots.add(foundPosition)
             }
+        }
+
+    val draggingBookShelfIndex =
+        draggingBookId?.let { bookId ->
+            effectiveBookPositions[bookId]?.first
+        }
+
+    val draggingDecorationShelfIndex =
+        draggingDecorationId?.let { decorationId ->
+            decorations
+                .firstOrNull { it.id == decorationId }
+                ?.shelfIndex
         }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(
+                MaterialTheme.colorScheme.background
+            )
             .padding(20.dp)
     ) {
+
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            horizontalArrangement =
+                Arrangement.SpaceBetween,
+            verticalAlignment =
+                Alignment.CenterVertically
         ) {
             Text(
                 text = "My bookshelf",
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onBackground
+                style =
+                    MaterialTheme.typography.headlineMedium,
+                color =
+                    MaterialTheme.colorScheme.onBackground
             )
 
             Button(
@@ -164,40 +210,54 @@ fun BookshelfScreen(
 
                     if (!isDecorating) {
                         selectedDecoration = null
-                        selectedBookId = null
                         selectedPlacedDecorationId = null
                     }
                 }
             ) {
                 Text(
-                    text = if (isDecorating) {
-                        "Done"
-                    } else {
-                        "Decorate"
-                    }
+                    text =
+                        if (isDecorating) {
+                            "Done"
+                        } else {
+                            "Decorate"
+                        }
                 )
             }
         }
-        if (books.isEmpty() && !isDecorating) {
-            Spacer(modifier = Modifier.height(12.dp))
+
+        if (
+            books.isEmpty() &&
+            !isDecorating
+        ) {
+            Spacer(
+                modifier = Modifier.height(12.dp)
+            )
 
             Text(
-                text = "Your bookshelf is waiting for its first book.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                text =
+                    "Your bookshelf is waiting for its first book.",
+                style =
+                    MaterialTheme.typography.bodyMedium,
+                color =
+                    MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
 
         if (isDecorating) {
-            Spacer(modifier = Modifier.height(16.dp))
+
+            Spacer(
+                modifier = Modifier.height(16.dp)
+            )
 
             LazyRow(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement =
+                    Arrangement.spacedBy(8.dp)
             ) {
                 items(
                     items = DecorationType.entries
                 ) { decoration ->
+
                     val isSelected =
                         selectedDecoration == decoration
 
@@ -205,17 +265,32 @@ fun BookshelfScreen(
                         modifier = Modifier
                             .width(90.dp)
                             .background(
-                                color = if (isSelected) {
-                                    ShelfWood
-                                } else {
-                                    MaterialTheme.colorScheme.surfaceVariant
-                                },
-                                shape = RoundedCornerShape(12.dp)
+                                color =
+                                    if (isSelected) {
+                                        ShelfWood
+                                    } else {
+                                        MaterialTheme
+                                            .colorScheme
+                                            .surfaceVariant
+                                    },
+                                shape =
+                                    RoundedCornerShape(
+                                        12.dp
+                                    )
                             )
                             .clickable {
-                                selectedDecoration = decoration
-                                selectedBookId = null
-                                selectedPlacedDecorationId = null
+                                selectedDecoration =
+                                    if (
+                                        selectedDecoration ==
+                                        decoration
+                                    ) {
+                                        null
+                                    } else {
+                                        decoration
+                                    }
+
+                                selectedPlacedDecorationId =
+                                    null
                             }
                             .padding(
                                 horizontal = 8.dp,
@@ -223,8 +298,10 @@ fun BookshelfScreen(
                             )
                     ) {
                         Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.fillMaxWidth()
+                            horizontalAlignment =
+                                Alignment.CenterHorizontally,
+                            modifier =
+                                Modifier.fillMaxWidth()
                         ) {
                             DecorationArtwork(
                                 decoration = decoration,
@@ -234,17 +311,27 @@ fun BookshelfScreen(
                             )
 
                             Spacer(
-                                modifier = Modifier.height(4.dp)
+                                modifier =
+                                    Modifier.height(4.dp)
                             )
 
                             Text(
-                                text = decoration.displayName,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = if (isSelected) {
-                                    MaterialTheme.colorScheme.onPrimary
-                                } else {
-                                    MaterialTheme.colorScheme.onSurface
-                                },
+                                text =
+                                    decoration.displayName,
+                                style =
+                                    MaterialTheme
+                                        .typography
+                                        .bodySmall,
+                                color =
+                                    if (isSelected) {
+                                        MaterialTheme
+                                            .colorScheme
+                                            .onPrimary
+                                    } else {
+                                        MaterialTheme
+                                            .colorScheme
+                                            .onSurface
+                                    },
                                 maxLines = 1
                             )
                         }
@@ -252,78 +339,96 @@ fun BookshelfScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = when {
-                    selectedBookId != null ->
-                        "Choose an empty slot to move the book"
-
-                    selectedPlacedDecoration != null ->
-                        "Choose an empty slot to move the decoration"
-
-                    selectedDecoration != null ->
-                        "Choose an empty slot to place ${selectedDecoration!!.displayName}"
-
-                    else ->
-                        "Choose a decoration or tap a book to move it"
-                },
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+            Spacer(
+                modifier = Modifier.height(8.dp)
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text =
+                    when {
+                        selectedPlacedDecoration != null ->
+                            "Decoration selected"
 
-            if (
-                selectedBookId != null ||
-                selectedPlacedDecorationId != null
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        selectedDecoration != null ->
+                            "Choose an empty slot to place ${selectedDecoration!!.displayName}"
+
+                        draggingBookId != null ->
+                            "Drag the book to an empty slot"
+
+                        draggingDecorationId != null ->
+                            "Drag the decoration to an empty slot"
+
+                        else ->
+                            "Choose a decoration or drag an item to move it"
+                    },
+                style =
+                    MaterialTheme.typography.bodySmall,
+                color =
+                    MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(
+                modifier = Modifier.height(8.dp)
+            )
+
+            if (selectedPlacedDecoration != null) {
+                Button(
+                    onClick = {
+                        onDeleteDecoration(
+                            selectedPlacedDecoration
+                        )
+
+                        selectedPlacedDecorationId =
+                            null
+                    }
                 ) {
-                    Button(
-                        onClick = {
-                            selectedBookId = null
-                            selectedPlacedDecorationId = null
-                        }
-                    ) {
-                        Text("Cancel")
-                    }
-
-                    if (selectedPlacedDecoration != null) {
-                        Button(
-                            onClick = {
-                                onDeleteDecoration(
-                                    selectedPlacedDecoration
-                                )
-
-                                selectedPlacedDecorationId = null
-                            }
-                        ) {
-                            Text("Delete")
-                        }
-                    }
+                    Text("Delete decoration")
                 }
+
+                Spacer(
+                    modifier =
+                        Modifier.height(8.dp)
+                )
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(
+            modifier = Modifier.height(24.dp)
+        )
 
         LazyColumn(
             modifier = Modifier.fillMaxSize()
         ) {
             items(shelfCount) { shelfIndex ->
+
                 val shelfDecorations =
                     decorations.filter { decoration ->
-                        decoration.shelfIndex == shelfIndex
+                        decoration.shelfIndex ==
+                                shelfIndex
                     }
 
                 Column(
                     modifier = Modifier
+                        .zIndex(
+                            if (
+                                draggingBookShelfIndex ==
+                                shelfIndex ||
+                                draggingDecorationShelfIndex ==
+                                shelfIndex
+                            ) {
+                                10f
+                            } else {
+                                0f
+                            }
+                        )
                         .fillMaxWidth()
                         .background(
-                            color = MaterialTheme.colorScheme.surfaceVariant,
-                            shape = RoundedCornerShape(20.dp)
+                            color =
+                                MaterialTheme
+                                    .colorScheme
+                                    .surfaceVariant,
+                            shape =
+                                RoundedCornerShape(20.dp)
                         )
                         .padding(
                             start = 14.dp,
@@ -331,109 +436,545 @@ fun BookshelfScreen(
                             top = 18.dp
                         )
                 ) {
+
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(170.dp),
-                        verticalAlignment = Alignment.Bottom,
-                        horizontalArrangement = Arrangement.spacedBy(5.dp)
+                        verticalAlignment =
+                            Alignment.Bottom,
+                        horizontalArrangement =
+                            Arrangement.spacedBy(5.dp)
                     ) {
-                        repeat(6) { slotIndex ->
-                            val book = books.firstOrNull { currentBook ->
-                                effectiveBookPositions[currentBook.id] ==
-                                        (shelfIndex to slotIndex)
-                            }
 
-                            val decoration =
-                                shelfDecorations.firstOrNull { decoration ->
-                                    decoration.slotIndex == slotIndex
+                        repeat(6) { slotIndex ->
+
+                            val slotPosition =
+                                shelfIndex to slotIndex
+
+                            androidx.compose.runtime.DisposableEffect(slotPosition) {
+                                onDispose { slotBounds.remove(slotPosition) }
+                            }
+                            val book =
+                                books.firstOrNull {
+                                        currentBook ->
+                                    effectiveBookPositions[
+                                        currentBook.id
+                                    ] == slotPosition
                                 }
 
+                            val decoration =
+                                shelfDecorations
+                                    .firstOrNull {
+                                            currentDecoration ->
+                                        currentDecoration
+                                            .slotIndex ==
+                                                slotIndex
+                                    }
+
                             val isEmpty =
-                                book == null && decoration == null
+                                book == null &&
+                                        decoration == null
+
+                            val isDraggingSomething =
+                                draggingBookId != null ||
+                                        draggingDecorationId != null
+
+                            val isAvailableDropTarget =
+                                isDraggingSomething &&
+                                        isEmpty
 
                             Box(
                                 modifier = Modifier
-                                    .width(52.dp)
+                                    .weight(1f)
                                     .height(170.dp)
+                                    .background(
+                                        color =
+                                            if (
+                                                isAvailableDropTarget
+                                            ) {
+                                                MaterialTheme
+                                                    .colorScheme
+                                                    .primary
+                                                    .copy(
+                                                        alpha =
+                                                            0.08f
+                                                    )
+                                            } else {
+                                                MaterialTheme
+                                                    .colorScheme
+                                                    .surfaceVariant
+                                                    .copy(
+                                                        alpha =
+                                                            0f
+                                                    )
+                                            },
+                                        shape =
+                                            RoundedCornerShape(
+                                                8.dp
+                                            )
+                                    )
+                                    .onGloballyPositioned {
+                                            coordinates ->
+
+                                        slotBounds[
+                                            slotPosition
+                                        ] =
+                                            coordinates
+                                                .boundsInRoot()
+                                    }
                                     .clickable(
-                                        enabled = isDecorating && isEmpty
+                                        enabled =
+                                            isDecorating &&
+                                                    isEmpty &&
+                                                    selectedDecoration !=
+                                                    null
                                     ) {
-                                        when {
-                                            selectedBookId != null -> {
-                                                onMoveBook(
-                                                    selectedBookId!!,
-                                                    shelfIndex,
-                                                    slotIndex
-                                                )
+                                        selectedDecoration
+                                            ?.let {
+                                                    decorationType ->
 
-                                                selectedBookId = null
-                                            }
-
-                                            selectedPlacedDecoration != null -> {
-                                                onMoveDecoration(
-                                                    selectedPlacedDecoration,
-                                                    shelfIndex,
-                                                    slotIndex
-                                                )
-
-                                                selectedPlacedDecorationId = null
-                                            }
-
-                                            selectedDecoration != null -> {
                                                 onAddDecoration(
-                                                    selectedDecoration!!,
+                                                    decorationType,
                                                     shelfIndex,
                                                     slotIndex
                                                 )
                                             }
-                                        }
                                     },
-                                contentAlignment = Alignment.BottomCenter
+                                contentAlignment =
+                                    Alignment.BottomCenter
                             ) {
+
                                 when {
+
                                     book != null -> {
+
+                                        val isDragging =
+                                            draggingBookId ==
+                                                    book.id
+
                                         BookSpine(
                                             book = book,
-                                            isSelected =
-                                                selectedBookId == book.id,
-                                            onClick = {
-                                                if (isDecorating) {
-                                                    selectedBookId = book.id
+                                            modifier =
+                                                Modifier
+                                                    .zIndex(
+                                                        if (
+                                                            isDragging
+                                                        ) {
+                                                            1f
+                                                        } else {
+                                                            0f
+                                                        }
+                                                    )
+                                                    .graphicsLayer {
+                                                        if (
+                                                            isDragging
+                                                        ) {
+                                                            translationX =
+                                                                dragOffset.x
 
-                                                    selectedDecoration = null
-                                                    selectedPlacedDecorationId =
-                                                        null
-                                                } else {
-                                                    onBookClick(book)
+                                                            translationY =
+                                                                dragOffset.y
+
+                                                            scaleX =
+                                                                1.05f
+
+                                                            scaleY =
+                                                                1.05f
+
+                                                            alpha =
+                                                                0.9f
+                                                        }
+                                                    }
+                                                    .pointerInput(
+                                                        isDecorating,
+                                                        book.id,
+                                                        bookPositions,
+                                                        decorations
+                                                    ) {
+                                                        if (
+                                                            isDecorating
+                                                        ) {
+                                                            detectDragGesturesAfterLongPress(
+
+                                                                onDragStart = {
+                                                                    draggingBookId =
+                                                                        book.id
+
+                                                                    draggingDecorationId =
+                                                                        null
+
+                                                                    dragOffset =
+                                                                        Offset.Zero
+
+                                                                    dragStartCenter =
+                                                                        slotBounds[
+                                                                            slotPosition
+                                                                        ]?.center
+
+                                                                    selectedDecoration =
+                                                                        null
+
+                                                                    selectedPlacedDecorationId =
+                                                                        null
+                                                                },
+
+                                                                onDrag = {
+                                                                        change,
+                                                                        dragAmount ->
+
+                                                                    change.consume()
+
+                                                                    dragOffset +=
+                                                                        dragAmount
+                                                                },
+
+                                                                onDragCancel = {
+                                                                    draggingBookId =
+                                                                        null
+
+                                                                    dragOffset =
+                                                                        Offset.Zero
+
+                                                                    dragStartCenter =
+                                                                        null
+                                                                },
+
+                                                                onDragEnd = {
+
+                                                                    val startCenter =
+                                                                        dragStartCenter
+
+                                                                    if (
+                                                                        startCenter !=
+                                                                        null
+                                                                    ) {
+                                                                        val dropPoint =
+                                                                            startCenter +
+                                                                                    dragOffset
+
+                                                                        val targetSlot =
+                                                                            slotBounds
+                                                                                .entries
+                                                                                .firstOrNull {
+                                                                                        entry ->
+                                                                                    entry
+                                                                                        .value
+                                                                                        .contains(
+                                                                                            dropPoint
+                                                                                        )
+                                                                                }
+                                                                                ?.key
+
+                                                                        if (
+                                                                            targetSlot !=
+                                                                            null
+                                                                        ) {
+                                                                            val targetShelfIndex =
+                                                                                targetSlot.first
+
+                                                                            val targetSlotIndex =
+                                                                                targetSlot.second
+
+                                                                            val targetBook =
+                                                                                books
+                                                                                    .firstOrNull {
+                                                                                            currentBook ->
+                                                                                        effectiveBookPositions[
+                                                                                            currentBook.id
+                                                                                        ] ==
+                                                                                                targetSlot
+                                                                                    }
+
+                                                                            val targetDecoration =
+                                                                                decorations
+                                                                                    .firstOrNull {
+                                                                                            currentDecoration ->
+                                                                                        currentDecoration
+                                                                                            .shelfIndex ==
+                                                                                                targetShelfIndex &&
+                                                                                                currentDecoration
+                                                                                                    .slotIndex ==
+                                                                                                targetSlotIndex
+                                                                                    }
+
+                                                                            val isTargetFree =
+                                                                                (
+                                                                                        targetBook ==
+                                                                                                null ||
+                                                                                                targetBook.id ==
+                                                                                                book.id
+                                                                                        ) &&
+                                                                                        targetDecoration ==
+                                                                                        null
+
+                                                                            if (
+                                                                                isTargetFree
+                                                                            ) {
+                                                                                onMoveBook(
+                                                                                    book.id,
+                                                                                    targetShelfIndex,
+                                                                                    targetSlotIndex
+                                                                                )
+                                                                            }
+                                                                        }
+                                                                    }
+
+                                                                    draggingBookId =
+                                                                        null
+
+                                                                    dragOffset =
+                                                                        Offset.Zero
+
+                                                                    dragStartCenter =
+                                                                        null
+                                                                }
+                                                            )
+                                                        }
+                                                    },
+                                            onClick = {
+                                                if (
+                                                    !isDecorating
+                                                ) {
+                                                    onBookClick(
+                                                        book
+                                                    )
                                                 }
                                             }
                                         )
                                     }
 
                                     decoration != null -> {
-                                        DecorationItem(
-                                            decoration = decoration.type,
-                                            isDecorating = isDecorating,
-                                            isSelected =
-                                                selectedPlacedDecorationId ==
-                                                        decoration.id,
-                                            onClick = {
-                                                selectedPlacedDecorationId =
+
+                                        val isDraggingDecoration =
+                                            draggingDecorationId ==
                                                     decoration.id
 
-                                                selectedBookId = null
-                                                selectedDecoration = null
+                                        DecorationItem(
+                                            decoration =
+                                                decoration.type,
+
+                                            isDecorating =
+                                                isDecorating,
+
+                                            modifier =
+                                                Modifier
+                                                    .zIndex(
+                                                        if (
+                                                            isDraggingDecoration
+                                                        ) {
+                                                            1f
+                                                        } else {
+                                                            0f
+                                                        }
+                                                    )
+                                                    .graphicsLayer {
+                                                        if (
+                                                            isDraggingDecoration
+                                                        ) {
+                                                            translationX =
+                                                                dragOffset.x
+
+                                                            translationY =
+                                                                dragOffset.y
+
+                                                            scaleX =
+                                                                1.08f
+
+                                                            scaleY =
+                                                                1.08f
+
+                                                            alpha =
+                                                                0.9f
+                                                        }
+                                                    }
+                                                    .pointerInput(
+                                                        isDecorating,
+                                                        decoration.id,
+                                                        bookPositions,
+                                                        decorations
+                                                    ) {
+                                                        if (
+                                                            isDecorating
+                                                        ) {
+                                                            detectDragGesturesAfterLongPress(
+
+                                                                onDragStart = {
+                                                                    draggingDecorationId =
+                                                                        decoration.id
+
+                                                                    draggingBookId =
+                                                                        null
+
+                                                                    dragOffset =
+                                                                        Offset.Zero
+
+                                                                    dragStartCenter =
+                                                                        slotBounds[
+                                                                            slotPosition
+                                                                        ]?.center
+
+                                                                    selectedPlacedDecorationId =
+                                                                        null
+
+                                                                    selectedDecoration =
+                                                                        null
+                                                                },
+
+                                                                onDrag = {
+                                                                        change,
+                                                                        dragAmount ->
+
+                                                                    change.consume()
+
+                                                                    dragOffset +=
+                                                                        dragAmount
+                                                                },
+
+                                                                onDragCancel = {
+                                                                    draggingDecorationId =
+                                                                        null
+
+                                                                    dragOffset =
+                                                                        Offset.Zero
+
+                                                                    dragStartCenter =
+                                                                        null
+                                                                },
+
+                                                                onDragEnd = {
+
+                                                                    val startCenter =
+                                                                        dragStartCenter
+
+                                                                    if (
+                                                                        startCenter !=
+                                                                        null
+                                                                    ) {
+                                                                        val dropPoint =
+                                                                            startCenter +
+                                                                                    dragOffset
+
+                                                                        val targetSlot =
+                                                                            slotBounds
+                                                                                .entries
+                                                                                .firstOrNull {
+                                                                                        entry ->
+                                                                                    entry
+                                                                                        .value
+                                                                                        .contains(
+                                                                                            dropPoint
+                                                                                        )
+                                                                                }
+                                                                                ?.key
+
+                                                                        if (
+                                                                            targetSlot !=
+                                                                            null
+                                                                        ) {
+                                                                            val targetShelfIndex =
+                                                                                targetSlot.first
+
+                                                                            val targetSlotIndex =
+                                                                                targetSlot.second
+
+                                                                            val targetBook =
+                                                                                books
+                                                                                    .firstOrNull {
+                                                                                            currentBook ->
+                                                                                        effectiveBookPositions[
+                                                                                            currentBook.id
+                                                                                        ] ==
+                                                                                                targetSlot
+                                                                                    }
+
+                                                                            val targetDecoration =
+                                                                                decorations
+                                                                                    .firstOrNull {
+                                                                                            currentDecoration ->
+                                                                                        currentDecoration
+                                                                                            .shelfIndex ==
+                                                                                                targetShelfIndex &&
+                                                                                                currentDecoration
+                                                                                                    .slotIndex ==
+                                                                                                targetSlotIndex
+                                                                                    }
+
+                                                                            val isTargetFree =
+                                                                                targetBook ==
+                                                                                        null &&
+                                                                                        (
+                                                                                                targetDecoration ==
+                                                                                                        null ||
+                                                                                                        targetDecoration.id ==
+                                                                                                        decoration.id
+                                                                                                )
+
+                                                                            if (
+                                                                                isTargetFree
+                                                                            ) {
+                                                                                onMoveDecoration(
+                                                                                    decoration,
+                                                                                    targetShelfIndex,
+                                                                                    targetSlotIndex
+                                                                                )
+                                                                            }
+                                                                        }
+                                                                    }
+
+                                                                    draggingDecorationId =
+                                                                        null
+
+                                                                    dragOffset =
+                                                                        Offset.Zero
+
+                                                                    dragStartCenter =
+                                                                        null
+                                                                }
+                                                            )
+                                                        }
+                                                    },
+
+                                            onClick = {
+                                                if (
+                                                    isDecorating
+                                                ) {
+                                                    selectedPlacedDecorationId =
+                                                        if (
+                                                            selectedPlacedDecorationId ==
+                                                            decoration.id
+                                                        ) {
+                                                            null
+                                                        } else {
+                                                            decoration.id
+                                                        }
+
+                                                    selectedDecoration =
+                                                        null
+                                                }
                                             }
                                         )
                                     }
 
+                                    isAvailableDropTarget -> {
+                                        Text(
+                                            text = "+",
+                                            fontSize = 22.sp,
+                                            color =
+                                                MaterialTheme
+                                                    .colorScheme
+                                                    .primary
+                                                    .copy(
+                                                        alpha =
+                                                            0.7f
+                                                    )
+                                        )
+                                    }
+
                                     isDecorating &&
-                                            (
-                                                    selectedDecoration != null ||
-                                                            selectedBookId != null ||
-                                                            selectedPlacedDecorationId != null
-                                                    ) -> {
+                                            selectedDecoration !=
+                                            null -> {
+
                                         Text(
                                             text = "+",
                                             fontSize = 22.sp,
@@ -454,43 +995,47 @@ fun BookshelfScreen(
                             .height(16.dp)
                             .shadow(
                                 elevation = 5.dp,
-                                shape = RoundedCornerShape(3.dp)
+                                shape =
+                                    RoundedCornerShape(
+                                        3.dp
+                                    )
                             )
                             .background(
                                 color = ShelfWood,
-                                shape = RoundedCornerShape(3.dp)
+                                shape =
+                                    RoundedCornerShape(
+                                        3.dp
+                                    )
                             )
                     )
 
                     Spacer(
-                        modifier = Modifier.height(12.dp)
+                        modifier =
+                            Modifier.height(12.dp)
                     )
                 }
 
                 Spacer(
-                    modifier = Modifier.height(24.dp)
+                    modifier =
+                        Modifier.height(24.dp)
                 )
             }
         }
     }
 }
 
+
 @Composable
 fun DecorationItem(
     decoration: DecorationType,
     isDecorating: Boolean,
-    isSelected: Boolean,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit
-) {
+){
     Box(
-        modifier = Modifier
-            .width(52.dp)
+        modifier = modifier
+            .fillMaxWidth()
             .height(85.dp)
-            .border(
-                width = if (isSelected) 2.dp else 0.dp,
-                color = MaterialTheme.colorScheme.surfaceVariant,
-                shape = RoundedCornerShape(10.dp)
-            )
             .clickable(
                 enabled = isDecorating,
                 onClick = onClick
@@ -531,8 +1076,9 @@ fun DecorationItem(
             }
 
         DecorationArtwork(
-            decoration = decoration,
-            modifier = artworkModifier
+            modifier = artworkModifier,
+            decoration = decoration
+
         )
     }
 }
@@ -540,7 +1086,9 @@ fun DecorationItem(
 @Composable
 fun BookSpine(
     book: Book,
-    isSelected: Boolean = false,
+    modifier: Modifier = Modifier,
+
+
     onClick: () -> Unit
 ) {
     val heights = listOf(
@@ -568,19 +1116,11 @@ fun BookSpine(
     }
 
     Box(
-        modifier = Modifier
-            .width(52.dp)
+        modifier = modifier
+            .fillMaxWidth()
             .height(spineHeight)
             .background(
                 color = spineColor,
-                shape = RoundedCornerShape(
-                    topStart = 8.dp,
-                    topEnd = 8.dp
-                )
-            )
-            .border(
-                width = if (isSelected) 2.dp else 0.dp,
-                color = ShelfWood,
                 shape = RoundedCornerShape(
                     topStart = 8.dp,
                     topEnd = 8.dp
