@@ -378,11 +378,29 @@ fun BookshelfScreen(
 
                             val isEmpty =
                                 book == null && decoration == null
+                            val isDraggingBook =
+                                draggingBookId != null
+
+                            val isAvailableDropTarget =
+                                isDraggingBook && isEmpty
 
                             Box(
                                 modifier = Modifier
                                     .width(52.dp)
                                     .height(170.dp)
+                                    .background(
+                                        color =
+                                            if (isAvailableDropTarget) {
+                                                MaterialTheme.colorScheme.primary.copy(
+                                                    alpha = 0.08f
+                                                )
+                                            } else {
+                                                MaterialTheme.colorScheme.surfaceVariant.copy(
+                                                    alpha = 0f
+                                                )
+                                            },
+                                        shape = RoundedCornerShape(8.dp)
+                                    )
                                     .onGloballyPositioned { coordinates ->
                                         slotBounds[shelfIndex to slotIndex] =
                                             coordinates.boundsInRoot()
@@ -480,6 +498,47 @@ fun BookshelfScreen(
                                                             },
 
                                                             onDragEnd = {
+                                                                val startCenter = dragStartCenter
+
+                                                                if (startCenter != null) {
+                                                                    val dropPoint =
+                                                                        startCenter + dragOffset
+
+                                                                    val targetSlot =
+                                                                        slotBounds.entries.firstOrNull { entry ->
+                                                                            entry.value.contains(dropPoint)
+                                                                        }?.key
+
+                                                                    if (targetSlot != null) {
+                                                                        val targetShelfIndex = targetSlot.first
+                                                                        val targetSlotIndex = targetSlot.second
+
+                                                                        val targetBook =
+                                                                            books.firstOrNull { currentBook ->
+                                                                                effectiveBookPositions[currentBook.id] ==
+                                                                                        targetSlot
+                                                                            }
+
+                                                                        val targetDecoration =
+                                                                            decorations.firstOrNull { decoration ->
+                                                                                decoration.shelfIndex == targetShelfIndex &&
+                                                                                        decoration.slotIndex == targetSlotIndex
+                                                                            }
+
+                                                                        val isTargetFree =
+                                                                            (targetBook == null || targetBook.id == book.id) &&
+                                                                                    targetDecoration == null
+
+                                                                        if (isTargetFree) {
+                                                                            onMoveBook(
+                                                                                book.id,
+                                                                                targetShelfIndex,
+                                                                                targetSlotIndex
+                                                                            )
+                                                                        }
+                                                                    }
+                                                                }
+
                                                                 draggingBookId = null
                                                                 dragOffset = Offset.Zero
                                                                 dragStartCenter = null
@@ -520,6 +579,18 @@ fun BookshelfScreen(
                                         )
                                     }
 
+                                    isAvailableDropTarget -> {
+                                        Text(
+                                            text = "+",
+                                            fontSize = 22.sp,
+                                            color =
+                                                MaterialTheme.colorScheme.primary.copy(
+                                                    alpha = 0.7f
+                                                )
+                                        )
+                                    }
+
+
                                     isDecorating &&
                                             (
                                                     selectedDecoration != null ||
@@ -535,6 +606,8 @@ fun BookshelfScreen(
                                                     .onSurfaceVariant
                                         )
                                     }
+
+
                                 }
                             }
                         }
@@ -623,8 +696,9 @@ fun DecorationItem(
             }
 
         DecorationArtwork(
-            decoration = decoration,
-            modifier = artworkModifier
+            modifier = artworkModifier,
+            decoration = decoration
+
         )
     }
 }
@@ -632,8 +706,9 @@ fun DecorationItem(
 @Composable
 fun BookSpine(
     book: Book,
-    isSelected: Boolean = false,
     modifier: Modifier = Modifier,
+    isSelected: Boolean = false,
+
     onClick: () -> Unit
 ) {
     val heights = listOf(
