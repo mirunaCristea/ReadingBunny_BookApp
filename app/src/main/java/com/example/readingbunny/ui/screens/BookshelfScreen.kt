@@ -398,7 +398,7 @@ fun BookshelfScreen(
 
                             Box(
                                 modifier = Modifier
-                                    .width(1f.dp)
+                                    .weight(1f)
                                     .height(170.dp)
                                     .background(
                                         color =
