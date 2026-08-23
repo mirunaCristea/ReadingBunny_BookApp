@@ -42,6 +42,10 @@ import com.example.readingbunny.ui.viewmodel.ReadingJournalViewModelFactory
 import com.example.readingbunny.ui.viewmodel.ReadingSessionViewModel
 import com.example.readingbunny.ui.viewmodel.ReadingSessionViewModelFactory
 import kotlinx.coroutines.launch
+import com.example.readingbunny.util.calculateCurrentStreak
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 
 @Composable
 fun ReadingBunnyApp() {
@@ -165,6 +169,22 @@ fun ReadingBunnyApp() {
             .sumOf { session ->
                 session.durationSeconds
             }
+
+    val sessionDates =
+        readingSessions
+            .map { session ->
+                Instant
+                    .ofEpochMilli(session.startedAt)
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDate()
+            }
+            .toSet()
+
+    val currentStreak =
+        calculateCurrentStreak(
+            sessionDates = sessionDates,
+            today = today
+        )
 
     var activeSessionBookId by rememberSaveable {
         mutableStateOf<Int?>(null)
@@ -332,6 +352,7 @@ fun ReadingBunnyApp() {
                         book = currentBook,
                         todayReadingSeconds = todayReadingSeconds,
                         dailyGoalMinutes = dailyGoalMinutes,
+                        currentStreak = currentStreak,
                         onStartReading = { book ->
                             activeSessionBookId = book.id
 
