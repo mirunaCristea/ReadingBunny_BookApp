@@ -452,6 +452,9 @@ fun BookshelfScreen(
                             val slotPosition =
                                 shelfIndex to slotIndex
 
+                            androidx.compose.runtime.DisposableEffect(slotPosition) {
+                                onDispose { slotBounds.remove(slotPosition) }
+                            }
                             val book =
                                 books.firstOrNull {
                                         currentBook ->
