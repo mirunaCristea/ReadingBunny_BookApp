@@ -138,6 +138,11 @@ fun BookshelfScreen(
             position.shelfIndex to position.slotIndex
     }
 
+    val draggingBookShelfIndex =
+        draggingBookId?.let { bookId ->
+            effectiveBookPositions[bookId]?.first
+        }
+
 
 
     books
@@ -347,6 +352,13 @@ fun BookshelfScreen(
 
                 Column(
                     modifier = Modifier
+                        .zIndex(
+                            if (draggingBookShelfIndex == shelfIndex) {
+                                10f
+                            } else {
+                                0f
+                            }
+                        )
                         .fillMaxWidth()
                         .background(
                             color = MaterialTheme.colorScheme.surfaceVariant,
@@ -386,7 +398,7 @@ fun BookshelfScreen(
 
                             Box(
                                 modifier = Modifier
-                                    .width(52.dp)
+                                    .width(1f.dp)
                                     .height(170.dp)
                                     .background(
                                         color =
@@ -649,7 +661,7 @@ fun DecorationItem(
 ) {
     Box(
         modifier = Modifier
-            .width(52.dp)
+            .fillMaxWidth()
             .height(85.dp)
             .border(
                 width = if (isSelected) 2.dp else 0.dp,
@@ -737,7 +749,7 @@ fun BookSpine(
 
     Box(
         modifier = modifier
-            .width(52.dp)
+            .fillMaxWidth()
             .height(spineHeight)
             .background(
                 color = spineColor,
