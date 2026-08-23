@@ -25,6 +25,7 @@ import com.example.readingbunny.model.ReadingAchievement
 import com.example.readingbunny.model.ReadingSession
 import com.example.readingbunny.model.ReadingStatus
 import com.example.readingbunny.ui.theme.ShelfWood
+import com.example.readingbunny.util.calculateCurrentStreak
 import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
@@ -531,32 +532,6 @@ private fun formatReadingDuration(
     }
 }
 
-private fun calculateCurrentStreak(
-    sessionDates: Set<LocalDate>,
-    today: LocalDate
-): Int {
-    if (sessionDates.isEmpty()) {
-        return 0
-    }
-
-    var currentDate =
-        if (today in sessionDates) {
-            today
-        } else {
-            today.minusDays(1)
-        }
-
-    var streak = 0
-
-    while (currentDate in sessionDates) {
-        streak++
-
-        currentDate =
-            currentDate.minusDays(1)
-    }
-
-    return streak
-}
 
 private fun buildAchievements(
     sessions: List<ReadingSession>,

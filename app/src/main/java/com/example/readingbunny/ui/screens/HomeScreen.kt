@@ -41,9 +41,12 @@ fun HomeScreen(
     onStartReading: (Book) -> Unit,
     todayReadingSeconds: Long,
     dailyGoalMinutes: Int,
+    currentStreak: Int,
 ) {
     val todayReadingMinutes =
         todayReadingSeconds / 60
+
+
 
     val goalProgress =
         if (dailyGoalMinutes > 0) {
@@ -83,7 +86,11 @@ fun HomeScreen(
                 shape = RoundedCornerShape(50)
             ) {
                 Text(
-                    text = "7 zile 🔥",
+                    text = if (currentStreak == 0) {
+                        "Start streak 🔥"
+                    } else {
+                        "$currentStreak day streak 🔥"
+                    },
                     modifier = Modifier.padding(
                         horizontal = 14.dp,
                         vertical = 8.dp
@@ -278,6 +285,7 @@ private fun HomeScreenPreview() {
         book = null,
         onStartReading = {},
         todayReadingSeconds = 0L,
-        dailyGoalMinutes = 30
+        dailyGoalMinutes = 30,
+        currentStreak = 0
     )
 }
