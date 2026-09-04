@@ -22,6 +22,10 @@ data class ShelfDecoration(
 
     val type: DecorationType,
     val slotIndex: Int,
-    val shelfIndex: Int
-)
+    val shelfIndex: Int,
 
+    val scale: Float = 1f,
+    val rotation: Float = 0f,
+    val offsetX: Float = 0f,
+    val offsetY: Float = 0f
+)
