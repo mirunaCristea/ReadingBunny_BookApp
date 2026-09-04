@@ -47,6 +47,8 @@ import com.example.readingbunny.model.ShelfDecoration
 import com.example.readingbunny.ui.theme.BookSpineColors
 import com.example.readingbunny.ui.theme.ShelfWood
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.TextButton
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.graphicsLayer
@@ -55,6 +57,10 @@ import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.zIndex
+import com.example.readingbunny.model.BookshelfStyle
+import com.example.readingbunny.ui.theme.CozyBookshelfColors
+import com.example.readingbunny.ui.theme.ForestBookshelfColors
+import com.example.readingbunny.ui.theme.NightBookshelfColors
 
 
 @Composable
@@ -73,7 +79,9 @@ fun BookshelfScreen(
             Float,
             Float,
             Float
-            ) -> Unit
+            ) -> Unit,
+    bookshelfStyle: BookshelfStyle,
+    onBookshelfStyleChange: (BookshelfStyle) -> Unit,
 ) {
     var isDecorating by rememberSaveable {
         mutableStateOf(false)
@@ -188,6 +196,44 @@ fun BookshelfScreen(
                 ?.shelfIndex
         }
 
+    val bookshelfBackgroundColor =
+        when (bookshelfStyle) {
+            BookshelfStyle.COZY ->
+                CozyBookshelfColors.background
+
+            BookshelfStyle.FOREST ->
+                ForestBookshelfColors.background
+
+            BookshelfStyle.NIGHT ->
+                NightBookshelfColors.background
+        }
+
+    val shelfBackgroundColor =
+        when (bookshelfStyle) {
+            BookshelfStyle.COZY ->
+                CozyBookshelfColors.shelfBackground
+
+            BookshelfStyle.FOREST ->
+                ForestBookshelfColors.shelfBackground
+
+            BookshelfStyle.NIGHT ->
+                NightBookshelfColors.shelfBackground
+        }
+
+    val shelfWoodColor =
+        when (bookshelfStyle) {
+            BookshelfStyle.COZY ->
+                CozyBookshelfColors.wood
+
+            BookshelfStyle.FOREST ->
+                ForestBookshelfColors.wood
+
+            BookshelfStyle.NIGHT ->
+                NightBookshelfColors.wood
+
+        }
+
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -256,6 +302,36 @@ fun BookshelfScreen(
             Spacer(
                 modifier = Modifier.height(16.dp)
             )
+
+            Text(
+                text = "Bookshelf style",
+                style =  MaterialTheme.typography.titleSmall
+            )
+
+            Spacer(
+                modifier = Modifier.height(8.dp)
+            )
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ){
+                BookshelfStyle.entries.forEach { style ->
+                    FilterChip(
+                        selected = bookshelfStyle == style,
+                        onClick = {
+                            onBookshelfStyleChange(style)
+                        },
+                        label = {
+                            Text(style.displayName)
+                        }
+                    )
+                }
+            }
+
+            Spacer(
+                modifier = Modifier.height(16.dp)
+            )
+
 
             LazyRow(
                 modifier = Modifier.fillMaxWidth(),
@@ -429,7 +505,19 @@ fun BookshelfScreen(
                 Spacer(
                     modifier = Modifier.height(8.dp)
                 )
-
+                TextButton(
+                    onClick = {
+                        onUpdateDecorationTransform(
+                            selectedPlacedDecoration,
+                            1f,
+                            selectedPlacedDecoration.rotation,
+                            selectedPlacedDecoration.offsetX,
+                            selectedPlacedDecoration.offsetY
+                        )
+                    }
+                ) {
+                    Text("Reset size")
+                }
 
 
                 Button(
@@ -483,12 +571,8 @@ fun BookshelfScreen(
                         )
                         .fillMaxWidth()
                         .background(
-                            color =
-                                MaterialTheme
-                                    .colorScheme
-                                    .surfaceVariant,
-                            shape =
-                                RoundedCornerShape(20.dp)
+                            color = shelfBackgroundColor,
+                            shape = RoundedCornerShape(20.dp)
                         )
                         .padding(
                             start = 14.dp,
@@ -1061,7 +1145,7 @@ fun BookshelfScreen(
                                     )
                             )
                             .background(
-                                color = ShelfWood,
+                                color = shelfWoodColor,
                                 shape =
                                     RoundedCornerShape(
                                         3.dp

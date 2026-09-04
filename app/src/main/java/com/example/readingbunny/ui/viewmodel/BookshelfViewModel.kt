@@ -9,11 +9,18 @@ import com.example.readingbunny.model.ShelfBookPosition
 import com.example.readingbunny.model.ShelfDecoration
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import com.example.readingbunny.data.preferences.UserPreferencesRepository
+import com.example.readingbunny.model.BookshelfStyle
 
 class BookshelfViewModel(
     private val decorationRepository: ShelfDecorationRepository,
-    private val positionRepository: ShelfBookPositionRepository
+    private val positionRepository: ShelfBookPositionRepository,
+    private val userPreferencesRepository: UserPreferencesRepository
 ) : ViewModel() {
+
+
+    val bookshelfStyle: Flow<BookshelfStyle> =
+        userPreferencesRepository.bookshelfStyle
 
     val decorations: Flow<List<ShelfDecoration>> =
         decorationRepository.getAllDecorations()
@@ -96,6 +103,13 @@ class BookshelfViewModel(
         }
 
 
+    }
+
+
+    fun setBookshelfStyle(style: BookshelfStyle) {
+        viewModelScope.launch {
+            userPreferencesRepository.setBookshelfStyle(style)
+        }
     }
 
 }
