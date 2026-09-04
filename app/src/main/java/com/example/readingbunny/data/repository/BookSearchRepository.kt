@@ -68,6 +68,24 @@ class BookSearchRepository(
                             "https://"
                         )
 
+                val thumbnailUrl =
+                    volumeInfo.imageLinks
+                        ?.thumbnail
+                        ?.replaceFirst("http://", "https://")
+
+                val largeCoverUrl =
+                    (
+                        volumeInfo.imageLinks?.extraLarge
+                            ?: volumeInfo.imageLinks?.large
+                            ?: volumeInfo.imageLinks?.medium
+                            ?: volumeInfo.imageLinks?.small
+                    )
+                        ?.replaceFirst("http://", "https://")
+                        ?: thumbnailUrl?.replace(
+                            "zoom=1",
+                            "zoom=6"
+                        )
+
                 BookSearchResult(
                     externalId = item.id,
                     title = title,
@@ -75,6 +93,7 @@ class BookSearchRepository(
                     totalPages = volumeInfo.pageCount,
                     isbn = isbn,
                     coverUrl = coverUrl,
+                    largeCoverUrl = largeCoverUrl,
                     description = volumeInfo.description
                 )
             }
@@ -142,6 +161,11 @@ class BookSearchRepository(
                 book.coverId?.let { coverId ->
                     "https://covers.openlibrary.org/b/id/$coverId-M.jpg"
                 }
+                
+            val largeCoverUrl =
+                book.coverId?.let { coverId ->
+                    "https://covers.openlibrary.org/b/id/$coverId-L.jpg"
+                }
 
             BookSearchResult(
                 externalId = "openlibrary:${book.key}",
@@ -150,6 +174,7 @@ class BookSearchRepository(
                 totalPages = book.numberOfPages,
                 isbn = isbn,
                 coverUrl = coverUrl,
+                largeCoverUrl = largeCoverUrl,
                 description = null
             )
         }

@@ -1,6 +1,6 @@
 package com.example.readingbunny.ui.screens
 
-import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -34,6 +34,7 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,36 +44,35 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil3.compose.AsyncImage
 import com.example.readingbunny.model.Book
 import com.example.readingbunny.model.BookOwnership
 import com.example.readingbunny.model.BookSearchResult
 import com.example.readingbunny.model.ReadingStatus
-import com.example.readingbunny.ui.viewmodel.BookSearchViewModel
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import coil3.compose.AsyncImage
 import com.example.readingbunny.ui.scanner.BookScannerMode
 import com.example.readingbunny.ui.scanner.BookScannerScreen
+import com.example.readingbunny.ui.viewmodel.BookSearchViewModel
 
 private enum class AddBookMethod {
     SEARCH,
     SCAN,
     MANUAL
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddBookScreen(
     onBackClick: () -> Unit,
     onSaveBook: (Book) -> Unit,
     bookSearchViewModel: BookSearchViewModel
-
 ) {
     val searchUiState by bookSearchViewModel.uiState.collectAsStateWithLifecycle()
 
@@ -83,6 +83,19 @@ fun AddBookScreen(
     var selectedMethod by rememberSaveable {
         mutableStateOf<AddBookMethod?>(null)
     }
+
+    val handleBack: () -> Unit = {
+        if (selectedMethod == null) {
+            onBackClick()
+        } else {
+            selectedMethod = null
+        }
+    }
+
+    BackHandler(
+        onBack = handleBack
+    )
+
     var scannerMode by rememberSaveable {
         mutableStateOf(BookScannerMode.BARCODE)
     }
@@ -107,6 +120,10 @@ fun AddBookScreen(
         mutableStateOf<String?>(null)
     }
 
+    var selectedLargeCoverUrl by rememberSaveable {
+        mutableStateOf<String?>(null)
+    }
+    
     var selectedDescription by rememberSaveable {
         mutableStateOf<String?>(null)
     }
@@ -115,13 +132,12 @@ fun AddBookScreen(
 
     val hasPagesError =
         bookTotalPages.isNotBlank() &&
-                (totalPages  == null || totalPages <= 0)
-
-
+                (totalPages == null || totalPages <= 0)
 
     var selectedStatus by rememberSaveable {
         mutableStateOf<ReadingStatus?>(null)
     }
+
     var selectedOwnership by rememberSaveable {
         mutableStateOf<BookOwnership?>(null)
     }
@@ -129,6 +145,7 @@ fun AddBookScreen(
     var isOwnershipMenuExpanded by rememberSaveable {
         mutableStateOf(false)
     }
+
     var isStatusMenuExpanded by rememberSaveable {
         mutableStateOf(false)
     }
@@ -156,13 +173,7 @@ fun AddBookScreen(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             IconButton(
-                onClick = {
-                    if (selectedMethod == null) {
-                        onBackClick()
-                    } else {
-                        selectedMethod = null
-                    }
-                }
+                onClick = handleBack
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -172,24 +183,23 @@ fun AddBookScreen(
 
             Text(
                 text = when (selectedMethod) {
-                    AddBookMethod.SEARCH -> "Search for a Book"
-                    AddBookMethod.SCAN -> "Scan a Book"
-                    AddBookMethod.MANUAL -> "Add Manually"
-                    null -> "Add a Book"
+                    AddBookMethod.SEARCH -> "Search for a book"
+                    AddBookMethod.SCAN -> "Scan a book"
+                    AddBookMethod.MANUAL -> "Add manually"
+                    null -> "Add a book"
                 },
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF382B27)
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onBackground
             )
         }
 
-        Spacer(modifier = Modifier.height(height = 24.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         if (selectedMethod == null) {
             Text(
                 text = "How would you like to add it?",
-                fontSize = 16.sp,
-                color = Color(0xFF74645E)
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -272,27 +282,39 @@ fun AddBookScreen(
                         )
 
                         if (searchUiState.isLoading) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.align(Alignment.CenterHorizontally)
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                CircularProgressIndicator(
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+
+                                Text(
+                                    text = "Searching for books...",
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+
+                        searchUiState.errorMessage?.let {
+                            Text(
+                                text = "Could not search for books. Please try again.",
+                                color = MaterialTheme.colorScheme.error
                             )
                         }
 
-                        searchUiState.errorMessage?.let { message ->
+                        if (
+                            !searchUiState.isLoading &&
+                            searchUiState.errorMessage == null &&
+                            searchUiState.results.isNotEmpty()
+                        ) {
                             Text(
-                                text = message,
-                                color = Color.Red
+                                text = "${searchUiState.results.size} results",
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onBackground
                             )
-                        }
-                            if (
-                                !searchUiState.isLoading &&
-                                searchUiState.errorMessage == null &&
-                                searchUiState.results.isNotEmpty()
-                            ) {
-                                Text(
-                                    text = "${searchUiState.results.size} results",
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF382B27)
-                                )
 
                                 LazyColumn(
                                     modifier = Modifier.weight(1f),
@@ -312,6 +334,7 @@ fun AddBookScreen(
                                                 bookTotalPages = book.totalPages?.toString().orEmpty()
                                                 selectedIsbn = book.isbn
                                                 selectedCoverUrl = book.coverUrl
+                                                selectedLargeCoverUrl = book.largeCoverUrl
                                                 selectedDescription = book.description
                                                 selectedMethod = AddBookMethod.MANUAL
                                             }
@@ -325,7 +348,6 @@ fun AddBookScreen(
                             searchUiState.errorMessage == null &&
                             searchUiState.results.isEmpty()
                         ) {
-
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -333,17 +355,15 @@ fun AddBookScreen(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
-
                                 Text(
                                     text = "We couldn't identify this book.",
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 18.sp,
-                                    color = Color(0xFF382B27)
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.onBackground
                                 )
 
                                 Text(
                                     text = "Try scanning it again or search for it manually.",
-                                    color = Color(0xFF74645E)
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
 
                                 Button(
@@ -363,13 +383,10 @@ fun AddBookScreen(
                                 }
                             }
                         }
-
-
                     }
                 }
 
                 AddBookMethod.SCAN -> {
-
                     BookScannerScreen(
                         mode = scannerMode,
                         onModeChange = { newMode ->
@@ -377,8 +394,6 @@ fun AddBookScreen(
                         },
 
                         onSpineTextRecognized = { text ->
-
-
                             val searchText = text
                                 .lines()
                                 .map { line ->
@@ -397,14 +412,10 @@ fun AddBookScreen(
                                     }
 
                             if (recognizedWords.size < 2) {
-
                                 scannerMessage =
                                     "I couldn't read enough text. Try taking another photo."
-
                             } else {
-
                                 scannerMessage = null
-
                                 searchQuery = searchText
 
                                 bookSearchViewModel.searchBooksWithFallback(
@@ -416,7 +427,6 @@ fun AddBookScreen(
                         },
 
                         onBarcodeDetected = { barcode ->
-
                             searchQuery = barcode
 
                             bookSearchViewModel.searchBookByIsbn(
@@ -425,26 +435,21 @@ fun AddBookScreen(
 
                             selectedMethod = AddBookMethod.SEARCH
                         },
+
                         modifier = Modifier.weight(1f)
-
-
-
                     )
 
                     scannerMessage?.let { message ->
-
                         Text(
                             text = message,
-                            color = Color(0xFFB85C48),
+                            color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.padding(top = 8.dp)
                         )
                     }
-
                 }
 
                 AddBookMethod.MANUAL -> {
                     Column {
-
                         OutlinedTextField(
                             value = bookTitle,
                             onValueChange = {
@@ -454,23 +459,19 @@ fun AddBookScreen(
                                 Text("Book title")
                             },
                             modifier = Modifier.fillMaxWidth()
-
                         )
 
                         Spacer(modifier = Modifier.height(12.dp))
 
-
-
                         OutlinedTextField(
                             value = bookAuthor,
                             onValueChange = {
-                                bookAuthor= it
+                                bookAuthor = it
                             },
                             label = {
                                 Text("Author")
                             },
                             modifier = Modifier.fillMaxWidth()
-
                         )
 
                         Spacer(modifier = Modifier.height(12.dp))
@@ -478,35 +479,30 @@ fun AddBookScreen(
                         OutlinedTextField(
                             value = bookTotalPages,
                             onValueChange = { newValue ->
-                                if (newValue.all { character -> character.isDigit() }) {
+                                if (newValue.all { character ->
+                                        character.isDigit()
+                                    }
+                                ) {
                                     bookTotalPages = newValue
                                 }
                             },
-
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Number
                             ),
-
                             label = {
                                 Text("Total pages")
-
                             },
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true,
-                            isError = hasPagesError,
-
-
+                            isError = hasPagesError
                         )
 
-                        if(hasPagesError)
-                        {
+                        if (hasPagesError) {
                             Spacer(modifier = Modifier.height(4.dp))
 
                             Text(
                                 text = "Enter a valid page number",
-                                color = Color.Red
-
-
+                                color = MaterialTheme.colorScheme.error
                             )
                         }
 
@@ -536,7 +532,8 @@ fun AddBookScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .menuAnchor(
-                                        type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,
+                                        type =
+                                            ExposedDropdownMenuAnchorType.PrimaryNotEditable,
                                         enabled = true
                                     )
                             )
@@ -560,12 +557,14 @@ fun AddBookScreen(
                                 }
                             }
                         }
+
                         Spacer(modifier = Modifier.height(16.dp))
 
                         ExposedDropdownMenuBox(
                             expanded = isOwnershipMenuExpanded,
                             onExpandedChange = {
-                                isOwnershipMenuExpanded = !isOwnershipMenuExpanded
+                                isOwnershipMenuExpanded =
+                                    !isOwnershipMenuExpanded
                             }
                         ) {
                             OutlinedTextField(
@@ -586,7 +585,8 @@ fun AddBookScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .menuAnchor(
-                                        type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,
+                                        type =
+                                            ExposedDropdownMenuAnchorType.PrimaryNotEditable,
                                         enabled = true
                                     )
                             )
@@ -610,15 +610,17 @@ fun AddBookScreen(
                                 }
                             }
                         }
+
                         Spacer(modifier = Modifier.height(24.dp))
 
                         Button(
                             onClick = {
                                 val pages = totalPages ?: return@Button
                                 val status = selectedStatus ?: return@Button
-                                val ownership = selectedOwnership ?: return@Button
-                                val newBook = Book(
+                                val ownership =
+                                    selectedOwnership ?: return@Button
 
+                                val newBook = Book(
                                     title = bookTitle.trim(),
                                     author = bookAuthor.trim(),
                                     status = status,
@@ -627,25 +629,22 @@ fun AddBookScreen(
                                     ownership = ownership,
                                     isbn = selectedIsbn,
                                     coverUrl =selectedCoverUrl,
+                                    largeCoverUrl= selectedLargeCoverUrl,
                                     description = selectedDescription
-                                    )
+                                )
 
                                 onSaveBook(newBook)
                             },
                             modifier = Modifier.fillMaxWidth(),
                             enabled = isFormValid
                         ) {
-                            Text("Save Book")
+                            Text("Save book")
                         }
                     }
-
                 }
 
                 null -> Unit
             }
-
-
-
         }
     }
 }
@@ -662,7 +661,7 @@ private fun AddBookOptionCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFFFF3E7)
+            containerColor = MaterialTheme.colorScheme.surface
         )
     ) {
         Row(
@@ -675,7 +674,7 @@ private fun AddBookOptionCard(
                 modifier = Modifier
                     .size(52.dp)
                     .background(
-                        color = Color(0xFFB85C48),
+                        color = MaterialTheme.colorScheme.primary,
                         shape = RoundedCornerShape(16.dp)
                     ),
                 contentAlignment = Alignment.Center
@@ -683,7 +682,7 @@ private fun AddBookOptionCard(
                 Text(
                     text = number,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.onPrimary
                 )
             }
 
@@ -694,17 +693,16 @@ private fun AddBookOptionCard(
             ) {
                 Text(
                     text = title,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF382B27)
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
                     text = description,
-                    fontSize = 14.sp,
-                    color = Color(0xFF74645E)
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -726,7 +724,6 @@ private fun BookOwnership.displayName(): String {
         BookOwnership.OWNED -> "Owned"
         BookOwnership.BORROWED -> "Borrowed"
         BookOwnership.WISHLIST -> "Wishlist"
-
     }
 }
 
@@ -738,10 +735,10 @@ private fun BookSearchResultCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick=onClick),
+            .clickable(onClick = onClick),
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFFFF3E7)
+            containerColor = MaterialTheme.colorScheme.surface
         )
     ) {
         Row(
@@ -754,7 +751,9 @@ private fun BookSearchResultCard(
                     .width(72.dp)
                     .height(104.dp)
                     .clip(RoundedCornerShape(10.dp))
-                    .background(Color(0xFFE8D8C8)),
+                    .background(
+                        MaterialTheme.colorScheme.surfaceVariant
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 if (!book.coverUrl.isNullOrBlank()) {
@@ -778,22 +777,21 @@ private fun BookSearchResultCard(
             ) {
                 Text(
                     text = book.title,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF382B27)
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Text(
                     text = book.author,
-                    fontSize = 14.sp,
-                    color = Color(0xFF74645E)
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 book.totalPages?.let { pageCount ->
                     Text(
                         text = "$pageCount pages",
-                        fontSize = 13.sp,
-                        color = Color(0xFF74645E)
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
@@ -801,7 +799,7 @@ private fun BookSearchResultCard(
                     Text(
                         text = "ISBN: $isbn",
                         fontSize = 12.sp,
-                        color = Color(0xFF74645E)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }

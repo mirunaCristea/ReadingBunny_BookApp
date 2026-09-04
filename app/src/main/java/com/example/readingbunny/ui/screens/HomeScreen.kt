@@ -17,7 +17,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -28,7 +27,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -36,12 +34,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.example.readingbunny.model.Book
-import com.example.readingbunny.ui.theme.DarkBrown
-import com.example.readingbunny.ui.theme.SoftCream
-import com.example.readingbunny.ui.theme.SoftSage
-import com.example.readingbunny.ui.theme.Terracotta
-import com.example.readingbunny.ui.theme.WarmCream
-
 
 @Composable
 fun HomeScreen(
@@ -49,10 +41,12 @@ fun HomeScreen(
     onStartReading: (Book) -> Unit,
     todayReadingSeconds: Long,
     dailyGoalMinutes: Int,
+    currentStreak: Int,
 ) {
-
     val todayReadingMinutes =
         todayReadingSeconds / 60
+
+
 
     val goalProgress =
         if (dailyGoalMinutes > 0) {
@@ -71,7 +65,7 @@ fun HomeScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(WarmCream)
+            .background(MaterialTheme.colorScheme.background)
             .safeDrawingPadding()
             .padding(horizontal = 20.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(18.dp)
@@ -83,43 +77,48 @@ fun HomeScreen(
         ) {
             Text(
                 text = "ReadingBunny",
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
-                color = DarkBrown
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             Surface(
-                color = SoftSage,
+                color = MaterialTheme.colorScheme.secondary,
                 shape = RoundedCornerShape(50)
             ) {
                 Text(
-                    text = "7 zile 🔥",
+                    text = if (currentStreak == 0) {
+                        "Start streak 🔥"
+                    } else {
+                        "$currentStreak day streak 🔥"
+                    },
                     modifier = Modifier.padding(
                         horizontal = 14.dp,
                         vertical = 8.dp
                     ),
                     fontWeight = FontWeight.Medium,
-                    color = DarkBrown
+                    color = MaterialTheme.colorScheme.onSecondary
                 )
             }
         }
 
         Text(
-            text = "Un colț liniștit pentru fiecare poveste.",
-            color = DarkBrown.copy(alpha = 0.7f)
+            text = "A quiet corner for every story.",
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
         Text(
-            text = "Citesc acum",
+            text = "Currently reading",
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.SemiBold,
-            color = DarkBrown
+            color = MaterialTheme.colorScheme.onBackground
         )
 
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(containerColor = SoftCream)
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
+            )
         ) {
             Row(
                 modifier = Modifier.padding(16.dp),
@@ -129,29 +128,26 @@ fun HomeScreen(
                     modifier = Modifier
                         .size(width = 84.dp, height = 124.dp)
                         .background(
-                            color = Terracotta,
+                            color = MaterialTheme.colorScheme.primary,
                             shape = RoundedCornerShape(10.dp)
                         ),
                     contentAlignment = Alignment.Center
                 ) {
-                    if(!book?.coverUrl.isNullOrBlank())
-                    {
+                    if (!book?.coverUrl.isNullOrBlank()) {
                         AsyncImage(
                             model = book.coverUrl,
-                            contentDescription =  "Cover ${book.title}",
+                            contentDescription = "Cover ${book.title}",
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop
                         )
-                    }
-                    else {
+                    } else {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.MenuBook,
                             contentDescription = null,
-                            tint = Color.White,
+                            tint = MaterialTheme.colorScheme.onPrimary,
                             modifier = Modifier.size(38.dp)
                         )
                     }
-
                 }
 
                 val progress = if (book != null && book.totalPages > 0) {
@@ -159,19 +155,22 @@ fun HomeScreen(
                 } else {
                     0f
                 }
+
                 Spacer(modifier = Modifier.width(16.dp))
 
-                Column(modifier = Modifier.weight(1f)) {
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
                     Text(
                         text = book?.title ?: "No book in progress",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = DarkBrown
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
 
                     Text(
                         text = book?.author ?: "Choose a book to start reading",
-                        color = DarkBrown.copy(alpha = 0.65f)
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
                     Spacer(modifier = Modifier.height(18.dp))
@@ -179,20 +178,20 @@ fun HomeScreen(
                     LinearProgressIndicator(
                         progress = { progress },
                         modifier = Modifier.fillMaxWidth(),
-                        color = Terracotta,
-                        trackColor = Color.White
+                        color = MaterialTheme.colorScheme.primary,
+                        trackColor = MaterialTheme.colorScheme.outlineVariant
                     )
 
                     Spacer(modifier = Modifier.height(6.dp))
 
                     Text(
-                        text = if (book != null ) {
-                            "${book.currentPage} din ${book.totalPages} pagini · ${(progress * 100).toInt()} % "
-                            } else {
-                            "0% progress"
+                        text = if (book != null) {
+                            "${book.currentPage} / ${book.totalPages} pages · ${(progress * 100).toInt()}%"
+                        } else {
+                            "No reading progress yet"
                         },
-                        fontSize = 12.sp,
-                        color = DarkBrown.copy(alpha = 0.7f)
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
                     Spacer(modifier = Modifier.height(14.dp))
@@ -201,16 +200,13 @@ fun HomeScreen(
                         onClick = {
                             book?.let {
                                 onStartReading(it)
-                             }
+                            }
                         },
                         enabled = book != null,
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(14.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Terracotta
-                        )
+                        shape = RoundedCornerShape(14.dp)
                     ) {
-                        Text("Start Reading")
+                        Text("Start reading")
                     }
                 }
             }
@@ -220,7 +216,7 @@ fun HomeScreen(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(20.dp),
             colors = CardDefaults.cardColors(
-                containerColor = SoftCream
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
             )
         ) {
             Column(
@@ -228,24 +224,22 @@ fun HomeScreen(
                     .fillMaxWidth()
                     .padding(18.dp)
             ) {
-
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-
                     Text(
                         text = "Today's goal",
-                        fontWeight = FontWeight.SemiBold,
-                        color = DarkBrown
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
 
                     Text(
                         text = "$todayReadingMinutes / $dailyGoalMinutes min",
-                        fontSize = 16.sp,
+                        style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Medium,
-                        color = DarkBrown
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
 
@@ -258,8 +252,8 @@ fun HomeScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(8.dp),
-                    color = Terracotta,
-                    trackColor = Color.White
+                    color = MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.outlineVariant
                 )
 
                 Spacer(
@@ -272,8 +266,8 @@ fun HomeScreen(
                     } else {
                         "Daily goal completed! 📚"
                     },
-                    fontSize = 13.sp,
-                    color = DarkBrown.copy(alpha = 0.7f)
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -285,13 +279,13 @@ fun HomeScreen(
     widthDp = 412,
     heightDp = 915
 )
-
 @Composable
 private fun HomeScreenPreview() {
     HomeScreen(
         book = null,
         onStartReading = {},
         todayReadingSeconds = 0L,
-        dailyGoalMinutes = 30
+        dailyGoalMinutes = 30,
+        currentStreak = 0
     )
 }

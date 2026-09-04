@@ -21,7 +21,7 @@ import com.example.readingbunny.model.ReadingJournalEntry
         ReadingSession::class,
         ReadingJournalEntry::class
     ],
-    version = 7,
+    version = 9,
     exportSchema = false
 )
 abstract class ReadingBunnyDatabase : RoomDatabase() {
@@ -77,6 +77,43 @@ abstract class ReadingBunnyDatabase : RoomDatabase() {
                     )
                 }
             }
+            
+        private val MIGRATION_7_8 =
+            object : Migration(7, 8) {
+
+            override suspend fun migrate(
+                connection: SQLiteConnection
+            ) {
+                connection.execSQL(
+                    "ALTER TABLE `books` ADD COLUMN `largeCoverUrl` TEXT"
+                )
+            }
+        }
+
+        private val MIGRATION_8_9 =
+            object : Migration(8, 9) {
+
+                override suspend fun migrate(
+                    connection: SQLiteConnection
+                ) {
+                    connection.execSQL(
+                        "ALTER TABLE `shelf_decorations` ADD COLUMN `scale` REAL NOT NULL DEFAULT 1.0"
+                    )
+
+                    connection.execSQL(
+                        "ALTER TABLE `shelf_decorations` ADD COLUMN `rotation` REAL NOT NULL DEFAULT 0.0"
+                    )
+
+                    connection.execSQL(
+                        "ALTER TABLE `shelf_decorations` ADD COLUMN `offsetX` REAL NOT NULL DEFAULT 0.0"
+                    )
+
+                    connection.execSQL(
+                        "ALTER TABLE `shelf_decorations` ADD COLUMN `offsetY` REAL NOT NULL DEFAULT 0.0"
+                    )
+                }
+            }
+
         @Volatile
         private var INSTANCE: ReadingBunnyDatabase? = null
 
@@ -90,7 +127,9 @@ abstract class ReadingBunnyDatabase : RoomDatabase() {
                 )
                     .addMigrations(
                         MIGRATION_5_6,
-                        MIGRATION_6_7
+                        MIGRATION_6_7,
+                        MIGRATION_7_8,
+                        MIGRATION_8_9
                     )
                     .build()
 

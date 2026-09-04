@@ -77,4 +77,26 @@ class BookshelfViewModel(
         }
     }
 
+    fun updateDecorationTransform(
+        decoration: ShelfDecoration,
+        scale: Float = decoration.scale,
+        rotation: Float = decoration.rotation,
+        offsetX: Float = decoration.offsetX,
+        offsetY: Float = decoration.offsetY
+    ) {
+        viewModelScope.launch {
+            decorationRepository.updateDecoration(
+                decoration.copy(
+                    scale = scale,
+                    rotation = rotation,
+                    offsetX = offsetX,
+                    offsetY = offsetY
+                )
+            )
+        }
+
+
+    }
+
 }
+

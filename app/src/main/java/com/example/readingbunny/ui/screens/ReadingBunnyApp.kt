@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.CollectionsBookmark
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -24,12 +25,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.readingbunny.ReadingBunnyApplication
-import com.example.readingbunny.model.JournalEntryType
-import com.example.readingbunny.model.ReadingJournalEntry
 import com.example.readingbunny.model.ReadingStatus
 import com.example.readingbunny.ui.viewmodel.BookSearchViewModel
 import com.example.readingbunny.ui.viewmodel.BookSearchViewModelFactory
@@ -37,24 +35,27 @@ import com.example.readingbunny.ui.viewmodel.BookViewModel
 import com.example.readingbunny.ui.viewmodel.BookViewModelFactory
 import com.example.readingbunny.ui.viewmodel.BookshelfViewModel
 import com.example.readingbunny.ui.viewmodel.BookshelfViewModelFactory
-import com.example.readingbunny.ui.viewmodel.ReadingSessionViewModel
-import com.example.readingbunny.ui.viewmodel.ReadingSessionViewModelFactory
 import com.example.readingbunny.ui.viewmodel.ProfileViewModel
 import com.example.readingbunny.ui.viewmodel.ProfileViewModelFactory
-import kotlinx.coroutines.launch
 import com.example.readingbunny.ui.viewmodel.ReadingJournalViewModel
 import com.example.readingbunny.ui.viewmodel.ReadingJournalViewModelFactory
+import com.example.readingbunny.ui.viewmodel.ReadingSessionViewModel
+import com.example.readingbunny.ui.viewmodel.ReadingSessionViewModelFactory
+import kotlinx.coroutines.launch
+import com.example.readingbunny.util.calculateCurrentStreak
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 
 @Composable
 fun ReadingBunnyApp() {
     var selectedItem by rememberSaveable {
         mutableIntStateOf(0)
     }
+
     var isAddingBook by rememberSaveable {
         mutableStateOf(false)
     }
-
-
 
     val context = LocalContext.current
 
@@ -71,6 +72,7 @@ fun ReadingBunnyApp() {
             application.bookPositionRepository
         )
     )
+
     val decorations by bookshelfViewModel.decorations.collectAsState(
         initial = emptyList()
     )
@@ -78,13 +80,12 @@ fun ReadingBunnyApp() {
     val books by bookViewModel.books.collectAsState(
         initial = emptyList()
     )
+
     val bookPositions by bookshelfViewModel.bookPositions.collectAsState(
         initial = emptyList()
     )
 
-    val readingJournalViewModel:
-            ReadingJournalViewModel = viewModel(
-
+    val readingJournalViewModel: ReadingJournalViewModel = viewModel(
         factory =
             ReadingJournalViewModelFactory(
                 application.readingJournalRepository
@@ -115,7 +116,7 @@ fun ReadingBunnyApp() {
             initial = emptyList()
         )
 
-    val currentBook = books.firstOrNull() { book ->
+    val currentBook = books.firstOrNull { book ->
         book.status == ReadingStatus.READING
     }
 
@@ -157,7 +158,6 @@ fun ReadingBunnyApp() {
     val todayReadingSeconds =
         readingSessions
             .filter { session ->
-
                 val sessionDate =
                     java.time.Instant
                         .ofEpochMilli(session.startedAt)
@@ -166,22 +166,34 @@ fun ReadingBunnyApp() {
 
                 sessionDate == today
             }
-            .sumOf {
-                it.durationSeconds
+            .sumOf { session ->
+                session.durationSeconds
             }
 
+    val sessionDates =
+        readingSessions
+            .map { session ->
+                Instant
+                    .ofEpochMilli(session.startedAt)
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDate()
+            }
+            .toSet()
 
+    val currentStreak =
+        calculateCurrentStreak(
+            sessionDates = sessionDates,
+            today = today
+        )
 
     var activeSessionBookId by rememberSaveable {
         mutableStateOf<Int?>(null)
     }
 
     val activeSessionBook =
-        books.firstOrNull {
-            it.id == activeSessionBookId
+        books.firstOrNull { book ->
+            book.id == activeSessionBookId
         }
-
-
 
     val bookSearchViewModel: BookSearchViewModel = viewModel(
         factory = BookSearchViewModelFactory(
@@ -190,7 +202,6 @@ fun ReadingBunnyApp() {
     )
 
     if (activeSessionBook != null) {
-
         val sessionBook = activeSessionBook
 
         ReadingSessionScreen(
@@ -207,11 +218,9 @@ fun ReadingBunnyApp() {
             },
 
             onFinish = { endPage ->
-
                 readingSessionViewModel.finishSession(
                     endPage = endPage
                 ) {
-
                     val newStatus =
                         if (endPage >= sessionBook.totalPages) {
                             ReadingStatus.FINISHED
@@ -235,9 +244,7 @@ fun ReadingBunnyApp() {
                 activeSessionBookId = null
             }
         )
-
     } else {
-
         val currentlyReadingBooks =
             books.count { book ->
                 book.status == ReadingStatus.READING
@@ -248,11 +255,8 @@ fun ReadingBunnyApp() {
                 book.status == ReadingStatus.FINISHED
             }
 
-
-
-
         Scaffold(
-            containerColor = Color(0xFFFFF8EF),
+            containerColor = MaterialTheme.colorScheme.background,
 
             bottomBar = {
                 NavigationBar {
@@ -279,9 +283,9 @@ fun ReadingBunnyApp() {
                         },
                         icon = {
                             Icon(
-                                imageVector = Icons.AutoMirrored.Filled.MenuBook,
+                                imageVector =
+                                    Icons.AutoMirrored.Filled.MenuBook,
                                 contentDescription = "Books"
-
                             )
                         },
                         label = {
@@ -296,7 +300,8 @@ fun ReadingBunnyApp() {
                         },
                         icon = {
                             Icon(
-                                imageVector = Icons.Filled.CollectionsBookmark,
+                                imageVector =
+                                    Icons.Filled.CollectionsBookmark,
                                 contentDescription = "Bookshelf"
                             )
                         },
@@ -341,26 +346,24 @@ fun ReadingBunnyApp() {
         ) { innerPadding ->
             Box(
                 modifier = Modifier.padding(innerPadding)
-            )
-            {
+            ) {
                 when (selectedItem) {
                     0 -> HomeScreen(
                         book = currentBook,
                         todayReadingSeconds = todayReadingSeconds,
                         dailyGoalMinutes = dailyGoalMinutes,
+                        currentStreak = currentStreak,
                         onStartReading = { book ->
-
                             activeSessionBookId = book.id
 
                             readingSessionViewModel.startSession(
                                 book
                             )
-
-                        })
+                        }
+                    )
 
                     1 -> {
                         if (selectedBook != null) {
-
                             BookDetailsScreen(
                                 book = selectedBook,
                                 journalEntries = journalEntries,
@@ -386,18 +389,13 @@ fun ReadingBunnyApp() {
                                         page = page
                                     )
                                 },
-
                                 onDeleteJournalEntry = { entry ->
-
                                     readingJournalViewModel.deleteEntry(
                                         entry
                                     )
                                 }
-
                             )
-
                         } else if (isAddingBook) {
-
                             AddBookScreen(
                                 onBackClick = {
                                     isAddingBook = false
@@ -408,9 +406,7 @@ fun ReadingBunnyApp() {
                                 },
                                 bookSearchViewModel = bookSearchViewModel
                             )
-
                         } else {
-
                             BookScreen(
                                 books = books,
                                 onAddBookClick = {
@@ -452,21 +448,21 @@ fun ReadingBunnyApp() {
                                 slotIndex
                             )
                         },
-                        onMoveDecoration =
-                            { decoration, shelfIndex, slotIndex ->
 
-                                bookshelfViewModel.moveDecoration(
-                                    decoration,
-                                    shelfIndex,
-                                    slotIndex
-                                )
-                            }
+                        onMoveDecoration = { decoration, shelfIndex, slotIndex ->
+                            bookshelfViewModel.moveDecoration(
+                                decoration,
+                                shelfIndex,
+                                slotIndex
+                            )
+                        }
                     )
 
                     3 -> StatsScreen(
                         sessions = readingSessions,
                         books = books
                     )
+
                     4 -> ProfileScreen(
                         dailyGoalMinutes = dailyGoalMinutes,
                         totalBooks = books.size,
@@ -474,20 +470,16 @@ fun ReadingBunnyApp() {
                         finishedBooks = finishedBooks,
 
                         onDailyGoalChange = { minutes ->
-
                             profileViewModel.setDailyGoalMinutes(
                                 minutes
                             )
                         },
 
                         onExportBackup = { uri ->
-
                             backupMessage = null
 
                             coroutineScope.launch {
-
                                 try {
-
                                     application.backupRepository
                                         .exportBackup(
                                             uri = uri,
@@ -506,13 +498,7 @@ fun ReadingBunnyApp() {
 
                                     backupMessage =
                                         "Backup exported successfully."
-
-
-
-
-
                                 } catch (exception: Exception) {
-
                                     Log.e(
                                         "Backup",
                                         "Backup export failed",
@@ -520,30 +506,22 @@ fun ReadingBunnyApp() {
                                     )
 
                                     backupMessage =
-                                        "Could not export backup."
+                                        "Could not export backup. Please try again."
                                 }
-
-
-
                             }
                         },
 
                         onRestoreBackup = { uri ->
-
                             backupMessage = null
 
                             coroutineScope.launch {
-
                                 try {
-
                                     application.backupRepository
                                         .restoreBackup(uri)
 
                                     backupMessage =
                                         "Backup restored successfully."
-
                                 } catch (exception: Exception) {
-
                                     Log.e(
                                         "Backup",
                                         "Backup restore failed",
@@ -551,8 +529,7 @@ fun ReadingBunnyApp() {
                                     )
 
                                     backupMessage =
-                                        exception.message
-                                            ?: "Could not restore backup."
+                                        "Could not restore backup. Please check the backup file and try again."
                                 }
                             }
                         },
@@ -561,8 +538,6 @@ fun ReadingBunnyApp() {
                     )
                 }
             }
-
         }
-
     }
-    }
+}

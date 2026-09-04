@@ -10,7 +10,9 @@ enum class DecorationType(
     PLANT("Plant", "🌱"),
     CANDLE("Candle", "🕯️"),
     LAMP("Lamp", "💡"),
-    FRAME("Frame", "🖼️")
+    FRAME("Frame", "🖼️"),
+    PUMPKIN("Pumpkin", "🎃"),
+    TEA_CUP("Tea Cup", "☕")
 }
 
 @Entity(tableName = "shelf_decorations")
@@ -20,6 +22,10 @@ data class ShelfDecoration(
 
     val type: DecorationType,
     val slotIndex: Int,
-    val shelfIndex: Int
-)
+    val shelfIndex: Int,
 
+    val scale: Float = 1f,
+    val rotation: Float = 0f,
+    val offsetX: Float = 0f,
+    val offsetY: Float = 0f
+)

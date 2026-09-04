@@ -29,6 +29,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,18 +39,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Color.Companion.White
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.readingbunny.model.Book
-import com.example.readingbunny.model.ReadingStatus
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import coil3.compose.AsyncImage
-
-
+import com.example.readingbunny.model.Book
+import com.example.readingbunny.model.ReadingStatus
 
 @Composable
 fun BookScreen(
@@ -57,7 +54,6 @@ fun BookScreen(
     onAddBookClick: () -> Unit,
     onBookClick: (Book) -> Unit
 ) {
-
     var searchQuery by rememberSaveable {
         mutableStateOf("")
     }
@@ -68,9 +64,8 @@ fun BookScreen(
 
     val visibleBooks = books.filter { book ->
         val matchesSearch =
-                    book.title.contains(searchQuery, ignoreCase = true) ||
-                    book.author.contains(searchQuery,ignoreCase = true)
-
+            book.title.contains(searchQuery, ignoreCase = true) ||
+                    book.author.contains(searchQuery, ignoreCase = true)
 
         val matchesFilter = when (selectedFilter) {
             "Unread" -> book.status == ReadingStatus.UNREAD
@@ -78,12 +73,10 @@ fun BookScreen(
             "Want to Read" -> book.status == ReadingStatus.WANT_TO_READ
             "Finished" -> book.status == ReadingStatus.FINISHED
             "DNF" -> book.status == ReadingStatus.DNF
-
             else -> true
         }
 
         matchesSearch && matchesFilter
-
     }
 
     Column(
@@ -92,33 +85,31 @@ fun BookScreen(
             .padding(20.dp)
     ) {
         Row(
-            modifier =  Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "My Books",
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF382B27)
+                text = "My books",
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             FilledIconButton(
-                onClick =onAddBookClick,
+                onClick = onAddBookClick,
                 colors = IconButtonDefaults.filledIconButtonColors(
-                    containerColor = Color(0xFFB85C48)
+                    containerColor = MaterialTheme.colorScheme.primary
                 )
             ) {
                 Icon(
                     imageVector = Icons.Filled.Add,
                     contentDescription = "Add book",
-                    tint = White
+                    tint = MaterialTheme.colorScheme.onPrimary
                 )
             }
         }
 
         Spacer(modifier = Modifier.height(20.dp))
-
 
         OutlinedTextField(
             value = searchQuery,
@@ -129,36 +120,34 @@ fun BookScreen(
             placeholder = {
                 Text("Search your books")
             },
-
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Filled.Search,
                     contentDescription = "Search"
                 )
             },
-
             singleLine = true,
             shape = RoundedCornerShape(16.dp)
         )
-            Spacer(modifier = Modifier.height(12.dp))
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                val filters = listOf(
-                    "All",
-                    "Reading",
-                    "Want to Read",
-                    "Unread",
-                    "Finished",
-                    "DNF"
+        Spacer(modifier = Modifier.height(12.dp))
 
-                )
-            filters.forEach {  filter ->
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            val filters = listOf(
+                "All",
+                "Reading",
+                "Want to Read",
+                "Unread",
+                "Finished",
+                "DNF"
+            )
 
+            filters.forEach { filter ->
                 FilterChip(
                     selected = selectedFilter == filter,
                     onClick = {
@@ -181,8 +170,12 @@ fun BookScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "No books found",
-                    color = Color(0xFF74645E)
+                    text = if (books.isEmpty()) {
+                        "Your library is empty"
+                    } else {
+                        "No books found"
+                    },
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         } else {
@@ -201,16 +194,19 @@ fun BookScreen(
                         book = book,
                         onClick = {
                             onBookClick(book)
-                        })
+                        }
+                    )
                 }
             }
         }
-
     }
 }
 
 @Composable
-fun BookCard(book: Book, onClick: () -> Unit) {
+fun BookCard(
+    book: Book,
+    onClick: () -> Unit
+) {
     val progress = if (book.totalPages > 0) {
         book.currentPage.toFloat() / book.totalPages.toFloat()
     } else {
@@ -221,8 +217,7 @@ fun BookCard(book: Book, onClick: () -> Unit) {
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFFFF3E7)
-
+            containerColor = MaterialTheme.colorScheme.surface
         ),
         onClick = onClick
     ) {
@@ -230,15 +225,14 @@ fun BookCard(book: Book, onClick: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            verticalAlignment =  Alignment.CenterVertically
-        )
-        {
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Box(
                 modifier = Modifier
                     .width(82.dp)
                     .height(118.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(Color(0xFFB85C48)),
+                    .background(MaterialTheme.colorScheme.primary),
                 contentAlignment = Alignment.Center
             ) {
                 if (!book.coverUrl.isNullOrBlank()) {
@@ -252,7 +246,7 @@ fun BookCard(book: Book, onClick: () -> Unit) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.MenuBook,
                         contentDescription = null,
-                        tint = Color.White,
+                        tint = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.size(38.dp)
                     )
                 }
@@ -267,12 +261,12 @@ fun BookCard(book: Book, onClick: () -> Unit) {
                     text = book.title,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF382B27)
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Text(
                     text = book.author,
-                    color = Color(0xFF74645E)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 Spacer(modifier = Modifier.height(14.dp))
@@ -282,8 +276,8 @@ fun BookCard(book: Book, onClick: () -> Unit) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(7.dp),
-                    color = Color(0xFFB85C48),
-                    trackColor = Color(0xFFE8D8CC)
+                    color = MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.outlineVariant
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -291,10 +285,9 @@ fun BookCard(book: Book, onClick: () -> Unit) {
                 Text(
                     text = "${book.currentPage} / ${book.totalPages} pages · ${(progress * 100).toInt()}%",
                     fontSize = 13.sp,
-                    color = Color(0xFF74645E)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
-
     }
 }

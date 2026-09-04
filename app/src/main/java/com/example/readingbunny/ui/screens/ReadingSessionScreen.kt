@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -25,12 +26,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.readingbunny.model.Book
-import com.example.readingbunny.ui.theme.DarkBrown
-import com.example.readingbunny.ui.theme.SoftCream
-import com.example.readingbunny.ui.theme.Terracotta
-import com.example.readingbunny.ui.theme.WarmCream
+import androidx.compose.material3.AlertDialog
 
 @Composable
 fun ReadingSessionScreen(
@@ -42,8 +39,11 @@ fun ReadingSessionScreen(
     onFinish: (Int) -> Unit,
     onCancel: () -> Unit
 ) {
-
     var isFinishing by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    var showDiscardDialog by rememberSaveable {
         mutableStateOf(false)
     }
 
@@ -51,33 +51,68 @@ fun ReadingSessionScreen(
         mutableStateOf(book.currentPage.toString())
     }
 
-    val endPage = endPageText.toIntOrNull()
+    val endPage =
+        endPageText.toIntOrNull()
 
     val hasPageError =
-        endPage != null &&
+        endPageText.isNotBlank() &&
                 (
-                        endPage < book.currentPage ||
+                        endPage == null ||
+                                endPage < book.currentPage ||
                                 endPage > book.totalPages
                         )
 
     val formattedTime =
         formatReadingTime(elapsedSeconds)
 
+
+    if (showDiscardDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showDiscardDialog = false
+            },
+            title = {
+                Text("Discard session?")
+            },
+            text = {
+                Text("If you close now, this reading session will be lost.")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDiscardDialog = false
+                        onCancel()
+                    }
+                ) {
+                    Text("Discard session")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showDiscardDialog = false
+                    }
+                ) {
+                    Text("Keep reading")
+                }
+            }
+        )
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(WarmCream)
+            .background(MaterialTheme.colorScheme.background)
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Start
         ) {
-
             TextButton(
-                onClick = onCancel
+                onClick = {
+                    showDiscardDialog = true
+                }
             ) {
                 Text("Close")
             }
@@ -89,8 +124,8 @@ fun ReadingSessionScreen(
 
         Text(
             text = book.title,
-            fontSize = 26.sp,
-            color = DarkBrown
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onBackground
         )
 
         Spacer(
@@ -99,8 +134,8 @@ fun ReadingSessionScreen(
 
         Text(
             text = book.author,
-            fontSize = 16.sp,
-            color = DarkBrown.copy(alpha = 0.7f)
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
         Spacer(
@@ -109,8 +144,8 @@ fun ReadingSessionScreen(
 
         Text(
             text = formattedTime,
-            fontSize = 48.sp,
-            color = DarkBrown
+            style = MaterialTheme.typography.displayMedium,
+            color = MaterialTheme.colorScheme.onBackground
         )
 
         Spacer(
@@ -123,8 +158,8 @@ fun ReadingSessionScreen(
             } else {
                 "Session paused"
             },
-            fontSize = 15.sp,
-            color = DarkBrown.copy(alpha = 0.7f)
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
         Spacer(
@@ -135,18 +170,16 @@ fun ReadingSessionScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(
-                    color = SoftCream,
+                    color = MaterialTheme.colorScheme.surfaceVariant,
                     shape = RoundedCornerShape(18.dp)
                 )
                 .padding(20.dp)
         ) {
-
             Column {
-
                 Text(
                     text = "Started at page",
-                    fontSize = 14.sp,
-                    color = DarkBrown.copy(alpha = 0.7f)
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 Spacer(
@@ -155,8 +188,8 @@ fun ReadingSessionScreen(
 
                 Text(
                     text = "${book.currentPage} / ${book.totalPages}",
-                    fontSize = 20.sp,
-                    color = DarkBrown
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
         }
@@ -166,7 +199,6 @@ fun ReadingSessionScreen(
         )
 
         if (!isFinishing) {
-
             Button(
                 onClick = {
                     if (isRunning) {
@@ -177,7 +209,6 @@ fun ReadingSessionScreen(
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-
                 Text(
                     text = if (isRunning) {
                         "Pause"
@@ -204,28 +235,23 @@ fun ReadingSessionScreen(
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-
                 Text("Stop session")
             }
-
         } else {
-
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(
-                        color = SoftCream,
+                        color = MaterialTheme.colorScheme.surfaceVariant,
                         shape = RoundedCornerShape(18.dp)
                     )
                     .padding(20.dp)
             ) {
-
                 Column {
-
                     Text(
                         text = "Where did you stop?",
-                        fontSize = 20.sp,
-                        color = DarkBrown
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
 
                     Spacer(
@@ -234,8 +260,13 @@ fun ReadingSessionScreen(
 
                     OutlinedTextField(
                         value = endPageText,
-                        onValueChange = {
-                            endPageText = it
+                        onValueChange = { newValue ->
+                            if (newValue.all { character ->
+                                    character.isDigit()
+                                }
+                            ) {
+                                endPageText = newValue
+                            }
                         },
                         label = {
                             Text("End page")
@@ -245,11 +276,11 @@ fun ReadingSessionScreen(
                         ),
                         isError = hasPageError,
                         supportingText = {
-
                             if (hasPageError) {
                                 Text(
-                                    "Page must be between " +
-                                            "${book.currentPage} and ${book.totalPages}"
+                                    text = "Page must be between " +
+                                            "${book.currentPage} and ${book.totalPages}",
+                                    color = MaterialTheme.colorScheme.error
                                 )
                             }
                         },
@@ -277,7 +308,6 @@ fun ReadingSessionScreen(
                                     !hasPageError,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-
                         Text("Save session")
                     }
 
@@ -291,7 +321,6 @@ fun ReadingSessionScreen(
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-
                         Text("Continue reading")
                     }
                 }
@@ -300,11 +329,9 @@ fun ReadingSessionScreen(
     }
 }
 
-
 private fun formatReadingTime(
     totalSeconds: Long
 ): String {
-
     val hours =
         totalSeconds / 3600
 
