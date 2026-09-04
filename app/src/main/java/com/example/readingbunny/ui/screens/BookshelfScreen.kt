@@ -53,6 +53,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.zIndex
 
 
@@ -65,7 +66,14 @@ fun BookshelfScreen(
     onDeleteDecoration: (ShelfDecoration) -> Unit,
     bookPositions: List<ShelfBookPosition>,
     onMoveBook: (Int, Int, Int) -> Unit,
-    onMoveDecoration: (ShelfDecoration, Int, Int) -> Unit
+    onMoveDecoration: (ShelfDecoration, Int, Int) -> Unit,
+    onUpdateDecorationTransform: (
+            ShelfDecoration,
+            Float,
+            Float,
+            Float,
+            Float
+            ) -> Unit
 ) {
     var isDecorating by rememberSaveable {
         mutableStateOf(false)
@@ -372,6 +380,58 @@ fun BookshelfScreen(
             )
 
             if (selectedPlacedDecoration != null) {
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Button(
+                        onClick = {
+                            val newScale =
+                                (selectedPlacedDecoration.scale - 0.1f)
+                                    .coerceAtLeast(0.6f)
+
+                            onUpdateDecorationTransform(
+                                selectedPlacedDecoration,
+                                newScale,
+                                selectedPlacedDecoration.rotation,
+                                selectedPlacedDecoration.offsetX,
+                                selectedPlacedDecoration.offsetY
+                            )
+                        }
+                    ) {
+                        Text("-")
+                    }
+
+                    Text(
+                        text = "${(selectedPlacedDecoration.scale * 100).toInt()}%"
+                    )
+
+                    Button(
+                        onClick = {
+                            val newScale =
+                                (selectedPlacedDecoration.scale + 0.1f)
+                                    .coerceAtMost(1.5f)
+
+                            onUpdateDecorationTransform(
+                                selectedPlacedDecoration,
+                                newScale,
+                                selectedPlacedDecoration.rotation,
+                                selectedPlacedDecoration.offsetX,
+                                selectedPlacedDecoration.offsetY
+                            )
+                        }
+                    ) {
+                        Text("+")
+                    }
+                }
+
+                Spacer(
+                    modifier = Modifier.height(8.dp)
+                )
+
+
+
                 Button(
                     onClick = {
                         onDeleteDecoration(
@@ -752,7 +812,7 @@ fun BookshelfScreen(
 
                                         DecorationItem(
                                             decoration =
-                                                decoration.type,
+                                                decoration,
 
                                             isDecorating =
                                                 isDecorating,
@@ -1027,15 +1087,33 @@ fun BookshelfScreen(
 
 @Composable
 fun DecorationItem(
-    decoration: DecorationType,
+    decoration: ShelfDecoration,
     isDecorating: Boolean,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ){
+    val density = LocalDensity.current
+
+    val offsetXPx = with(density) {
+        decoration.offsetX.dp.toPx()
+    }
+
+    val offsetYPx = with(density) {
+        decoration.offsetY.dp.toPx()
+    }
+
     Box(
         modifier = modifier
             .fillMaxWidth()
             .height(85.dp)
+            .graphicsLayer {
+                scaleX = decoration.scale
+                scaleY = decoration.scale
+                rotationZ = decoration.rotation
+
+                translationX = offsetXPx
+                translationY = offsetYPx
+            }
             .clickable(
                 enabled = isDecorating,
                 onClick = onClick
@@ -1043,7 +1121,7 @@ fun DecorationItem(
         contentAlignment = Alignment.BottomCenter
     ) {
         val artworkModifier =
-            when (decoration) {
+            when (decoration.type) {
                 DecorationType.PLANT ->
                     Modifier
                         .width(52.dp)
@@ -1077,7 +1155,7 @@ fun DecorationItem(
 
         DecorationArtwork(
             modifier = artworkModifier,
-            decoration = decoration
+            decoration = decoration.type
 
         )
     }

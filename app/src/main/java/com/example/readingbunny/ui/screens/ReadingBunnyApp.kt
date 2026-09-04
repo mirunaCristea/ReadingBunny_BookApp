@@ -455,7 +455,25 @@ fun ReadingBunnyApp() {
                                 shelfIndex,
                                 slotIndex
                             )
-                        }
+                        },
+
+                        onUpdateDecorationTransform = {
+                        decoration,
+                        scale,
+                        rotation,
+                        offsetX,
+                        offsetY ->
+
+                        bookshelfViewModel.updateDecorationTransform(
+                            decoration = decoration,
+                            scale = scale,
+                            rotation = rotation,
+                            offsetX = offsetX,
+                            offsetY = offsetY
+                        )
+                    }
+
+
                     )
 
                     3 -> StatsScreen(
