@@ -55,7 +55,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.zIndex
 import com.example.readingbunny.model.BookshelfStyle
 import com.example.readingbunny.ui.theme.CozyBookshelfColors
@@ -1176,15 +1175,6 @@ fun DecorationItem(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ){
-    val density = LocalDensity.current
-
-    val offsetXPx = with(density) {
-        decoration.offsetX.dp.toPx()
-    }
-
-    val offsetYPx = with(density) {
-        decoration.offsetY.dp.toPx()
-    }
 
     Box(
         modifier = modifier
@@ -1193,10 +1183,8 @@ fun DecorationItem(
             .graphicsLayer {
                 scaleX = decoration.scale
                 scaleY = decoration.scale
-                rotationZ = decoration.rotation
 
-                translationX = offsetXPx
-                translationY = offsetYPx
+
             }
             .clickable(
                 enabled = isDecorating,
