@@ -122,7 +122,7 @@ fun ReadingBunnyApp() {
             initial = emptyList()
         )
 
-    val currentBook = books.firstOrNull { book ->
+    val currentBooks = books.filter { book ->
         book.status == ReadingStatus.READING
     }
 
@@ -355,7 +355,12 @@ fun ReadingBunnyApp() {
             ) {
                 when (selectedItem) {
                     0 -> HomeScreen(
-                        book = currentBook,
+                        books= currentBooks,
+                        onBookClick = { book ->
+                            selectedBookId = book.id
+                            selectedItem = 1
+
+                        },
                         todayReadingSeconds = todayReadingSeconds,
                         dailyGoalMinutes = dailyGoalMinutes,
                         currentStreak = currentStreak,
@@ -549,6 +554,7 @@ fun ReadingBunnyApp() {
                                 try {
                                     application.backupRepository
                                         .restoreBackup(uri)
+
 
                                     backupMessage =
                                         "Backup restored successfully."

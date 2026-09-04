@@ -37,12 +37,17 @@ import com.example.readingbunny.model.Book
 
 @Composable
 fun HomeScreen(
-    book: Book?,
+    books: List<Book>,
     onStartReading: (Book) -> Unit,
+    onBookClick: (Book) -> Unit,
     todayReadingSeconds: Long,
     dailyGoalMinutes: Int,
     currentStreak: Int,
 ) {
+    val currentBooks = books
+
+    val book = currentBooks.firstOrNull()
+
     val todayReadingMinutes =
         todayReadingSeconds / 60
 
@@ -282,8 +287,9 @@ fun HomeScreen(
 @Composable
 private fun HomeScreenPreview() {
     HomeScreen(
-        book = null,
+        books= emptyList(),
         onStartReading = {},
+        onBookClick = {},
         todayReadingSeconds = 0L,
         dailyGoalMinutes = 30,
         currentStreak = 0
