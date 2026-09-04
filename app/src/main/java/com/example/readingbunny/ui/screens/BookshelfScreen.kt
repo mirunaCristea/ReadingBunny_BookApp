@@ -47,6 +47,8 @@ import com.example.readingbunny.model.ShelfDecoration
 import com.example.readingbunny.ui.theme.BookSpineColors
 import com.example.readingbunny.ui.theme.ShelfWood
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.TextButton
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.graphicsLayer
@@ -54,6 +56,10 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.zIndex
+import com.example.readingbunny.model.BookshelfStyle
+import com.example.readingbunny.ui.theme.CozyBookshelfColors
+import com.example.readingbunny.ui.theme.ForestBookshelfColors
+import com.example.readingbunny.ui.theme.NightBookshelfColors
 
 
 @Composable
@@ -65,7 +71,16 @@ fun BookshelfScreen(
     onDeleteDecoration: (ShelfDecoration) -> Unit,
     bookPositions: List<ShelfBookPosition>,
     onMoveBook: (Int, Int, Int) -> Unit,
-    onMoveDecoration: (ShelfDecoration, Int, Int) -> Unit
+    onMoveDecoration: (ShelfDecoration, Int, Int) -> Unit,
+    onUpdateDecorationTransform: (
+            ShelfDecoration,
+            Float,
+            Float,
+            Float,
+            Float
+            ) -> Unit,
+    bookshelfStyle: BookshelfStyle,
+    onBookshelfStyleChange: (BookshelfStyle) -> Unit,
 ) {
     var isDecorating by rememberSaveable {
         mutableStateOf(false)
@@ -180,6 +195,44 @@ fun BookshelfScreen(
                 ?.shelfIndex
         }
 
+    val bookshelfBackgroundColor =
+        when (bookshelfStyle) {
+            BookshelfStyle.COZY ->
+                CozyBookshelfColors.background
+
+            BookshelfStyle.FOREST ->
+                ForestBookshelfColors.background
+
+            BookshelfStyle.NIGHT ->
+                NightBookshelfColors.background
+        }
+
+    val shelfBackgroundColor =
+        when (bookshelfStyle) {
+            BookshelfStyle.COZY ->
+                CozyBookshelfColors.shelfBackground
+
+            BookshelfStyle.FOREST ->
+                ForestBookshelfColors.shelfBackground
+
+            BookshelfStyle.NIGHT ->
+                NightBookshelfColors.shelfBackground
+        }
+
+    val shelfWoodColor =
+        when (bookshelfStyle) {
+            BookshelfStyle.COZY ->
+                CozyBookshelfColors.wood
+
+            BookshelfStyle.FOREST ->
+                ForestBookshelfColors.wood
+
+            BookshelfStyle.NIGHT ->
+                NightBookshelfColors.wood
+
+        }
+
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -248,6 +301,36 @@ fun BookshelfScreen(
             Spacer(
                 modifier = Modifier.height(16.dp)
             )
+
+            Text(
+                text = "Bookshelf style",
+                style =  MaterialTheme.typography.titleSmall
+            )
+
+            Spacer(
+                modifier = Modifier.height(8.dp)
+            )
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ){
+                BookshelfStyle.entries.forEach { style ->
+                    FilterChip(
+                        selected = bookshelfStyle == style,
+                        onClick = {
+                            onBookshelfStyleChange(style)
+                        },
+                        label = {
+                            Text(style.displayName)
+                        }
+                    )
+                }
+            }
+
+            Spacer(
+                modifier = Modifier.height(16.dp)
+            )
+
 
             LazyRow(
                 modifier = Modifier.fillMaxWidth(),
@@ -372,6 +455,70 @@ fun BookshelfScreen(
             )
 
             if (selectedPlacedDecoration != null) {
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Button(
+                        onClick = {
+                            val newScale =
+                                (selectedPlacedDecoration.scale - 0.1f)
+                                    .coerceAtLeast(0.6f)
+
+                            onUpdateDecorationTransform(
+                                selectedPlacedDecoration,
+                                newScale,
+                                selectedPlacedDecoration.rotation,
+                                selectedPlacedDecoration.offsetX,
+                                selectedPlacedDecoration.offsetY
+                            )
+                        }
+                    ) {
+                        Text("-")
+                    }
+
+                    Text(
+                        text = "${(selectedPlacedDecoration.scale * 100).toInt()}%"
+                    )
+
+                    Button(
+                        onClick = {
+                            val newScale =
+                                (selectedPlacedDecoration.scale + 0.1f)
+                                    .coerceAtMost(1.5f)
+
+                            onUpdateDecorationTransform(
+                                selectedPlacedDecoration,
+                                newScale,
+                                selectedPlacedDecoration.rotation,
+                                selectedPlacedDecoration.offsetX,
+                                selectedPlacedDecoration.offsetY
+                            )
+                        }
+                    ) {
+                        Text("+")
+                    }
+                }
+
+                Spacer(
+                    modifier = Modifier.height(8.dp)
+                )
+                TextButton(
+                    onClick = {
+                        onUpdateDecorationTransform(
+                            selectedPlacedDecoration,
+                            1f,
+                            selectedPlacedDecoration.rotation,
+                            selectedPlacedDecoration.offsetX,
+                            selectedPlacedDecoration.offsetY
+                        )
+                    }
+                ) {
+                    Text("Reset size")
+                }
+
+
                 Button(
                     onClick = {
                         onDeleteDecoration(
@@ -423,12 +570,8 @@ fun BookshelfScreen(
                         )
                         .fillMaxWidth()
                         .background(
-                            color =
-                                MaterialTheme
-                                    .colorScheme
-                                    .surfaceVariant,
-                            shape =
-                                RoundedCornerShape(20.dp)
+                            color = shelfBackgroundColor,
+                            shape = RoundedCornerShape(20.dp)
                         )
                         .padding(
                             start = 14.dp,
@@ -752,7 +895,7 @@ fun BookshelfScreen(
 
                                         DecorationItem(
                                             decoration =
-                                                decoration.type,
+                                                decoration,
 
                                             isDecorating =
                                                 isDecorating,
@@ -1001,7 +1144,7 @@ fun BookshelfScreen(
                                     )
                             )
                             .background(
-                                color = ShelfWood,
+                                color = shelfWoodColor,
                                 shape =
                                     RoundedCornerShape(
                                         3.dp
@@ -1027,15 +1170,22 @@ fun BookshelfScreen(
 
 @Composable
 fun DecorationItem(
-    decoration: DecorationType,
+    decoration: ShelfDecoration,
     isDecorating: Boolean,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ){
+
     Box(
         modifier = modifier
             .fillMaxWidth()
             .height(85.dp)
+            .graphicsLayer {
+                scaleX = decoration.scale
+                scaleY = decoration.scale
+
+
+            }
             .clickable(
                 enabled = isDecorating,
                 onClick = onClick
@@ -1043,7 +1193,7 @@ fun DecorationItem(
         contentAlignment = Alignment.BottomCenter
     ) {
         val artworkModifier =
-            when (decoration) {
+            when (decoration.type) {
                 DecorationType.PLANT ->
                     Modifier
                         .width(52.dp)
@@ -1077,7 +1227,7 @@ fun DecorationItem(
 
         DecorationArtwork(
             modifier = artworkModifier,
-            decoration = decoration
+            decoration = decoration.type
 
         )
     }

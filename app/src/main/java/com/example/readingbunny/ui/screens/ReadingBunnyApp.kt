@@ -46,6 +46,7 @@ import com.example.readingbunny.util.calculateCurrentStreak
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
+import com.example.readingbunny.model.BookshelfStyle
 
 @Composable
 fun ReadingBunnyApp() {
@@ -69,7 +70,8 @@ fun ReadingBunnyApp() {
     val bookshelfViewModel: BookshelfViewModel = viewModel(
         factory = BookshelfViewModelFactory(
             application.decorationRepository,
-            application.bookPositionRepository
+            application.bookPositionRepository,
+            application.userPreferencesRepository,
         )
     )
 
@@ -83,6 +85,10 @@ fun ReadingBunnyApp() {
 
     val bookPositions by bookshelfViewModel.bookPositions.collectAsState(
         initial = emptyList()
+    )
+
+    val bookshelfStyle by bookshelfViewModel.bookshelfStyle.collectAsState(
+        initial = BookshelfStyle.COZY
     )
 
     val readingJournalViewModel: ReadingJournalViewModel = viewModel(
@@ -424,6 +430,10 @@ fun ReadingBunnyApp() {
                         decorations = decorations,
                         bookPositions = bookPositions,
 
+                        onBookshelfStyleChange = {style ->
+                            bookshelfViewModel.setBookshelfStyle(style)
+                        },
+
                         onBookClick = { book ->
                             selectedBookId = book.id
                             selectedItem = 1
@@ -455,7 +465,28 @@ fun ReadingBunnyApp() {
                                 shelfIndex,
                                 slotIndex
                             )
-                        }
+                        },
+
+                        onUpdateDecorationTransform = {
+                        decoration,
+                        scale,
+                        rotation,
+                        offsetX,
+                        offsetY ->
+
+                        bookshelfViewModel.updateDecorationTransform(
+                            decoration = decoration,
+                            scale = scale,
+                            rotation = rotation,
+                            offsetX = offsetX,
+                            offsetY = offsetY
+                        )
+
+                    },
+
+                        bookshelfStyle = bookshelfStyle,
+
+
                     )
 
                     3 -> StatsScreen(
