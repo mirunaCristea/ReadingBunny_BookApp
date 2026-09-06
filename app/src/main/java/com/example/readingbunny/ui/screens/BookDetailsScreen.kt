@@ -211,9 +211,38 @@ fun BookDetailsScreen(
                 },
 
                 onStatusChange = { newStatus ->
-                    onUpdateBook(
-                        book.copy(status = newStatus)
-                    )
+
+                    val updatedBook =
+                        when {
+
+                            newStatus == ReadingStatus.FINISHED &&
+                                    book.status != ReadingStatus.FINISHED -> {
+
+                                book.copy(
+                                    status = newStatus,
+                                    finishedAt =
+                                        book.finishedAt
+                                            ?: System.currentTimeMillis()
+                                )
+                            }
+
+                            newStatus != ReadingStatus.FINISHED &&
+                                    book.status == ReadingStatus.FINISHED -> {
+
+                                book.copy(
+                                    status = newStatus,
+                                    finishedAt = null
+                                )
+                            }
+
+                            else -> {
+                                book.copy(
+                                    status = newStatus
+                                )
+                            }
+                        }
+
+                    onUpdateBook(updatedBook)
                 },
 
                 onOwnershipChange = { newOwnership ->

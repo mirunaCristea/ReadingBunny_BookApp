@@ -266,10 +266,55 @@ fun StatsScreen(
      * Therefore, finished books is an all-time statistic.
      */
     val finishedBooksCount =
-        books.count {
-            it.status == ReadingStatus.FINISHED
-        }
+        books.count { book ->
 
+            if (
+                book.status != ReadingStatus.FINISHED
+            ) {
+                return@count false
+            }
+
+            when (selectedPeriod) {
+
+                StatsPeriod.WEEK -> {
+
+                    val finishedDate =
+                        book.finishedAt?.let { timestamp ->
+                            Instant
+                                .ofEpochMilli(timestamp)
+                                .atZone(
+                                    ZoneId.systemDefault()
+                                )
+                                .toLocalDate()
+                        }
+                            ?: return@count false
+
+                    !finishedDate.isBefore(startOfWeek) &&
+                            !finishedDate.isAfter(endOfWeek)
+                }
+
+                StatsPeriod.MONTH -> {
+
+                    val finishedDate =
+                        book.finishedAt?.let { timestamp ->
+                            Instant
+                                .ofEpochMilli(timestamp)
+                                .atZone(
+                                    ZoneId.systemDefault()
+                                )
+                                .toLocalDate()
+                        }
+                            ?: return@count false
+
+                    YearMonth.from(finishedDate) ==
+                            displayedYearMonth
+                }
+
+                StatsPeriod.ALL_TIME -> {
+                    true
+                }
+            }
+        }
     /*
      * RECENT ACTIVITY
      */
@@ -624,7 +669,16 @@ fun StatsScreen(
                         finishedBooksCount
                             .toString(),
                     label =
-                        "Finished books"
+                        when (selectedPeriod) {
+                            StatsPeriod.WEEK ->
+                                "Finished this week"
+
+                            StatsPeriod.MONTH ->
+                                "Finished this month"
+
+                            StatsPeriod.ALL_TIME ->
+                                "Finished books"
+                        }
                 )
             }
 

@@ -29,7 +29,8 @@ data class Book(
     val isbn: String? = null,
     val coverUrl: String? = null,
     val largeCoverUrl: String? = null,
-    val description: String? = null
+    val description: String? = null,
+    val finishedAt: Long? = null,
 ){
     private fun ReadingStatus.displayName(): String {
         return when (this) {
