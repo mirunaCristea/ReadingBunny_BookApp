@@ -28,6 +28,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.readingbunny.model.Book
 import androidx.compose.material3.AlertDialog
+import com.example.readingbunny.model.JournalEntryType
+import androidx.compose.material3.OutlinedButton
 
 @Composable
 fun ReadingSessionScreen(
@@ -37,7 +39,12 @@ fun ReadingSessionScreen(
     onPause: () -> Unit,
     onResume: () -> Unit,
     onFinish: (Int) -> Unit,
-    onCancel: () -> Unit
+    onCancel: () -> Unit,
+    onAddJournalEntry: (
+        JournalEntryType,
+            String,
+            Int?
+    ) -> Unit,
 ) {
     var isFinishing by rememberSaveable {
         mutableStateOf(false)
@@ -45,6 +52,10 @@ fun ReadingSessionScreen(
 
     var showDiscardDialog by rememberSaveable {
         mutableStateOf(false)
+    }
+
+    var quickJournalType by rememberSaveable {
+        mutableStateOf<JournalEntryType?>(null)
     }
 
     var endPageText by rememberSaveable {
@@ -95,6 +106,27 @@ fun ReadingSessionScreen(
                 ) {
                     Text("Keep reading")
                 }
+            }
+        )
+    }
+
+    quickJournalType?.let { journalType ->
+        QuickJournalEntryDialog(
+            type = journalType,
+            totalPages = book.totalPages,
+
+            onDismiss = {
+                quickJournalType = null
+            },
+
+            onSave = { content, page ->
+                onAddJournalEntry(
+                    journalType,
+                    content,
+                    page
+                )
+
+                quickJournalType = null
             }
         )
     }
@@ -193,12 +225,40 @@ fun ReadingSessionScreen(
                 )
             }
         }
-
         Spacer(
-            modifier = Modifier.height(32.dp)
+            modifier = Modifier.height(24.dp)
         )
 
         if (!isFinishing) {
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+
+                OutlinedButton(
+                    onClick = {
+                        quickJournalType = JournalEntryType.NOTE
+                    },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("Note")
+                }
+
+                OutlinedButton(
+                    onClick = {
+                        quickJournalType = JournalEntryType.QUOTE
+                    },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("Quote")
+                }
+            }
+
+            Spacer(
+                modifier = Modifier.height(24.dp)
+            )
+
             Button(
                 onClick = {
                     if (isRunning) {
@@ -329,6 +389,163 @@ fun ReadingSessionScreen(
     }
 }
 
+
+
+@Composable
+private fun QuickJournalEntryDialog(
+    type: JournalEntryType,
+    totalPages: Int,
+    onDismiss: () -> Unit,
+    onSave: (
+        content: String,
+        page: Int?
+    ) -> Unit
+) {
+
+    var content by rememberSaveable(type) {
+        mutableStateOf("")
+    }
+
+    var pageText by rememberSaveable(type) {
+        mutableStateOf("")
+    }
+
+
+    val page =
+        pageText.toIntOrNull()
+
+
+    val hasPageError =
+        pageText.isNotBlank() &&
+                (
+                        page == null ||
+                                page <= 0 ||
+                                page > totalPages
+                        )
+
+
+    val title =
+        when (type) {
+            JournalEntryType.NOTE ->
+                "Add note"
+
+            JournalEntryType.QUOTE ->
+                "Add quote"
+        }
+
+
+    val contentLabel =
+        when (type) {
+            JournalEntryType.NOTE ->
+                "Your note"
+
+            JournalEntryType.QUOTE ->
+                "Quote"
+        }
+
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+
+        title = {
+            Text(title)
+        },
+
+        text = {
+
+            Column {
+
+                OutlinedTextField(
+                    value = content,
+
+                    onValueChange = { newValue ->
+                        content = newValue
+                    },
+
+                    label = {
+                        Text(contentLabel)
+                    },
+
+                    minLines = 3,
+
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+
+                Spacer(
+                    modifier = Modifier.height(16.dp)
+                )
+
+
+                OutlinedTextField(
+                    value = pageText,
+
+                    onValueChange = { newValue ->
+
+                        if (
+                            newValue.all { character ->
+                                character.isDigit()
+                            }
+                        ) {
+                            pageText = newValue
+                        }
+                    },
+
+                    label = {
+                        Text("Page (optional)")
+                    },
+
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number
+                    ),
+
+                    isError = hasPageError,
+
+                    supportingText = {
+
+                        if (hasPageError) {
+
+                            Text(
+                                text =
+                                    "Page must be between 1 and $totalPages"
+                            )
+                        }
+                    },
+
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        },
+
+        confirmButton = {
+
+            TextButton(
+                onClick = {
+
+                    onSave(
+                        content.trim(),
+                        page
+                    )
+                },
+
+                enabled =
+                    content.isNotBlank() &&
+                            !hasPageError
+            ) {
+                Text("Save")
+            }
+        },
+
+        dismissButton = {
+
+            TextButton(
+                onClick = onDismiss
+            ) {
+                Text("Cancel")
+            }
+        }
+    )
+}
 private fun formatReadingTime(
     totalSeconds: Long
 ): String {
