@@ -14,9 +14,9 @@ val MutedBrown = Color(0xFF74645E)
 val CardCream = Color(0xFFFFF3E7)
 val ProgressTrack = Color(0xFFE8D8CC)
 
-val BookshelfCozyBackground = Color(0xFFF6EFE7)
+val BookshelfCozyBackground =  Color(0xFFF3E6D2)
 val BookshelfCozyShelfBackground = Color(0xFFE8D9C8)
-val BookshelfCozyWood = Color(0xFF8A5F3D)
+val BookshelfCozyWood = Color(0xFFA8754F)
 
 val BookshelfForestBackground = Color(0xFFE5ECDD)
 val BookshelfForestShelfBackground = Color(0xFFD7E0D0)
