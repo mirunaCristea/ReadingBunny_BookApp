@@ -215,6 +215,15 @@ fun ReadingBunnyApp() {
             elapsedSeconds = elapsedSeconds,
             isRunning = isSessionRunning,
 
+            onAddJournalEntry = { type, content, page ->
+                readingJournalViewModel.addEntry(
+                    bookId = sessionBook.id,
+                    type =type,
+                    content = content,
+                    page = page
+                )
+            },
+
             onPause = {
                 readingSessionViewModel.pauseSession()
             },
@@ -248,7 +257,10 @@ fun ReadingBunnyApp() {
             onCancel = {
                 readingSessionViewModel.cancelSession()
                 activeSessionBookId = null
-            }
+            },
+
+
+
         )
     } else {
         val currentlyReadingBooks =
