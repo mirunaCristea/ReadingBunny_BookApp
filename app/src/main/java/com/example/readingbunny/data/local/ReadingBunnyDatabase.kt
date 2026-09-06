@@ -21,7 +21,7 @@ import com.example.readingbunny.model.ReadingJournalEntry
         ReadingSession::class,
         ReadingJournalEntry::class
     ],
-    version = 9,
+    version = 10,
     exportSchema = false
 )
 abstract class ReadingBunnyDatabase : RoomDatabase() {
@@ -114,6 +114,18 @@ abstract class ReadingBunnyDatabase : RoomDatabase() {
                 }
             }
 
+        private val MIGRATION_9_10 =
+            object : Migration(9, 10) {
+
+                override suspend fun  migrate(
+                    connection: SQLiteConnection
+                ){
+                    connection.execSQL(
+                        "ALTER TABLE `books` ADD COLUMN `finishedAt` INTEGER"
+                    )
+                }
+            }
+
         @Volatile
         private var INSTANCE: ReadingBunnyDatabase? = null
 
@@ -129,7 +141,8 @@ abstract class ReadingBunnyDatabase : RoomDatabase() {
                         MIGRATION_5_6,
                         MIGRATION_6_7,
                         MIGRATION_7_8,
-                        MIGRATION_8_9
+                        MIGRATION_8_9,
+                        MIGRATION_9_10,
                     )
                     .build()
 
