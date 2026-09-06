@@ -10,13 +10,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
+import com.example.readingbunny.ui.theme.BookshelfColors
 
 @Composable
 fun ShelfLevel(
-    woodColor: Color,
-    backgroundColor: Color,
+    colors: BookshelfColors,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
@@ -27,12 +25,13 @@ fun ShelfLevel(
             .background(
                 brush = Brush.verticalGradient(
                     colorStops = arrayOf(
-                        0.00f to Color(0xFFE5D0B7),
-                        0.12f to backgroundColor,
-                        1.00f to backgroundColor
+                        0.00f to colors.innerShelfShadow,
+                        0.08f to colors.innerShelfShadow,
+                        0.22f to colors.shelfBackground,
+                        1.00f to colors.shelfBackground
                     )
                 )
-                )
+            )
     ) {
 
         Row(
@@ -40,7 +39,7 @@ fun ShelfLevel(
         ) {
 
             BookshelfSide(
-                color = woodColor
+                colors = colors
             )
 
             Box(
@@ -52,12 +51,12 @@ fun ShelfLevel(
             }
 
             BookshelfSide(
-                color = woodColor
+                colors = colors
             )
         }
 
         ShelfPlank(
-            color = woodColor,
+            colors = colors,
             modifier = Modifier.align(
                 Alignment.BottomCenter
             )

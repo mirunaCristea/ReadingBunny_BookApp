@@ -7,18 +7,19 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
+import com.example.readingbunny.ui.theme.BookshelfColors
 
 @Composable
 fun ShelfPlank(
-    color: Color,
+    colors: BookshelfColors,
     modifier: Modifier = Modifier
 ) {
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(16.dp)
+            .height(BookshelfTokens.ShelfHeight)
     ) {
 
         // top surface
@@ -28,7 +29,7 @@ fun ShelfPlank(
                 .height(2.dp)
                 .align(Alignment.TopCenter)
                 .background(
-                    Color(0xFFC58E65)
+                    colors.woodHighlight
                 )
         )
 
@@ -36,9 +37,17 @@ fun ShelfPlank(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(12.dp)
+                .height(10.dp)
                 .align(Alignment.Center)
-                .background(color)
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            colors.woodHighlight,
+                            colors.wood,
+                            colors.woodShadow
+                        )
+                    )
+                )
         )
 
         // darker lower edge
@@ -48,7 +57,7 @@ fun ShelfPlank(
                 .height(2.dp)
                 .align(Alignment.BottomCenter)
                 .background(
-                    Color(0xFF8E6042)
+                    colors.woodShadow
                 )
         )
     }

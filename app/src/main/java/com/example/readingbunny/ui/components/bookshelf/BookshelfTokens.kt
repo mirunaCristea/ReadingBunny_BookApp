@@ -6,7 +6,7 @@ object BookshelfTokens {
 
     val SideWidth = 12.dp
 
-    val ShelfHeight = 16.dp
+    val ShelfHeight = 14.dp
 
     val LevelHeight = 165.dp
 

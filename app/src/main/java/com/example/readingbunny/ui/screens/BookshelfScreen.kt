@@ -26,6 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,6 +56,7 @@ import com.example.readingbunny.model.DecorationType
 import com.example.readingbunny.model.ReadingStatus
 import com.example.readingbunny.model.ShelfBookPosition
 import com.example.readingbunny.model.ShelfDecoration
+import com.example.readingbunny.ui.components.bookshelf.BookshelfBottom
 import com.example.readingbunny.ui.components.bookshelf.BookshelfTokens
 import com.example.readingbunny.ui.components.bookshelf.BookshelfTop
 import com.example.readingbunny.ui.components.bookshelf.ShelfLevel
@@ -122,38 +124,29 @@ fun BookshelfScreen(
         mutableMapOf<Pair<Int, Int>, Rect>()
     }
 
-    /*
-     * Highest shelf that is already explicitly used.
-     */
-    val highestUsedShelf = maxOf(
-        decorations.maxOfOrNull {
-            it.shelfIndex
-        } ?: -1,
-        bookPositions.maxOfOrNull {
-            it.shelfIndex
-        } ?: -1
-    )
+    val highestUsedShelf =
+        maxOf(
+            decorations.maxOfOrNull {
+                it.shelfIndex
+            } ?: -1,
 
-    /*
-     * Minimum 4 shelves so the bookshelf visually fills
-     * most phone screens.
-     *
-     * Books + decorations are counted because both occupy
-     * shelf slots.
-     */
-    val shelfCount = maxOf(
-        4,
-        (books.size + decorations.size + 5) / 6,
-        highestUsedShelf + 1
-    )
+            bookPositions.maxOfOrNull {
+                it.shelfIndex
+            } ?: -1
+        )
 
-    /*
-     * Slots already occupied by persisted objects.
-     */
+    val shelfCount =
+        maxOf(
+            4,
+            (books.size + decorations.size + 5) / 6,
+            highestUsedShelf + 1
+        )
+
     val usedSlots =
         mutableSetOf<Pair<Int, Int>>()
 
     decorations.forEach { decoration ->
+
         usedSlots.add(
             decoration.shelfIndex to
                     decoration.slotIndex
@@ -161,23 +154,21 @@ fun BookshelfScreen(
     }
 
     bookPositions.forEach { position ->
+
         usedSlots.add(
             position.shelfIndex to
                     position.slotIndex
         )
     }
 
-    /*
-     * Actual position used to render each book.
-     *
-     * Books which do not have a persisted position yet
-     * receive the first available slot.
-     */
     val effectiveBookPositions =
         mutableMapOf<Int, Pair<Int, Int>>()
 
     bookPositions.forEach { position ->
-        effectiveBookPositions[position.bookId] =
+
+        effectiveBookPositions[
+            position.bookId
+        ] =
             position.shelfIndex to
                     position.slotIndex
     }
@@ -207,8 +198,10 @@ fun BookshelfScreen(
                     if (
                         position !in usedSlots
                     ) {
+
                         foundPosition =
                             position
+
                         break
                     }
                 }
@@ -223,6 +216,7 @@ fun BookshelfScreen(
             if (
                 foundPosition != null
             ) {
+
                 effectiveBookPositions[
                     book.id
                 ] = foundPosition
@@ -235,6 +229,7 @@ fun BookshelfScreen(
 
     val draggingBookShelfIndex =
         draggingBookId?.let { bookId ->
+
             effectiveBookPositions[
                 bookId
             ]?.first
@@ -252,36 +247,17 @@ fun BookshelfScreen(
                 ?.shelfIndex
         }
 
-    /*
-     * Current bookshelf colors.
-     */
-    val shelfBackgroundColor =
+    val bookshelfColors =
         when (bookshelfStyle) {
 
             BookshelfStyle.COZY ->
                 CozyBookshelfColors
-                    .shelfBackground
 
             BookshelfStyle.FOREST ->
                 ForestBookshelfColors
-                    .shelfBackground
 
             BookshelfStyle.NIGHT ->
                 NightBookshelfColors
-                    .shelfBackground
-        }
-
-    val shelfWoodColor =
-        when (bookshelfStyle) {
-
-            BookshelfStyle.COZY ->
-                CozyBookshelfColors.wood
-
-            BookshelfStyle.FOREST ->
-                ForestBookshelfColors.wood
-
-            BookshelfStyle.NIGHT ->
-                NightBookshelfColors.wood
         }
 
     Column(
@@ -296,10 +272,8 @@ fun BookshelfScreen(
 
         /*
          * HEADER
-         *
-         * Header has its own padding.
-         * The bookshelf underneath remains edge-to-edge.
          */
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -356,6 +330,7 @@ fun BookshelfScreen(
         /*
          * EMPTY STATE
          */
+
         if (
             books.isEmpty() &&
             !isDecorating
@@ -364,10 +339,11 @@ fun BookshelfScreen(
             Text(
                 text =
                     "Your bookshelf is waiting for its first book.",
-                modifier = Modifier.padding(
-                    horizontal = 20.dp,
-                    vertical = 4.dp
-                ),
+                modifier =
+                    Modifier.padding(
+                        horizontal = 20.dp,
+                        vertical = 4.dp
+                    ),
                 style =
                     MaterialTheme
                         .typography
@@ -380,8 +356,9 @@ fun BookshelfScreen(
         }
 
         /*
-         * DECORATION MODE CONTROLS
+         * DECORATION MODE
          */
+
         if (isDecorating) {
 
             Column(
@@ -398,8 +375,7 @@ fun BookshelfScreen(
                 )
 
                 Text(
-                    text =
-                        "Bookshelf style",
+                    text = "Bookshelf style",
                     style =
                         MaterialTheme
                             .typography
@@ -428,11 +404,13 @@ fun BookshelfScreen(
                                 selected =
                                     bookshelfStyle ==
                                             style,
+
                                 onClick = {
                                     onBookshelfStyleChange(
                                         style
                                     )
                                 },
+
                                 label = {
                                     Text(
                                         style.displayName
@@ -447,9 +425,14 @@ fun BookshelfScreen(
                         Modifier.height(12.dp)
                 )
 
+                /*
+                 * DECORATION PICKER
+                 */
+
                 LazyRow(
                     modifier =
                         Modifier.fillMaxWidth(),
+
                     horizontalArrangement =
                         Arrangement.spacedBy(
                             8.dp
@@ -474,8 +457,10 @@ fun BookshelfScreen(
                                             if (
                                                 isSelected
                                             ) {
-                                                shelfWoodColor
+                                                bookshelfColors
+                                                    .wood
                                             } else {
+
                                                 MaterialTheme
                                                     .colorScheme
                                                     .surfaceVariant
@@ -512,6 +497,7 @@ fun BookshelfScreen(
                                 horizontalAlignment =
                                     Alignment
                                         .CenterHorizontally,
+
                                 modifier =
                                     Modifier
                                         .fillMaxWidth()
@@ -520,6 +506,7 @@ fun BookshelfScreen(
                                 DecorationArtwork(
                                     decoration =
                                         decoration,
+
                                     modifier =
                                         Modifier
                                             .width(
@@ -532,20 +519,21 @@ fun BookshelfScreen(
 
                                 Spacer(
                                     modifier =
-                                        Modifier
-                                            .height(
-                                                4.dp
-                                            )
+                                        Modifier.height(
+                                            4.dp
+                                        )
                                 )
 
                                 Text(
                                     text =
                                         decoration
                                             .displayName,
+
                                     style =
                                         MaterialTheme
                                             .typography
                                             .bodySmall,
+
                                     color =
                                         if (
                                             isSelected
@@ -558,6 +546,7 @@ fun BookshelfScreen(
                                                 .colorScheme
                                                 .onSurface
                                         },
+
                                     maxLines = 1
                                 )
                             }
@@ -598,15 +587,21 @@ fun BookshelfScreen(
 
                                 "Choose a decoration or drag an item to move it"
                         },
+
                     style =
                         MaterialTheme
                             .typography
                             .bodySmall,
+
                     color =
                         MaterialTheme
                             .colorScheme
                             .onSurfaceVariant
                 )
+
+                /*
+                 * SELECTED DECORATION CONTROLS
+                 */
 
                 if (
                     selectedPlacedDecoration !=
@@ -624,6 +619,7 @@ fun BookshelfScreen(
                         verticalAlignment =
                             Alignment
                                 .CenterVertically,
+
                         horizontalArrangement =
                             Arrangement
                                 .spacedBy(
@@ -656,6 +652,7 @@ fun BookshelfScreen(
                                 )
                             }
                         ) {
+
                             Text("-")
                         }
 
@@ -695,6 +692,7 @@ fun BookshelfScreen(
                                 )
                             }
                         ) {
+
                             Text("+")
                         }
                     }
@@ -714,6 +712,7 @@ fun BookshelfScreen(
                             )
                         }
                     ) {
+
                         Text(
                             "Reset size"
                         )
@@ -730,6 +729,7 @@ fun BookshelfScreen(
                                 null
                         }
                     ) {
+
                         Text(
                             "Delete decoration"
                         )
@@ -752,32 +752,33 @@ fun BookshelfScreen(
 
         /*
          * BOOKSHELF
-         *
-         * No horizontal padding.
-         * The bookshelf itself fills the screen.
          */
+
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
-                    shelfBackgroundColor
+                    bookshelfColors
+                        .shelfBackground
                 )
         ) {
 
             /*
-             * Top wooden border.
+             * TOP OF BOOKSHELF
              */
+
             item {
 
                 BookshelfTop(
-                    color =
-                        shelfWoodColor
+                    colors =
+                        bookshelfColors
                 )
             }
 
             /*
-             * Repeated shelf levels.
+             * SHELF LEVELS
              */
+
             items(
                 count = shelfCount
             ) { shelfIndex ->
@@ -792,10 +793,9 @@ fun BookshelfScreen(
                     }
 
                 ShelfLevel(
-                    woodColor =
-                        shelfWoodColor,
-                    backgroundColor =
-                        shelfBackgroundColor,
+                    colors =
+                        bookshelfColors,
+
                     modifier =
                         Modifier.zIndex(
                             if (
@@ -811,10 +811,6 @@ fun BookshelfScreen(
                         )
                 ) {
 
-                    /*
-                     * The content area ends before
-                     * the wooden plank.
-                     */
                     Row(
                         modifier =
                             Modifier
@@ -829,42 +825,42 @@ fun BookshelfScreen(
                                     start =
                                         BookshelfTokens
                                             .ContentHorizontalPadding,
+
                                     end =
                                         BookshelfTokens
                                             .ContentHorizontalPadding,
+
                                     top =
                                         BookshelfTokens
                                             .ContentTopPadding
                                 ),
+
                         verticalAlignment =
                             Alignment.Bottom,
+
                         horizontalArrangement =
-                            Arrangement
-                                .spacedBy(
-                                    5.dp
-                                )
+                            Arrangement.spacedBy(
+                                5.dp
+                            )
                     ) {
 
-                        /*
-                         * Six equal slots per shelf.
-                         */
                         repeat(6) { slotIndex ->
 
                             val slotPosition =
                                 shelfIndex to
                                         slotIndex
 
-                            androidx.compose.runtime
-                                .DisposableEffect(
-                                    slotPosition
-                                ) {
+                            DisposableEffect(
+                                slotPosition
+                            ) {
 
-                                    onDispose {
-                                        slotBounds.remove(
-                                            slotPosition
-                                        )
-                                    }
+                                onDispose {
+
+                                    slotBounds.remove(
+                                        slotPosition
+                                    )
                                 }
+                            }
 
                             val book =
                                 books.firstOrNull {
@@ -900,12 +896,6 @@ fun BookshelfScreen(
                                 isDraggingSomething &&
                                         isEmpty
 
-                            /*
-                             * IMPORTANT:
-                             *
-                             * weight(1f) gives all six slots
-                             * equal width.
-                             */
                             Box(
                                 modifier =
                                     Modifier
@@ -916,6 +906,7 @@ fun BookshelfScreen(
                                                 if (
                                                     isAvailableDropTarget
                                                 ) {
+
                                                     MaterialTheme
                                                         .colorScheme
                                                         .primary
@@ -924,6 +915,7 @@ fun BookshelfScreen(
                                                                 0.08f
                                                         )
                                                 } else {
+
                                                     MaterialTheme
                                                         .colorScheme
                                                         .surfaceVariant
@@ -932,6 +924,7 @@ fun BookshelfScreen(
                                                                 0f
                                                         )
                                                 },
+
                                             shape =
                                                 RoundedCornerShape(
                                                     8.dp
@@ -965,6 +958,7 @@ fun BookshelfScreen(
                                                     )
                                                 }
                                         },
+
                                 contentAlignment =
                                     Alignment
                                         .BottomCenter
@@ -975,6 +969,7 @@ fun BookshelfScreen(
                                     /*
                                      * BOOK
                                      */
+
                                     book != null -> {
 
                                         val isDragging =
@@ -984,6 +979,7 @@ fun BookshelfScreen(
                                         BookSpine(
                                             book =
                                                 book,
+
                                             modifier =
                                                 Modifier
                                                     .zIndex(
@@ -1175,11 +1171,13 @@ fun BookshelfScreen(
                                                             )
                                                         }
                                                     },
+
                                             onClick = {
 
                                                 if (
                                                     !isDecorating
                                                 ) {
+
                                                     onBookClick(
                                                         book
                                                     )
@@ -1191,7 +1189,9 @@ fun BookshelfScreen(
                                     /*
                                      * DECORATION
                                      */
-                                    decoration != null -> {
+
+                                    decoration !=
+                                            null -> {
 
                                         val isDraggingDecoration =
                                             draggingDecorationId ==
@@ -1200,8 +1200,10 @@ fun BookshelfScreen(
                                         DecorationItem(
                                             decoration =
                                                 decoration,
+
                                             isDecorating =
                                                 isDecorating,
+
                                             modifier =
                                                 Modifier
                                                     .zIndex(
@@ -1393,6 +1395,7 @@ fun BookshelfScreen(
                                                             )
                                                         }
                                                     },
+
                                             onClick = {
 
                                                 if (
@@ -1417,8 +1420,9 @@ fun BookshelfScreen(
                                     }
 
                                     /*
-                                     * EMPTY DROP TARGET
+                                     * AVAILABLE DROP TARGET
                                      */
+
                                     isAvailableDropTarget -> {
 
                                         Text(
@@ -1437,9 +1441,9 @@ fun BookshelfScreen(
                                     }
 
                                     /*
-                                     * EMPTY SLOT WHILE
-                                     * PLACING DECORATION
+                                     * EMPTY DECORATION SLOT
                                      */
+
                                     isDecorating &&
                                             selectedDecoration !=
                                             null -> {
@@ -1460,6 +1464,12 @@ fun BookshelfScreen(
                     }
                 }
             }
+//            item {
+//                BookshelfBottom(
+//                    colors = bookshelfColors
+//                )
+//            }
+
         }
     }
 }
@@ -1478,6 +1488,7 @@ fun DecorationItem(
             .fillMaxWidth()
             .height(85.dp)
             .graphicsLayer {
+
                 scaleX =
                     decoration.scale
 
@@ -1490,39 +1501,48 @@ fun DecorationItem(
                 onClick =
                     onClick
             ),
+
         contentAlignment =
             Alignment.BottomCenter
     ) {
 
         val artworkModifier =
-            when (decoration.type) {
+            when (
+                decoration.type
+            ) {
 
                 DecorationType.PLANT ->
+
                     Modifier
                         .width(52.dp)
                         .height(80.dp)
 
                 DecorationType.CANDLE ->
+
                     Modifier
                         .width(34.dp)
                         .height(72.dp)
 
                 DecorationType.LAMP ->
+
                     Modifier
                         .width(50.dp)
                         .height(72.dp)
 
                 DecorationType.PUMPKIN ->
+
                     Modifier
                         .width(50.dp)
                         .height(50.dp)
 
                 DecorationType.FRAME ->
+
                     Modifier
                         .width(46.dp)
                         .height(55.dp)
 
                 DecorationType.TEA_CUP ->
+
                     Modifier
                         .width(56.dp)
                         .height(52.dp)
@@ -1606,6 +1626,7 @@ fun BookSpine(
             .background(
                 color =
                     spineColor,
+
                 shape =
                     RoundedCornerShape(
                         topStart =
@@ -1618,6 +1639,7 @@ fun BookSpine(
                 onClick =
                     onClick
             ),
+
         contentAlignment =
             Alignment.Center
     ) {
@@ -1625,6 +1647,7 @@ fun BookSpine(
         Text(
             text =
                 book.title,
+
             modifier =
                 Modifier
                     .width(
@@ -1634,15 +1657,20 @@ fun BookSpine(
                     .rotate(
                         -90f
                     ),
+
             maxLines = 1,
             softWrap = false,
+
             overflow =
                 TextOverflow
                     .Ellipsis,
+
             textAlign =
                 TextAlign.Center,
+
             fontSize =
                 14.sp,
+
             color =
                 MaterialTheme
                     .colorScheme
@@ -1736,11 +1764,14 @@ private fun DecorationArtwork(
                     id =
                         drawableRes
                 ),
+
             contentDescription =
                 decoration
                     .displayName,
+
             modifier =
                 modifier,
+
             contentScale =
                 ContentScale.Fit
         )
@@ -1750,6 +1781,7 @@ private fun DecorationArtwork(
         Text(
             text =
                 decoration.emoji,
+
             fontSize =
                 30.sp
         )

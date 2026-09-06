@@ -3,27 +3,27 @@ package com.example.readingbunny.ui.components.bookshelf
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import com.example.readingbunny.ui.theme.BookshelfColors
 
 @Composable
 fun BookshelfFrame(
     shelfCount: Int,
-    woodColor: Color,
-    backgroundColor: Color,
+    colors: BookshelfColors,
     modifier: Modifier = Modifier,
     shelfContent: @Composable (Int) -> Unit
 ) {
     Column(
         modifier = modifier
     ) {
+
         BookshelfTop(
-            color = woodColor
+            colors = colors
         )
 
         repeat(shelfCount) { shelfIndex ->
+
             ShelfLevel(
-                woodColor = woodColor,
-                backgroundColor = backgroundColor
+                colors = colors
             ) {
                 shelfContent(shelfIndex)
             }

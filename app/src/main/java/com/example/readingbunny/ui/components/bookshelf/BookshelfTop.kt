@@ -8,11 +8,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import com.example.readingbunny.ui.theme.BookshelfColors
 
 @Composable
 fun BookshelfTop(
-    color: Color,
+    colors: BookshelfColors,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -22,9 +22,9 @@ fun BookshelfTop(
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFFC58E65),
-                        color,
-                        Color(0xFF956343)
+                        colors.woodHighlight,
+                        colors.wood,
+                        colors.woodShadow
                     )
                 ),
                 shape = RoundedCornerShape(

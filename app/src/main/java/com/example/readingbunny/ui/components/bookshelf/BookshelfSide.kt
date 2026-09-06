@@ -7,11 +7,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import com.example.readingbunny.ui.theme.BookshelfColors
 
 @Composable
 fun BookshelfSide(
-    color: Color,
+    colors: BookshelfColors,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -21,9 +21,9 @@ fun BookshelfSide(
             .background(
                 brush = Brush.horizontalGradient(
                     colors = listOf(
-                        Color(0xFF9B6948),
-                        color,
-                        Color(0xFFB07A54)
+                        colors.woodOuter,
+                        colors.wood,
+                        colors.woodInner
                     )
                 )
             )
