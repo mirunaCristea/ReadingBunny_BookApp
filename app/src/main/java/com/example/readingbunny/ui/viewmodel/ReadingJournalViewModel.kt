@@ -50,6 +50,24 @@ class ReadingJournalViewModel(
         }
     }
 
+    fun updateEntry(
+        entry: ReadingJournalEntry
+    ) {
+        val cleanContent = entry.content.trim()
+
+        if (cleanContent.isBlank()) {
+            return
+        }
+
+        viewModelScope.launch {
+            repository.updateEntry(
+                entry.copy(
+                    content = cleanContent
+                )
+            )
+        }
+    }
+
     fun deleteEntry(
         entry: ReadingJournalEntry
     ) {

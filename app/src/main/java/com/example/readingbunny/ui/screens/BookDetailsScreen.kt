@@ -42,6 +42,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -82,6 +83,10 @@ import com.example.readingbunny.model.ReadingStatus
 import com.example.readingbunny.ui.theme.DarkBrown
 import com.example.readingbunny.ui.theme.Terracotta
 
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import androidx.core.graphics.drawable.toDrawable
 
 private val PageBackground = Color(0xFFFFF9F3)
 private val CreamCard = Color(0xFFFFF1E6)
@@ -104,6 +109,7 @@ fun BookDetailsScreen(
         String,
         Int?
     ) -> Unit,
+    onUpdateJournalEntry: (ReadingJournalEntry) -> Unit,
     onDeleteJournalEntry: (ReadingJournalEntry) -> Unit,
 ) {
     var isEditSectionVisible by rememberSaveable {
@@ -152,6 +158,7 @@ fun BookDetailsScreen(
                 journalEntries = journalEntries,
                 totalPages = book.totalPages,
                 onAddJournalEntry = onAddJournalEntry,
+                onUpdateJournalEntry = onUpdateJournalEntry,
                 onDeleteJournalEntry = onDeleteJournalEntry
             )
 
@@ -500,13 +507,14 @@ private fun BookInfoSection(
             }
 
             LinearProgressIndicator(
-                progress = progress,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(9.dp)
-                    .clip(RoundedCornerShape(10.dp)),
-                color = Terracotta,
-                trackColor = Terracotta.copy(alpha = 0.13f),
+            progress = { progress },
+            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(9.dp)
+                                .clip(RoundedCornerShape(10.dp)),
+            color = Terracotta,
+            trackColor = Terracotta.copy(alpha = 0.13f),
+            strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
             )
 
             Spacer(
@@ -567,8 +575,6 @@ private fun BookInfoSection(
         }
     }
 }
-
-
 @Composable
 private fun ReadingJournalSection(
     bookId: Int,
@@ -579,6 +585,7 @@ private fun ReadingJournalSection(
         String,
         Int?
     ) -> Unit,
+    onUpdateJournalEntry: (ReadingJournalEntry) -> Unit,
     onDeleteJournalEntry: (ReadingJournalEntry) -> Unit,
 ) {
     var journalText by rememberSaveable(bookId) {
@@ -593,16 +600,36 @@ private fun ReadingJournalSection(
         mutableStateOf(JournalEntryType.NOTE)
     }
 
+    var selectedFilter by rememberSaveable(bookId) {
+        mutableStateOf(JournalFilter.ALL)
+    }
+
+    val filteredEntries =
+        when (selectedFilter) {
+            JournalFilter.ALL ->
+                journalEntries
+
+            JournalFilter.NOTES ->
+                journalEntries.filter { entry ->
+                    entry.type == JournalEntryType.NOTE
+                }
+
+            JournalFilter.QUOTES ->
+                journalEntries.filter { entry ->
+                    entry.type == JournalEntryType.QUOTE
+                }
+        }
+
     val journalPage =
         journalPageText.toIntOrNull()
 
     val isJournalPageValid =
         journalPageText.isBlank() ||
-            (
-                journalPage != null &&
-                    journalPage > 0 &&
-                    journalPage <= totalPages
-                )
+                (
+                        journalPage != null &&
+                                journalPage > 0 &&
+                                journalPage <= totalPages
+                        )
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -622,6 +649,7 @@ private fun ReadingJournalSection(
             fontSize = 13.sp,
         )
 
+        // ADD NEW JOURNAL ENTRY
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(22.dp),
@@ -646,7 +674,7 @@ private fun ReadingJournalSection(
                         text = "📝 Note",
                         selected =
                             selectedJournalType ==
-                                JournalEntryType.NOTE,
+                                    JournalEntryType.NOTE,
                         modifier = Modifier.weight(1f),
                         onClick = {
                             selectedJournalType =
@@ -658,7 +686,7 @@ private fun ReadingJournalSection(
                         text = "💬 Quote",
                         selected =
                             selectedJournalType ==
-                                JournalEntryType.QUOTE,
+                                    JournalEntryType.QUOTE,
                         modifier = Modifier.weight(1f),
                         onClick = {
                             selectedJournalType =
@@ -669,8 +697,8 @@ private fun ReadingJournalSection(
 
                 OutlinedTextField(
                     value = journalText,
-                    onValueChange = {
-                        journalText = it
+                    onValueChange = { value ->
+                        journalText = value
                     },
                     modifier = Modifier.fillMaxWidth(),
                     label = {
@@ -706,8 +734,7 @@ private fun ReadingJournalSection(
                     onValueChange = { value ->
 
                         if (
-                            value.all {
-                                character ->
+                            value.all { character ->
                                 character.isDigit()
                             }
                         ) {
@@ -723,7 +750,8 @@ private fun ReadingJournalSection(
                     supportingText = {
                         if (!isJournalPageValid) {
                             Text(
-                                text = "Page must be between 1 and $totalPages."
+                                text =
+                                    "Page must be between 1 and $totalPages."
                             )
                         }
                     },
@@ -745,7 +773,7 @@ private fun ReadingJournalSection(
                     modifier = Modifier.fillMaxWidth(),
                     enabled =
                         journalText.isNotBlank() &&
-                            isJournalPageValid,
+                                isJournalPageValid,
                     shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Terracotta
@@ -759,8 +787,51 @@ private fun ReadingJournalSection(
             }
         }
 
-        if (journalEntries.isNotEmpty()) {
+        // NO ENTRIES AT ALL
+        if (journalEntries.isEmpty()) {
 
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(18.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = LightCream
+                )
+            ) {
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    horizontalAlignment =
+                        Alignment.CenterHorizontally,
+                    verticalArrangement =
+                        Arrangement.spacedBy(8.dp)
+                ) {
+
+                    Text(
+                        text = "📖",
+                        fontSize = 28.sp
+                    )
+
+                    Text(
+                        text = "No journal entries yet",
+                        color = DarkBrown,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    Text(
+                        text =
+                            "Add a note or save a favourite quote from this book.",
+                        color = MutedBrown,
+                        fontSize = 13.sp,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+
+        } else {
+
+            // ENTRIES HEADER
             Text(
                 text = "Your entries",
                 color = DarkBrown,
@@ -768,18 +839,175 @@ private fun ReadingJournalSection(
                 fontWeight = FontWeight.Bold,
             )
 
-            journalEntries.forEach { entry ->
+            // FILTERS
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement =
+                    Arrangement.spacedBy(8.dp)
+            ) {
 
-                JournalEntryCard(
-                    entry = entry,
-                    onDelete = onDeleteJournalEntry
+                JournalFilterButton(
+                    text = "All",
+                    selected =
+                        selectedFilter ==
+                                JournalFilter.ALL,
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        selectedFilter =
+                            JournalFilter.ALL
+                    }
                 )
+
+                JournalFilterButton(
+                    text = "Notes",
+                    selected =
+                        selectedFilter ==
+                                JournalFilter.NOTES,
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        selectedFilter =
+                            JournalFilter.NOTES
+                    }
+                )
+
+                JournalFilterButton(
+                    text = "Quotes",
+                    selected =
+                        selectedFilter ==
+                                JournalFilter.QUOTES,
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        selectedFilter =
+                            JournalFilter.QUOTES
+                    }
+                )
+            }
+
+            // FILTER HAS NO RESULTS
+            if (filteredEntries.isEmpty()) {
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(18.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = LightCream
+                    )
+                ) {
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(18.dp),
+                        horizontalAlignment =
+                            Alignment.CenterHorizontally,
+                        verticalArrangement =
+                            Arrangement.spacedBy(6.dp)
+                    ) {
+
+                        Text(
+                            text =
+                                when (selectedFilter) {
+                                    JournalFilter.NOTES ->
+                                        "📝"
+
+                                    JournalFilter.QUOTES ->
+                                        "💬"
+
+                                    JournalFilter.ALL ->
+                                        "📖"
+                                },
+                            fontSize = 24.sp
+                        )
+
+                        Text(
+                            text =
+                                when (selectedFilter) {
+                                    JournalFilter.NOTES ->
+                                        "No notes yet"
+
+                                    JournalFilter.QUOTES ->
+                                        "No quotes yet"
+
+                                    JournalFilter.ALL ->
+                                        "No journal entries yet"
+                                },
+                            color = DarkBrown,
+                            fontWeight = FontWeight.SemiBold
+                        )
+
+                        Text(
+                            text =
+                                when (selectedFilter) {
+                                    JournalFilter.NOTES ->
+                                        "Your notes will appear here."
+
+                                    JournalFilter.QUOTES ->
+                                        "Your favourite quotes will appear here."
+
+                                    JournalFilter.ALL ->
+                                        "Your journal entries will appear here."
+                                },
+                            color = MutedBrown,
+                            fontSize = 12.sp,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+
+            } else {
+
+                // FILTERED ENTRIES
+                filteredEntries.forEach { entry ->
+
+                    JournalEntryCard(
+                        entry = entry,
+                        totalPages = totalPages,
+                        onUpdate = onUpdateJournalEntry,
+                        onDelete = onDeleteJournalEntry
+                    )
+                }
             }
         }
     }
 }
-
-
+@Composable
+private fun JournalFilterButton(
+    text: String,
+    selected: Boolean,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+) {
+    OutlinedButton(
+        onClick = onClick,
+        modifier = modifier,
+        shape = RoundedCornerShape(50.dp),
+        colors = ButtonDefaults.outlinedButtonColors(
+            containerColor =
+                if (selected) {
+                    Terracotta.copy(alpha = 0.12f)
+                } else {
+                    Color.Transparent
+                },
+            contentColor =
+                if (selected) {
+                    Terracotta
+                } else {
+                    MutedBrown
+                }
+        )
+    ) {
+        Text(
+            text = text,
+            fontSize = 13.sp,
+            fontWeight =
+                if (selected) {
+                    FontWeight.Bold
+                } else {
+                    FontWeight.Medium
+                }
+        )
+    }
+}
 @Composable
 private fun JournalTypeButton(
     text: String,
@@ -813,13 +1041,33 @@ private fun JournalTypeButton(
     }
 }
 
+private fun formatJournalDate(timestamp: Long): String {
+    val formatter =
+        DateTimeFormatter.ofPattern("dd MMM yyyy • HH:mm")
 
+    return Instant
+        .ofEpochMilli(timestamp)
+        .atZone(ZoneId.systemDefault())
+        .format(formatter)
+}
+
+private enum class JournalFilter {
+    ALL,
+    NOTES,
+    QUOTES
+}
 @Composable
 private fun JournalEntryCard(
     entry: ReadingJournalEntry,
+    totalPages: Int,
+    onUpdate: (ReadingJournalEntry) -> Unit,
     onDelete: (ReadingJournalEntry) -> Unit,
 ) {
     var showDeleteConfirmation by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    var showEditDialog by rememberSaveable {
         mutableStateOf(false)
     }
 
@@ -883,6 +1131,12 @@ private fun JournalEntryCard(
             }
 
             Text(
+                text = formatJournalDate(entry.createdAt),
+                color = MutedBrown,
+                fontSize = 12.sp
+            )
+
+            Text(
                 text = entry.content,
                 color = DarkBrown.copy(alpha = 0.86f),
                 fontSize = 14.sp,
@@ -898,19 +1152,50 @@ private fun JournalEntryCard(
                     },
             )
 
-            TextButton(
-                onClick = {
-                    showDeleteConfirmation = true
-                },
-                modifier = Modifier.align(Alignment.End)
+            Row(
+                modifier = Modifier.align(Alignment.End),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                Text(
-                    text = "Delete",
-                    color = DangerRed,
-                )
+                TextButton(
+                    onClick = {
+                        showEditDialog = true
+                    }
+                ) {
+                    Text(
+                        text = "Edit",
+                        color = Terracotta,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+
+                TextButton(
+                    onClick = {
+                        showDeleteConfirmation = true
+                    }
+                ) {
+                    Text(
+                        text = "Delete",
+                        color = DangerRed
+                    )
+                }
             }
         }
     }
+
+    if (showEditDialog) {
+        EditJournalEntryDialog(
+            entry = entry,
+            totalPages = totalPages,
+            onDismiss = {
+                showEditDialog = false
+            },
+            onSave = { updatedEntry ->
+                onUpdate(updatedEntry)
+                showEditDialog = false
+            }
+        )
+    }
+
 
     if (showDeleteConfirmation) {
 
@@ -921,29 +1206,117 @@ private fun JournalEntryCard(
 
             title = {
                 Text(
-                    text = "Delete journal entry?",
+                    text =
+                        if (entry.type == JournalEntryType.QUOTE) {
+                            "Delete this quote?"
+                        } else {
+                            "Delete this note?"
+                        },
                     color = DarkBrown,
+                    fontWeight = FontWeight.Bold
                 )
             },
 
             text = {
-                Text(
-                    text = "This action cannot be undone.",
-                    color = MutedBrown,
-                )
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+
+                    Text(
+                        text =
+                            if (entry.type == JournalEntryType.QUOTE) {
+                                "This quote will be permanently removed from your reading journal."
+                            } else {
+                                "This note will be permanently removed from your reading journal."
+                            },
+                        color = MutedBrown,
+                        fontSize = 14.sp
+                    )
+
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(14.dp),
+                        color = LightCream
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement =
+                                    Arrangement.SpaceBetween,
+                                verticalAlignment =
+                                    Alignment.CenterVertically
+                            ) {
+
+                                Text(
+                                    text =
+                                        when (entry.type) {
+                                            JournalEntryType.NOTE ->
+                                                "📝 Note"
+
+                                            JournalEntryType.QUOTE ->
+                                                "💬 Quote"
+                                        },
+                                    color = DarkBrown,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+
+                                entry.page?.let { page ->
+                                    Text(
+                                        text = "Page $page",
+                                        color = Terracotta,
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                }
+                            }
+
+                            Text(
+                                text = entry.content,
+                                color = DarkBrown.copy(alpha = 0.80f),
+                                fontSize = 13.sp,
+                                maxLines = 3,
+                                overflow = TextOverflow.Ellipsis,
+                                fontStyle =
+                                    if (
+                                        entry.type ==
+                                        JournalEntryType.QUOTE
+                                    ) {
+                                        FontStyle.Italic
+                                    } else {
+                                        FontStyle.Normal
+                                    }
+                            )
+                        }
+                    }
+
+                    Text(
+                        text = "This action cannot be undone.",
+                        color = DangerRed,
+                        fontSize = 12.sp
+                    )
+                }
             },
 
             confirmButton = {
-                TextButton(
+                Button(
                     onClick = {
                         onDelete(entry)
                         showDeleteConfirmation = false
-                    }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = DangerRed,
+                        contentColor = Color.White
+                    ),
+                    shape = RoundedCornerShape(12.dp)
                 ) {
                     Text(
                         text = "Delete",
-                        color = DangerRed,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.Bold
                     )
                 }
             },
@@ -955,8 +1328,9 @@ private fun JournalEntryCard(
                     }
                 ) {
                     Text(
-                        text = "Cancel",
+                        text = "Keep entry",
                         color = DarkBrown,
+                        fontWeight = FontWeight.SemiBold
                     )
                 }
             }
@@ -964,6 +1338,164 @@ private fun JournalEntryCard(
     }
 }
 
+
+@Composable
+private fun EditJournalEntryDialog(
+    entry: ReadingJournalEntry,
+    totalPages: Int,
+    onDismiss: () -> Unit,
+    onSave: (ReadingJournalEntry) -> Unit,
+) {
+    var content by rememberSaveable(entry.id) {
+        mutableStateOf(entry.content)
+    }
+
+    var pageText by rememberSaveable(entry.id) {
+        mutableStateOf(entry.page?.toString() ?: "")
+    }
+
+    var selectedType by rememberSaveable(entry.id) {
+        mutableStateOf(entry.type)
+    }
+
+    val page = pageText.toIntOrNull()
+
+    val isPageValid =
+        pageText.isBlank() ||
+                (
+                        page != null &&
+                                page > 0 &&
+                                page <= totalPages
+                        )
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+
+        title = {
+            Text(
+                text = "Edit journal entry",
+                color = DarkBrown,
+                fontWeight = FontWeight.Bold
+            )
+        },
+
+        text = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+
+                    JournalTypeButton(
+                        text = "📝 Note",
+                        selected =
+                            selectedType == JournalEntryType.NOTE,
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            selectedType = JournalEntryType.NOTE
+                        }
+                    )
+
+                    JournalTypeButton(
+                        text = "💬 Quote",
+                        selected =
+                            selectedType == JournalEntryType.QUOTE,
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            selectedType = JournalEntryType.QUOTE
+                        }
+                    )
+                }
+
+                OutlinedTextField(
+                    value = content,
+                    onValueChange = {
+                        content = it
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = {
+                        Text(
+                            if (
+                                selectedType ==
+                                JournalEntryType.QUOTE
+                            ) {
+                                "Favourite quote"
+                            } else {
+                                "Your note"
+                            }
+                        )
+                    },
+                    minLines = 3,
+                    shape = RoundedCornerShape(14.dp)
+                )
+
+                OutlinedTextField(
+                    value = pageText,
+                    onValueChange = { value ->
+                        if (
+                            value.all { character ->
+                                character.isDigit()
+                            }
+                        ) {
+                            pageText = value
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = {
+                        Text("Page (optional)")
+                    },
+                    singleLine = true,
+                    isError = !isPageValid,
+                    supportingText = {
+                        if (!isPageValid) {
+                            Text(
+                                "Page must be between 1 and $totalPages."
+                            )
+                        }
+                    },
+                    shape = RoundedCornerShape(14.dp)
+                )
+            }
+        },
+
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onSave(
+                        entry.copy(
+                            type = selectedType,
+                            content = content.trim(),
+                            page = page
+                        )
+                    )
+                },
+                enabled =
+                    content.isNotBlank() &&
+                            isPageValid
+            ) {
+                Text(
+                    text = "Save",
+                    color = Terracotta,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        },
+
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss
+            ) {
+                Text(
+                    text = "Cancel",
+                    color = DarkBrown
+                )
+            }
+        }
+    )
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -1414,9 +1946,7 @@ private fun BookBackdropDialog(
             )
 
             dialogWindow?.setBackgroundDrawable(
-                ColorDrawable(
-                    android.graphics.Color.TRANSPARENT
-                )
+                android.graphics.Color.TRANSPARENT.toDrawable()
             )
 
             dialogWindow?.setDimAmount(0f)

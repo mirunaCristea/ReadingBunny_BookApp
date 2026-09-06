@@ -412,6 +412,9 @@ fun ReadingBunnyApp() {
                                         page = page
                                     )
                                 },
+                                onUpdateJournalEntry ={ entry ->
+                                    readingJournalViewModel.updateEntry(entry)
+                                } ,
                                 onDeleteJournalEntry = { entry ->
                                     readingJournalViewModel.deleteEntry(
                                         entry
