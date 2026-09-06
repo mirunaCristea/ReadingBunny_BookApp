@@ -21,9 +21,9 @@ fun BookshelfSide(
             .background(
                 brush = Brush.horizontalGradient(
                     colors = listOf(
-                        color.copy(alpha = 0.92f),
+                        Color(0xFF9B6948),
                         color,
-                        color.copy(alpha = 0.85f)
+                        Color(0xFFB07A54)
                     )
                 )
             )

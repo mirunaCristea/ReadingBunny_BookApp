@@ -25,10 +25,10 @@ fun ShelfPlank(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(3.dp)
+                .height(2.dp)
                 .align(Alignment.TopCenter)
                 .background(
-                    Color(0xFFC9956D)
+                    Color(0xFFC58E65)
                 )
         )
 
@@ -36,7 +36,7 @@ fun ShelfPlank(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(11.dp)
+                .height(12.dp)
                 .align(Alignment.Center)
                 .background(color)
         )
@@ -48,7 +48,7 @@ fun ShelfPlank(
                 .height(2.dp)
                 .align(Alignment.BottomCenter)
                 .background(
-                    Color(0xFF86583A)
+                    Color(0xFF8E6042)
                 )
         )
     }

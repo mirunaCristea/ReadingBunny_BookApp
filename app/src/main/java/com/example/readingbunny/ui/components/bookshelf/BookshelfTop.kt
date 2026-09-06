@@ -22,9 +22,9 @@ fun BookshelfTop(
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        color.copy(alpha = 0.92f),
+                        Color(0xFFC58E65),
                         color,
-                        color.copy(alpha = 0.98f)
+                        Color(0xFF956343)
                     )
                 ),
                 shape = RoundedCornerShape(

@@ -4,11 +4,11 @@ import androidx.compose.ui.unit.dp
 
 object BookshelfTokens {
 
-    val SideWidth = 11.dp
+    val SideWidth = 12.dp
 
     val ShelfHeight = 16.dp
 
-    val LevelHeight = 170.dp
+    val LevelHeight = 165.dp
 
     val CornerRadius = 10.dp
 

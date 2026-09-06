@@ -26,10 +26,10 @@ fun ShelfLevel(
             .height(BookshelfTokens.LevelHeight)
             .background(
                 brush = Brush.verticalGradient(
-                    colors = listOf(
-                        backgroundColor.copy(alpha = 0.90f),
-                        backgroundColor,
-                        backgroundColor
+                    colorStops = arrayOf(
+                        0.00f to Color(0xFFE5D0B7),
+                        0.12f to backgroundColor,
+                        1.00f to backgroundColor
                     )
                 )
                 )
@@ -61,15 +61,6 @@ fun ShelfLevel(
             modifier = Modifier.align(
                 Alignment.BottomCenter
             )
-        )
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(6.dp)
-                .align(Alignment.BottomCenter)
-                .background(
-                    Color.Black.copy(alpha = 0.06f)
-                )
         )
     }
 }
