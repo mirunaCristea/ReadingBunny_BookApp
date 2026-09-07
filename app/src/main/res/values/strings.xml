@@ -84,4 +84,66 @@
 
     <string name="save_action">Save</string>
 
+
+    <!-- Add Book Screen-->
+    <string name="go_back">Go back</string>
+
+    <string name="add_book_title">Add a book</string>
+    <string name="search_for_book_title">Search for a book</string>
+    <string name="scan_book_title">Scan a book</string>
+    <string name="add_manually_title">Add manually</string>
+
+    <string name="choose_add_book_method">How would you like to add it?</string>
+
+    <string name="search_online">Search online</string>
+    <string name="search_online_description">Find the book by its title or author.</string>
+
+    <string name="scan_book">Scan a book</string>
+    <string name="scan_book_description">Use the barcode or photograph the book spine.</string>
+
+    <string name="add_manually">Add manually</string>
+    <string name="add_manually_description">Enter the title, author and reading details yourself.</string>
+
+    <string name="search_by_title_or_author">Search by title or author</string>
+    <string name="search_action">Search</string>
+    <string name="searching_for_books">Searching for books...</string>
+    <string name="book_search_error">Could not search for books. Please try again.</string>
+    <string name="search_results_count">%1$d results</string>
+
+    <string name="book_not_identified">"We couldn't identify this book."</string>
+    <string name="book_not_identified_hint">Try scanning it again or search for it manually.</string>
+    <string name="scan_again">Scan again</string>
+
+    <string name="scanner_text_error">"I couldn't read enough text. Try taking another photo."</string>
+
+
+    <!-- Add Book - Manual form -->
+    <string name="book_title">Book title</string>
+    <string name="author_label">Author</string>
+    <string name="total_pages">Total pages</string>
+    <string name="invalid_page_number">Enter a valid page number</string>
+
+    <string name="reading_status">Reading status</string>
+    <string name="choose_status">Choose a status</string>
+
+    <string name="book_ownership">Book ownership</string>
+    <string name="choose_ownership">Choose ownership</string>
+
+    <string name="save_book">Save book</string>
+
+    <!-- Reading statuses -->
+    <string name="status_currently_reading">Currently Reading</string>
+    <string name="status_want_to_read">Want to Read</string>
+    <string name="status_finished">Finished</string>
+    <string name="status_did_not_finish">Did Not Finish</string>
+    <string name="status_unread">Unread</string>
+
+    <!-- Ownership -->
+    <string name="ownership_owned">Owned</string>
+    <string name="ownership_borrowed">Borrowed</string>
+    <string name="ownership_wishlist">Wishlist</string>
+
+    <!-- Search result -->
+    <string name="pages_count">%1$d pages</string>
+    <string name="isbn_label">ISBN: %1$s</string>
 </resources>
