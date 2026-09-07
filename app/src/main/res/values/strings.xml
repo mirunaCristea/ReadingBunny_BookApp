@@ -158,4 +158,76 @@
 
     <string name="library_empty">Your library is empty</string>
     <string name="no_books_found">No books found</string>
+
+
+    <!-- Book Details -->
+    <string name="book_details_title">Book Details</string>
+    <string name="edit_book">Edit Book</string>
+    <string name="delete_book">Delete Book</string>
+
+    <string name="book_isbn_details">ISBN  •  %1$s</string>
+
+    <string name="reading_progress_title">Reading Progress</string>
+    <string name="pages_progress">%1$d / %2$d pages</string>
+    <string name="keep_going">Keep going ✨</string>
+    <string name="progress_percentage">%1$d%%</string>
+
+    <string name="about_this_book">About this book</string>
+    <string name="no_description_available">No description available.</string>
+    <string name="show_less">Show less</string>
+    <string name="show_more">Show more</string>
+
+    <!-- Reading Journal -->
+    <string name="reading_journal">Reading Journal</string>
+    <string name="reading_journal_description">Save thoughts, favourite quotes and little moments from your reading.</string>
+
+    <string name="journal_note_type">📝 Note</string>
+    <string name="journal_quote_type">💬 Quote</string>
+
+    <string name="favourite_quote">Favourite quote</string>
+    <string name="write_quote_here">Write the quote here...</string>
+    <string name="what_are_you_thinking">What are you thinking?</string>
+
+    <string name="save_to_journal">Save to Journal</string>
+
+    <string name="no_journal_entries_yet">No journal entries yet</string>
+    <string name="journal_empty_hint">Add a note or save a favourite quote from this book.</string>
+
+    <string name="your_entries">Your entries</string>
+    <string name="journal_filter_notes">Notes</string>
+    <string name="journal_filter_quotes">Quotes</string>
+
+    <string name="no_notes_yet">No notes yet</string>
+    <string name="no_quotes_yet">No quotes yet</string>
+
+    <string name="notes_appear_here">Your notes will appear here.</string>
+    <string name="quotes_appear_here">Your favourite quotes will appear here.</string>
+    <string name="journal_entries_appear_here">Your journal entries will appear here.</string>
+
+    <string name="page_number">Page %1$d</string>
+
+    <string name="edit_action">Edit</string>
+    <string name="delete_action">Delete</string>
+
+    <string name="delete_quote_question">Delete this quote?</string>
+    <string name="delete_note_question">Delete this note?</string>
+
+    <string name="delete_quote_warning">This quote will be permanently removed from your reading journal.</string>
+    <string name="delete_note_warning">This note will be permanently removed from your reading journal.</string>
+
+    <string name="action_cannot_be_undone">This action cannot be undone.</string>
+    <string name="keep_entry">Keep entry</string>
+
+    <string name="edit_journal_entry">Edit journal entry</string>
+
+    <!-- Edit Book -->
+    <string name="changes_saved_automatically">Changes are saved automatically</string>
+    <string name="book_information">Book information</string>
+    <string name="title_label">Title</string>
+    <string name="reading_section">Reading</string>
+    <string name="ownership_label">Ownership</string>
+    <string name="pages_section">Pages</string>
+    <string name="current_page_label">Current</string>
+    <string name="total_label">Total</string>
+    <string name="done_action">Done</string>
 </resources>
