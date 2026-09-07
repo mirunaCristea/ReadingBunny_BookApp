@@ -30,6 +30,8 @@ import com.example.readingbunny.model.Book
 import androidx.compose.material3.AlertDialog
 import com.example.readingbunny.model.JournalEntryType
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.ui.res.stringResource
+import com.example.readingbunny.R
 
 @Composable
 fun ReadingSessionScreen(
@@ -83,10 +85,14 @@ fun ReadingSessionScreen(
                 showDiscardDialog = false
             },
             title = {
-                Text("Discard session?")
+                Text(
+                    stringResource(R.string.discard_session_question)
+                )
             },
             text = {
-                Text("If you close now, this reading session will be lost.")
+                Text(
+                    stringResource(R.string.discard_session_warning)
+                )
             },
             confirmButton = {
                 TextButton(
@@ -95,7 +101,9 @@ fun ReadingSessionScreen(
                         onCancel()
                     }
                 ) {
-                    Text("Discard session")
+                    Text(
+                        stringResource(R.string.discard_session)
+                    )
                 }
             },
             dismissButton = {
@@ -104,7 +112,9 @@ fun ReadingSessionScreen(
                         showDiscardDialog = false
                     }
                 ) {
-                    Text("Keep reading")
+                    Text(
+                        stringResource(R.string.keep_reading)
+                    )
                 }
             }
         )
@@ -146,7 +156,9 @@ fun ReadingSessionScreen(
                     showDiscardDialog = true
                 }
             ) {
-                Text("Close")
+                Text(
+                    stringResource(R.string.close_action)
+                )
             }
         }
 
@@ -186,9 +198,9 @@ fun ReadingSessionScreen(
 
         Text(
             text = if (isRunning) {
-                "Reading time"
+                stringResource(R.string.reading_time)
             } else {
-                "Session paused"
+                stringResource(R.string.session_paused)
             },
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -209,7 +221,7 @@ fun ReadingSessionScreen(
         ) {
             Column {
                 Text(
-                    text = "Started at page",
+                    text = stringResource(R.string.started_at_page),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -219,7 +231,11 @@ fun ReadingSessionScreen(
                 )
 
                 Text(
-                    text = "${book.currentPage} / ${book.totalPages}",
+                    text = stringResource(
+                        R.string.page_progress,
+                        book.currentPage,
+                        book.totalPages
+                    ),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -242,7 +258,9 @@ fun ReadingSessionScreen(
                     },
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text("Note")
+                    Text(
+                        stringResource(R.string.note_action)
+                    )
                 }
 
                 OutlinedButton(
@@ -251,7 +269,9 @@ fun ReadingSessionScreen(
                     },
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text("Quote")
+                    Text(
+                        stringResource(R.string.quote_action)
+                    )
                 }
             }
 
@@ -271,9 +291,9 @@ fun ReadingSessionScreen(
             ) {
                 Text(
                     text = if (isRunning) {
-                        "Pause"
+                        stringResource(R.string.pause_action)
                     } else {
-                        "Resume"
+                        stringResource(R.string.resume_action)
                     }
                 )
             }
@@ -295,7 +315,9 @@ fun ReadingSessionScreen(
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Stop session")
+                Text(
+                    stringResource(R.string.stop_session)
+                )
             }
         } else {
             Box(
@@ -309,7 +331,7 @@ fun ReadingSessionScreen(
             ) {
                 Column {
                     Text(
-                        text = "Where did you stop?",
+                        text = stringResource(R.string.where_did_you_stop),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -329,7 +351,9 @@ fun ReadingSessionScreen(
                             }
                         },
                         label = {
-                            Text("End page")
+                            Text(
+                                stringResource(R.string.end_page)
+                            )
                         },
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Number
@@ -338,8 +362,11 @@ fun ReadingSessionScreen(
                         supportingText = {
                             if (hasPageError) {
                                 Text(
-                                    text = "Page must be between " +
-                                            "${book.currentPage} and ${book.totalPages}",
+                                    text = stringResource(
+                                        R.string.page_range_error,
+                                        book.currentPage,
+                                        book.totalPages
+                                    ),
                                     color = MaterialTheme.colorScheme.error
                                 )
                             }
@@ -368,7 +395,9 @@ fun ReadingSessionScreen(
                                     !hasPageError,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Save session")
+                        Text(
+                            stringResource(R.string.save_session)
+                        )
                     }
 
                     Spacer(
@@ -381,7 +410,9 @@ fun ReadingSessionScreen(
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Continue reading")
+                        Text(
+                            stringResource(R.string.continue_reading)
+                        )
                     }
                 }
             }
@@ -427,20 +458,20 @@ private fun QuickJournalEntryDialog(
     val title =
         when (type) {
             JournalEntryType.NOTE ->
-                "Add note"
+                stringResource(R.string.add_note)
 
             JournalEntryType.QUOTE ->
-                "Add quote"
+                stringResource(R.string.add_quote)
         }
 
 
     val contentLabel =
         when (type) {
             JournalEntryType.NOTE ->
-                "Your note"
+                stringResource(R.string.your_note)
 
             JournalEntryType.QUOTE ->
-                "Quote"
+                stringResource(R.string.quote_label)
         }
 
 
@@ -492,7 +523,9 @@ private fun QuickJournalEntryDialog(
                     },
 
                     label = {
-                        Text("Page (optional)")
+                        Text(
+                            stringResource(R.string.page_optional)
+                        )
                     },
 
                     keyboardOptions = KeyboardOptions(
@@ -507,7 +540,10 @@ private fun QuickJournalEntryDialog(
 
                             Text(
                                 text =
-                                    "Page must be between 1 and $totalPages"
+                                    stringResource(
+                                        R.string.journal_page_range_error,
+                                        totalPages
+                                    )
                             )
                         }
                     },
@@ -532,7 +568,9 @@ private fun QuickJournalEntryDialog(
                     content.isNotBlank() &&
                             !hasPageError
             ) {
-                Text("Save")
+                Text(
+                    stringResource(R.string.save_action)
+                )
             }
         },
 
@@ -541,7 +579,9 @@ private fun QuickJournalEntryDialog(
             TextButton(
                 onClick = onDismiss
             ) {
-                Text("Cancel")
+                Text(
+                    stringResource(R.string.cancel_action)
+                )
             }
         }
     )

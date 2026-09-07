@@ -1,4 +1,5 @@
 <resources>
+    <!-- Home Screen -->
     <string name="app_name">ReadingBunny</string>
     <string name="home_tagline">A quiet corner for every story.</string>
 
@@ -7,7 +8,7 @@
     <string name="choose_book_to_start">Choose a book to start reading</string>
     <string name="start_reading">Start reading</string>
 
-    <string name="todays_goal">Today's goal</string>
+    <string name="todays_goal">Today\'s goal</string>
     <string name="daily_goal_completed">Daily goal completed! 📚</string>
 
     <string name="start_streak">Start streak 🔥</string>
@@ -17,4 +18,70 @@
     <string name="daily_goal_progress">%1$d / %2$d min</string>
     <string name="minutes_remaining">%1$d min remaining</string>
     <string name="book_cover_content_description">Cover of %1$s</string>
+
+    <!-- Profile Screen -->
+
+    <string name="profile_title">Profile</string>
+
+    <string name="daily_reading_goal">Daily reading goal</string>
+    <string name="minutes_per_day">%1$d minutes per day</string>
+    <string name="minutes_short">%1$d min</string>
+
+    <string name="my_library">My library</string>
+    <string name="books_label">Books</string>
+    <string name="reading_label">Reading</string>
+    <string name="finished_label">Finished</string>
+
+    <string name="settings_title">Settings</string>
+
+    <string name="data_backup">Data &amp; backup</string>
+    <string name="data_backup_description">Export or restore your ReadingBunny data</string>
+
+    <string name="export_backup">Export backup</string>
+    <string name="restore_backup">Restore backup</string>
+
+    <string name="restore_backup_question">Restore backup?</string>
+    <string name="restore_backup_warning">Your current books, reading sessions, shelf layout and reading goal will be replaced.</string>
+
+    <string name="restore_action">Restore</string>
+    <string name="cancel_action">Cancel</string>
+
+    <!-- Reading Session Screen -->
+
+    <string name="discard_session_question">Discard session?</string>
+    <string name="discard_session_warning">If you close now, this reading session will be lost.</string>
+    <string name="discard_session">Discard session</string>
+    <string name="keep_reading">Keep reading</string>
+
+    <string name="close_action">Close</string>
+
+    <string name="reading_time">Reading time</string>
+    <string name="session_paused">Session paused</string>
+
+    <string name="started_at_page">Started at page</string>
+    <string name="page_progress">%1$d / %2$d</string>
+
+    <string name="note_action">Note</string>
+    <string name="quote_action">Quote</string>
+
+    <string name="pause_action">Pause</string>
+    <string name="resume_action">Resume</string>
+    <string name="stop_session">Stop session</string>
+
+    <string name="where_did_you_stop">Where did you stop?</string>
+    <string name="end_page">End page</string>
+    <string name="page_range_error">Page must be between %1$d and %2$d</string>
+    <string name="save_session">Save session</string>
+    <string name="continue_reading">Continue reading</string>
+
+    <string name="add_note">Add note</string>
+    <string name="add_quote">Add quote</string>
+    <string name="your_note">Your note</string>
+    <string name="quote_label">Quote</string>
+
+    <string name="page_optional">Page (optional)</string>
+    <string name="journal_page_range_error">Page must be between 1 and %1$d</string>
+
+    <string name="save_action">Save</string>
+
 </resources>

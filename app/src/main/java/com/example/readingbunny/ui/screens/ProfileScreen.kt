@@ -28,6 +28,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.example.readingbunny.R
 
 @Composable
 fun ProfileScreen(
@@ -71,12 +73,13 @@ fun ProfileScreen(
                 pendingRestoreUri = null
             },
             title = {
-                Text("Restore backup?")
+                Text(
+                    stringResource(R.string.restore_backup_question)
+                )
             },
             text = {
                 Text(
-                    "Your current books, reading sessions, " +
-                            "shelf layout and reading goal will be replaced."
+                    stringResource(R.string.restore_backup_warning)
                 )
             },
             confirmButton = {
@@ -86,7 +89,9 @@ fun ProfileScreen(
                         onRestoreBackup(uri)
                     }
                 ) {
-                    Text("Restore")
+                    Text(
+                        stringResource(R.string.restore_action)
+                    )
                 }
             },
             dismissButton = {
@@ -95,7 +100,9 @@ fun ProfileScreen(
                         pendingRestoreUri = null
                     }
                 ) {
-                    Text("Cancel")
+                    Text(
+                        stringResource(R.string.cancel_action)
+                    )
                 }
             }
         )
@@ -111,19 +118,22 @@ fun ProfileScreen(
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         Text(
-            text = "Profile",
+            text = stringResource(R.string.profile_title),
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.onBackground
         )
 
         Text(
-            text = "Daily reading goal",
+            text = stringResource(R.string.daily_reading_goal),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onBackground
         )
 
         Text(
-            text = "$dailyGoalMinutes minutes per day",
+            text = stringResource(
+                R.string.minutes_per_day,
+                dailyGoalMinutes
+            ),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -144,14 +154,19 @@ fun ProfileScreen(
                         onDailyGoalChange(minutes)
                     },
                     label = {
-                        Text("$minutes min")
+                        Text(
+                            stringResource(
+                                R.string.minutes_short,
+                                minutes
+                            )
+                        )
                     }
                 )
             }
         }
 
         Text(
-            text = "My library",
+            text = stringResource(R.string.my_library),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onBackground
         )
@@ -162,25 +177,25 @@ fun ProfileScreen(
         ) {
             ProfileStatCard(
                 value = totalBooks.toString(),
-                label = "Books",
+                label = stringResource(R.string.books_label),
                 modifier = Modifier.weight(1f)
             )
 
             ProfileStatCard(
                 value = currentlyReadingBooks.toString(),
-                label = "Reading",
+                label = stringResource(R.string.reading_label),
                 modifier = Modifier.weight(1f)
             )
 
             ProfileStatCard(
                 value = finishedBooks.toString(),
-                label = "Finished",
+                label = stringResource(R.string.finished_label),
                 modifier = Modifier.weight(1f)
             )
         }
 
         Text(
-            text = "Settings",
+            text = stringResource(R.string.settings_title),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onBackground
         )
@@ -196,13 +211,13 @@ fun ProfileScreen(
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Text(
-                text = "Data & backup",
+                text = stringResource(R.string.data_backup),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
 
             Text(
-                text = "Export or restore your ReadingBunny data",
+                text = stringResource(R.string.data_backup_description),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -215,7 +230,9 @@ fun ProfileScreen(
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Export backup")
+                Text(
+                    stringResource(R.string.export_backup)
+                )
             }
 
             OutlinedButton(
@@ -228,7 +245,9 @@ fun ProfileScreen(
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Restore backup")
+                Text(
+                    stringResource(R.string.restore_backup)
+                )
             }
 
             backupMessage?.let { message ->
