@@ -336,4 +336,18 @@
     <string name="decoration_scale">%1$d%%</string>
     <string name="reset_size">Reset size</string>
     <string name="delete_decoration">Delete decoration</string>
+
+
+    <!-- Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_books">Books</string>
+    <string name="nav_bookshelf">Bookshelf</string>
+    <string name="nav_stats">Stats</string>
+    <string name="nav_profile">Profile</string>
+
+    <!-- Backup messages -->
+    <string name="backup_export_success">Backup exported successfully.</string>
+    <string name="backup_export_error">Could not export backup. Please try again.</string>
+    <string name="backup_restore_success">Backup restored successfully.</string>
+    <string name="backup_restore_error">Could not restore backup. Please check the backup file and try again.</string>
 </resources>
