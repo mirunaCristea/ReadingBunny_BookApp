@@ -1,6 +1,7 @@
 <resources>
     <!-- Home Screen -->
     <string name="app_name">ReadingBunny</string>
+    <string name="backup_default_filename">readingbunny-backup.json</string>
     <string name="home_tagline">A quiet corner for every story.</string>
 
     <string name="currently_reading">Currently reading</string>

@@ -43,6 +43,8 @@ fun ProfileScreen(
     onRestoreBackup: (Uri) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val backupDefaultFilename =
+        stringResource(R.string.backup_default_filename)
     var pendingRestoreUri by remember {
         mutableStateOf<Uri?>(null)
     }
@@ -225,7 +227,7 @@ fun ProfileScreen(
             Button(
                 onClick = {
                     exportBackupLauncher.launch(
-                        "readingbunny-backup.json"
+                        backupDefaultFilename
                     )
                 },
                 modifier = Modifier.fillMaxWidth()
