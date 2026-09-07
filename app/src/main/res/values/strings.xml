@@ -350,4 +350,12 @@
     <string name="backup_export_error">Could not export backup. Please try again.</string>
     <string name="backup_restore_success">Backup restored successfully.</string>
     <string name="backup_restore_error">Could not restore backup. Please check the backup file and try again.</string>
+
+    <!-- Scanner -->
+    <string name="camera_permission_required">Camera permission is required to scan books.</string>
+    <string name="allow_camera">Allow camera</string>
+
+    <string name="scanner_barcode">Barcode</string>
+    <string name="scanner_book_spine">Book spine</string>
+    <string name="capture_spine">Capture spine</string>
 </resources>
