@@ -230,4 +230,82 @@
     <string name="current_page_label">Current</string>
     <string name="total_label">Total</string>
     <string name="done_action">Done</string>
+
+
+    <!-- Stats / Journey -->
+    <string name="reading_journey">Reading journey</string>
+
+    <string name="stats_this_week">This week</string>
+    <string name="stats_all_reading_activity">All reading activity</string>
+
+    <string name="stats_week">Week</string>
+    <string name="stats_month">Month</string>
+    <string name="stats_all_time">All Time</string>
+
+    <plurals name="stats_day_streak">
+        <item quantity="one">🔥 %1$d day streak</item>
+        <item quantity="other">🔥 %1$d day streak</item>
+    </plurals>
+
+    <string name="keep_reading_streak">Keep your reading streak going!</string>
+    <string name="start_new_streak">Read today to start a new streak.</string>
+    <string name="best_streak">Best streak</string>
+
+    <string name="stats_reading_time">Reading time</string>
+    <string name="stats_pages">Pages</string>
+    <string name="stats_sessions">Sessions</string>
+    <string name="stats_reading_days">Reading days</string>
+    <string name="stats_average_session">Avg. session</string>
+
+    <string name="finished_this_week">Finished this week</string>
+    <string name="finished_this_month">Finished this month</string>
+    <string name="finished_books">Finished books</string>
+
+    <string name="this_week_activity">"This week's activity"</string>
+    <string name="monthly_activity">Monthly activity</string>
+
+    <string name="milestones">Milestones</string>
+
+    <string name="recent_activity_week">Recent activity this week</string>
+    <string name="recent_activity_month">Recent activity this month</string>
+    <string name="recent_activity">Recent activity</string>
+
+    <string name="no_sessions_week">No reading sessions this week.</string>
+    <string name="no_sessions_month">No reading sessions this month.</string>
+    <string name="no_sessions_yet">No reading sessions yet.</string>
+
+    <string name="unknown_book">Unknown book</string>
+    <string name="today_label">Today</string>
+    <string name="reading_activity">Reading activity</string>
+
+    <string name="no_reading_activity_day">No reading activity on this day.</string>
+
+    <plurals name="reading_sessions_count">
+        <item quantity="one">%1$d reading session</item>
+        <item quantity="other">%1$d reading sessions</item>
+    </plurals>
+
+    <string name="session_date_time">%1$s • %2$s</string>
+    <string name="session_duration_pages">%1$s · %2$d pages</string>
+
+    <!-- Duration -->
+    <string name="duration_hours_minutes">%1$dh %2$dm</string>
+    <string name="duration_minutes">%1$dm</string>
+    <string name="duration_seconds">%1$ds</string>
+
+    <!-- Achievements -->
+    <string name="achievement_first_chapter">First Chapter</string>
+    <string name="achievement_first_chapter_description">Complete your first reading session</string>
+
+    <string name="achievement_page_turner">Page Turner</string>
+    <string name="achievement_page_turner_description">Read 100 pages</string>
+
+    <string name="achievement_lost_in_book">Lost in a Book</string>
+    <string name="achievement_lost_in_book_description">Read for 1 hour</string>
+
+    <string name="achievement_on_a_roll">On a Roll</string>
+    <string name="achievement_on_a_roll_description">Reach a 3-day reading streak</string>
+
+    <string name="achievement_the_end">The End</string>
+    <string name="achievement_the_end_description">Finish your first book</string>
 </resources>
