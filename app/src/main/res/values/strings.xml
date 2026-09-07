@@ -308,4 +308,32 @@
 
     <string name="achievement_the_end">The End</string>
     <string name="achievement_the_end_description">Finish your first book</string>
+
+    <!-- Bookshelf -->
+    <string name="my_bookshelf">My bookshelf</string>
+    <string name="decorate_action">Decorate</string>
+    <string name="bookshelf_empty">Your bookshelf is waiting for its first book.</string>
+
+    <string name="bookshelf_style">Bookshelf style</string>
+    <string name="bookshelf_style_cozy">Cozy</string>
+    <string name="bookshelf_style_forest">Forest</string>
+    <string name="bookshelf_style_night">Night</string>
+
+    <!-- Decorations -->
+    <string name="decoration_plant">Plant</string>
+    <string name="decoration_candle">Candle</string>
+    <string name="decoration_lamp">Lamp</string>
+    <string name="decoration_frame">Frame</string>
+    <string name="decoration_pumpkin">Pumpkin</string>
+    <string name="decoration_tea_cup">Tea Cup</string>
+
+    <string name="decoration_selected">Decoration selected</string>
+    <string name="choose_empty_slot_to_place">Choose an empty slot to place %1$s</string>
+    <string name="drag_book_to_empty_slot">Drag the book to an empty slot</string>
+    <string name="drag_decoration_to_empty_slot">Drag the decoration to an empty slot</string>
+    <string name="choose_decoration_or_drag">Choose a decoration or drag an item to move it</string>
+
+    <string name="decoration_scale">%1$d%%</string>
+    <string name="reset_size">Reset size</string>
+    <string name="delete_decoration">Delete decoration</string>
 </resources>
