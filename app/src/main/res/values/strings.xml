@@ -359,4 +359,8 @@
     <string name="scanner_barcode">Barcode</string>
     <string name="scanner_book_spine">Book spine</string>
     <string name="capture_spine">Capture spine</string>
+
+    <!-- Accessibility -->
+    <string name="increase_decoration_size">Increase decoration size</string>
+    <string name="decrease_decoration_size">Decrease decoration size</string>
 </resources>

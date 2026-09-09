@@ -64,6 +64,8 @@ import com.example.readingbunny.ui.theme.BookSpineColors
 import com.example.readingbunny.ui.theme.CozyBookshelfColors
 import com.example.readingbunny.ui.theme.ForestBookshelfColors
 import com.example.readingbunny.ui.theme.NightBookshelfColors
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 
 @Composable
 fun BookshelfScreen(
@@ -635,11 +637,19 @@ fun BookshelfScreen(
                         modifier =
                             Modifier.height(8.dp)
                     )
+                    val decreaseSizeDescription =
+                        stringResource(
+                            R.string.decrease_decoration_size
+                        )
+
+                    val increaseSizeDescription =
+                        stringResource(
+                            R.string.increase_decoration_size
+                        )
 
                     Row(
                         verticalAlignment =
-                            Alignment
-                                .CenterVertically,
+                            Alignment.CenterVertically,
                         horizontalArrangement =
                             Arrangement.spacedBy(
                                 12.dp
@@ -649,24 +659,21 @@ fun BookshelfScreen(
                             onClick = {
                                 val newScale =
                                     (
-                                            selectedPlacedDecoration
-                                                .scale -
+                                            selectedPlacedDecoration.scale -
                                                     0.1f
-                                            )
-                                        .coerceAtLeast(
-                                            0.6f
-                                        )
+                                            ).coerceAtLeast(0.6f)
 
                                 onUpdateDecorationTransform(
                                     selectedPlacedDecoration,
                                     newScale,
-                                    selectedPlacedDecoration
-                                        .rotation,
-                                    selectedPlacedDecoration
-                                        .offsetX,
-                                    selectedPlacedDecoration
-                                        .offsetY
+                                    selectedPlacedDecoration.rotation,
+                                    selectedPlacedDecoration.offsetX,
+                                    selectedPlacedDecoration.offsetY
                                 )
+                            },
+                            modifier = Modifier.semantics {
+                                contentDescription =
+                                    decreaseSizeDescription
                             }
                         ) {
                             Text("-")
@@ -675,8 +682,7 @@ fun BookshelfScreen(
                         Text(
                             text =
                                 stringResource(
-                                    R.string
-                                        .decoration_scale,
+                                    R.string.decoration_scale,
                                     (
                                             selectedPlacedDecoration
                                                 .scale *
@@ -689,30 +695,26 @@ fun BookshelfScreen(
                             onClick = {
                                 val newScale =
                                     (
-                                            selectedPlacedDecoration
-                                                .scale +
+                                            selectedPlacedDecoration.scale +
                                                     0.1f
-                                            )
-                                        .coerceAtMost(
-                                            1.5f
-                                        )
+                                            ).coerceAtMost(1.5f)
 
                                 onUpdateDecorationTransform(
                                     selectedPlacedDecoration,
                                     newScale,
-                                    selectedPlacedDecoration
-                                        .rotation,
-                                    selectedPlacedDecoration
-                                        .offsetX,
-                                    selectedPlacedDecoration
-                                        .offsetY
+                                    selectedPlacedDecoration.rotation,
+                                    selectedPlacedDecoration.offsetX,
+                                    selectedPlacedDecoration.offsetY
                                 )
+                            },
+                            modifier = Modifier.semantics {
+                                contentDescription =
+                                    increaseSizeDescription
                             }
                         ) {
                             Text("+")
                         }
                     }
-
                     TextButton(
                         onClick = {
                             onUpdateDecorationTransform(
