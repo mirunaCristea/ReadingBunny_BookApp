@@ -63,6 +63,7 @@ import com.example.readingbunny.model.ReadingStatus
 import com.example.readingbunny.ui.scanner.BookScannerMode
 import com.example.readingbunny.ui.scanner.BookScannerScreen
 import com.example.readingbunny.ui.viewmodel.BookSearchViewModel
+import androidx.compose.ui.text.style.TextOverflow
 
 private enum class AddBookMethod {
     SEARCH,
@@ -217,7 +218,10 @@ fun AddBookScreen(
                         )
                 },
                 style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.weight(1f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
 
@@ -1134,7 +1138,10 @@ private fun BookSearchResultCard(
                     color =
                         MaterialTheme
                             .colorScheme
-                            .onSurface
+                            .onSurface,
+                    maxLines = 2,
+                    overflow =
+                        TextOverflow.Ellipsis
                 )
 
                 Text(
@@ -1146,7 +1153,10 @@ private fun BookSearchResultCard(
                     color =
                         MaterialTheme
                             .colorScheme
-                            .onSurfaceVariant
+                            .onSurfaceVariant,
+                    maxLines = 2,
+                    overflow =
+                        TextOverflow.Ellipsis
                 )
 
                 book.totalPages?.let { pageCount ->

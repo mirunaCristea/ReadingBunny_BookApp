@@ -232,7 +232,9 @@ fun HomeScreen(
                                 Text(
                                     text = book.author,
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
 
                                 Spacer(modifier = Modifier.height(10.dp))

@@ -32,6 +32,7 @@ import com.example.readingbunny.model.JournalEntryType
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.ui.res.stringResource
 import com.example.readingbunny.R
+import androidx.compose.ui.text.style.TextOverflow
 
 @Composable
 fun ReadingSessionScreen(
@@ -169,7 +170,9 @@ fun ReadingSessionScreen(
         Text(
             text = book.title,
             style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onBackground
+            color = MaterialTheme.colorScheme.onBackground,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
         )
 
         Spacer(
@@ -179,7 +182,9 @@ fun ReadingSessionScreen(
         Text(
             text = book.author,
             style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
 
         Spacer(
