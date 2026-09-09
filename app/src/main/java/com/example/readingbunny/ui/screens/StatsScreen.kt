@@ -33,10 +33,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.readingbunny.R
 import com.example.readingbunny.model.Book
 import com.example.readingbunny.model.ReadingAchievement
 import com.example.readingbunny.model.ReadingSession
@@ -49,21 +52,20 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
 import java.time.temporal.TemporalAdjusters
-
+import java.util.Locale
 
 private data class DayReadingActivity(
     val date: LocalDate,
     val readingSeconds: Long
 )
 
-
 private enum class StatsPeriod {
     WEEK,
     MONTH,
     ALL_TIME
 }
-
 
 @Composable
 fun StatsScreen(
@@ -76,9 +78,6 @@ fun StatsScreen(
         mutableStateOf(StatsPeriod.WEEK)
     }
 
-    /*
-     * Month displayed by the monthly calendar.
-     */
     var displayedYear by rememberSaveable {
         mutableStateOf(today.year)
     }
@@ -87,10 +86,6 @@ fun StatsScreen(
         mutableStateOf(today.monthValue)
     }
 
-    /*
-     * We store the selected day as epochDay because Long
-     * can safely be persisted by rememberSaveable.
-     */
     var selectedDayEpoch by rememberSaveable {
         mutableStateOf<Long?>(null)
     }
@@ -106,9 +101,6 @@ fun StatsScreen(
             displayedMonth
         )
 
-    /*
-     * Convert all reading sessions to dates.
-     */
     val sessionDates =
         sessions
             .map { session ->
@@ -116,9 +108,6 @@ fun StatsScreen(
             }
             .toSet()
 
-    /*
-     * STREAKS
-     */
     val currentStreak =
         calculateCurrentStreak(
             sessionDates = sessionDates,
@@ -130,11 +119,6 @@ fun StatsScreen(
             sessionDates
         )
 
-    /*
-     * ACHIEVEMENTS
-     *
-     * Always all-time.
-     */
     val achievements =
         buildAchievements(
             sessions = sessions,
@@ -142,9 +126,6 @@ fun StatsScreen(
             currentStreak = currentStreak
         )
 
-    /*
-     * CURRENT WEEK
-     */
     val startOfWeek =
         today.with(
             TemporalAdjusters.previousOrSame(
@@ -155,17 +136,12 @@ fun StatsScreen(
     val endOfWeek =
         startOfWeek.plusDays(6)
 
-    /*
-     * FILTERED SESSIONS
-     */
     val filteredSessions =
         sessions.filter { session ->
-
             val date =
                 sessionDate(session)
 
             when (selectedPeriod) {
-
                 StatsPeriod.WEEK ->
                     !date.isBefore(startOfWeek) &&
                             !date.isAfter(endOfWeek)
@@ -179,12 +155,8 @@ fun StatsScreen(
             }
         }
 
-    /*
-     * WEEK ACTIVITY
-     */
     val weekDays =
         (0L..6L).map { offset ->
-
             val date =
                 startOfWeek.plusDays(offset)
 
@@ -202,13 +174,9 @@ fun StatsScreen(
             )
         }
 
-    /*
-     * MONTH ACTIVITY
-     */
     val monthActivities =
         (1..displayedYearMonth.lengthOfMonth())
             .map { day ->
-
                 val date =
                     displayedYearMonth.atDay(day)
 
@@ -226,9 +194,6 @@ fun StatsScreen(
                 )
             }
 
-    /*
-     * PERIOD STATISTICS
-     */
     val totalSeconds =
         filteredSessions.sumOf {
             it.durationSeconds
@@ -259,65 +224,58 @@ fun StatsScreen(
             0L
         }
 
-    /*
-     * Book currently stores FINISHED status,
-     * but not a finishedAt date.
-     *
-     * Therefore, finished books is an all-time statistic.
-     */
     val finishedBooksCount =
         books.count { book ->
-
             if (
-                book.status != ReadingStatus.FINISHED
+                book.status !=
+                ReadingStatus.FINISHED
             ) {
                 return@count false
             }
 
             when (selectedPeriod) {
-
                 StatsPeriod.WEEK -> {
-
                     val finishedDate =
-                        book.finishedAt?.let { timestamp ->
+                        book.finishedAt?.let {
+                                timestamp ->
                             Instant
                                 .ofEpochMilli(timestamp)
                                 .atZone(
                                     ZoneId.systemDefault()
                                 )
                                 .toLocalDate()
-                        }
-                            ?: return@count false
+                        } ?: return@count false
 
-                    !finishedDate.isBefore(startOfWeek) &&
-                            !finishedDate.isAfter(endOfWeek)
+                    !finishedDate.isBefore(
+                        startOfWeek
+                    ) &&
+                            !finishedDate.isAfter(
+                                endOfWeek
+                            )
                 }
 
                 StatsPeriod.MONTH -> {
-
                     val finishedDate =
-                        book.finishedAt?.let { timestamp ->
+                        book.finishedAt?.let {
+                                timestamp ->
                             Instant
                                 .ofEpochMilli(timestamp)
                                 .atZone(
                                     ZoneId.systemDefault()
                                 )
                                 .toLocalDate()
-                        }
-                            ?: return@count false
+                        } ?: return@count false
 
-                    YearMonth.from(finishedDate) ==
-                            displayedYearMonth
+                    YearMonth.from(
+                        finishedDate
+                    ) == displayedYearMonth
                 }
 
-                StatsPeriod.ALL_TIME -> {
+                StatsPeriod.ALL_TIME ->
                     true
-                }
             }
         }
-    /*
-     * RECENT ACTIVITY
-     */
+
     val recentSessions =
         filteredSessions
             .sortedByDescending {
@@ -327,9 +285,10 @@ fun StatsScreen(
 
     val periodSubtitle =
         when (selectedPeriod) {
-
             StatsPeriod.WEEK ->
-                "This week"
+                stringResource(
+                    R.string.stats_this_week
+                )
 
             StatsPeriod.MONTH ->
                 displayedYearMonth.format(
@@ -339,38 +298,44 @@ fun StatsScreen(
                 )
 
             StatsPeriod.ALL_TIME ->
-                "All reading activity"
+                stringResource(
+                    R.string.stats_all_reading_activity
+                )
         }
 
     val recentActivityTitle =
         when (selectedPeriod) {
-
             StatsPeriod.WEEK ->
-                "Recent activity this week"
+                stringResource(
+                    R.string.recent_activity_week
+                )
 
             StatsPeriod.MONTH ->
-                "Recent activity this month"
+                stringResource(
+                    R.string.recent_activity_month
+                )
 
             StatsPeriod.ALL_TIME ->
-                "Recent activity"
+                stringResource(
+                    R.string.recent_activity
+                )
         }
 
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .background(
-                MaterialTheme.colorScheme.background
+                MaterialTheme
+                    .colorScheme
+                    .background
             )
             .padding(20.dp)
     ) {
-
         item {
-
-            /*
-             * HEADER
-             */
             Text(
-                text = "Reading journey",
+                text = stringResource(
+                    R.string.reading_journey
+                ),
                 style =
                     MaterialTheme
                         .typography
@@ -403,18 +368,17 @@ fun StatsScreen(
                     Modifier.height(16.dp)
             )
 
-            /*
-             * PERIOD SELECTOR
-             */
             Row(
                 modifier =
                     Modifier.fillMaxWidth(),
                 horizontalArrangement =
                     Arrangement.spacedBy(8.dp)
             ) {
-
                 StatsPeriodButton(
-                    text = "Week",
+                    text =
+                        stringResource(
+                            R.string.stats_week
+                        ),
                     selected =
                         selectedPeriod ==
                                 StatsPeriod.WEEK,
@@ -427,7 +391,10 @@ fun StatsScreen(
                 )
 
                 StatsPeriodButton(
-                    text = "Month",
+                    text =
+                        stringResource(
+                            R.string.stats_month
+                        ),
                     selected =
                         selectedPeriod ==
                                 StatsPeriod.MONTH,
@@ -437,10 +404,6 @@ fun StatsScreen(
                         selectedPeriod =
                             StatsPeriod.MONTH
 
-                        /*
-                         * When Month is opened,
-                         * return to the current month.
-                         */
                         displayedYear =
                             today.year
 
@@ -450,7 +413,10 @@ fun StatsScreen(
                 )
 
                 StatsPeriodButton(
-                    text = "All Time",
+                    text =
+                        stringResource(
+                            R.string.stats_all_time
+                        ),
                     selected =
                         selectedPeriod ==
                                 StatsPeriod.ALL_TIME,
@@ -468,9 +434,6 @@ fun StatsScreen(
                     Modifier.height(20.dp)
             )
 
-            /*
-             * STREAK CARD
-             */
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -486,7 +449,6 @@ fun StatsScreen(
                     )
                     .padding(18.dp)
             ) {
-
                 Row(
                     modifier =
                         Modifier.fillMaxWidth(),
@@ -495,12 +457,14 @@ fun StatsScreen(
                     verticalAlignment =
                         Alignment.CenterVertically
                 ) {
-
                     Column {
-
                         Text(
                             text =
-                                "🔥 $currentStreak day streak",
+                                pluralStringResource(
+                                    R.plurals.stats_day_streak,
+                                    currentStreak,
+                                    currentStreak
+                                ),
                             style =
                                 MaterialTheme
                                     .typography
@@ -521,9 +485,13 @@ fun StatsScreen(
                                 if (
                                     currentStreak > 0
                                 ) {
-                                    "Keep your reading streak going!"
+                                    stringResource(
+                                        R.string.keep_reading_streak
+                                    )
                                 } else {
-                                    "Read today to start a new streak."
+                                    stringResource(
+                                        R.string.start_new_streak
+                                    )
                                 },
                             style =
                                 MaterialTheme
@@ -540,7 +508,6 @@ fun StatsScreen(
                         horizontalAlignment =
                             Alignment.End
                     ) {
-
                         Text(
                             text =
                                 longestStreak
@@ -556,7 +523,10 @@ fun StatsScreen(
                         )
 
                         Text(
-                            text = "Best streak",
+                            text =
+                                stringResource(
+                                    R.string.best_streak
+                                ),
                             style =
                                 MaterialTheme
                                     .typography
@@ -575,16 +545,12 @@ fun StatsScreen(
                     Modifier.height(24.dp)
             )
 
-            /*
-             * STATISTICS
-             */
             Row(
                 modifier =
                     Modifier.fillMaxWidth(),
                 horizontalArrangement =
                     Arrangement.spacedBy(10.dp)
             ) {
-
                 StatCard(
                     modifier =
                         Modifier.weight(1f),
@@ -593,7 +559,9 @@ fun StatsScreen(
                             totalSeconds
                         ),
                     label =
-                        "Reading time"
+                        stringResource(
+                            R.string.stats_reading_time
+                        )
                 )
 
                 StatCard(
@@ -602,7 +570,9 @@ fun StatsScreen(
                     value =
                         pagesRead.toString(),
                     label =
-                        "Pages"
+                        stringResource(
+                            R.string.stats_pages
+                        )
                 )
             }
 
@@ -617,7 +587,6 @@ fun StatsScreen(
                 horizontalArrangement =
                     Arrangement.spacedBy(10.dp)
             ) {
-
                 StatCard(
                     modifier =
                         Modifier.weight(1f),
@@ -626,7 +595,9 @@ fun StatsScreen(
                             .size
                             .toString(),
                     label =
-                        "Sessions"
+                        stringResource(
+                            R.string.stats_sessions
+                        )
                 )
 
                 StatCard(
@@ -635,7 +606,9 @@ fun StatsScreen(
                     value =
                         readingDays.toString(),
                     label =
-                        "Reading days"
+                        stringResource(
+                            R.string.stats_reading_days
+                        )
                 )
             }
 
@@ -650,7 +623,6 @@ fun StatsScreen(
                 horizontalArrangement =
                     Arrangement.spacedBy(10.dp)
             ) {
-
                 StatCard(
                     modifier =
                         Modifier.weight(1f),
@@ -659,7 +631,9 @@ fun StatsScreen(
                             averageSessionSeconds
                         ),
                     label =
-                        "Avg. session"
+                        stringResource(
+                            R.string.stats_average_session
+                        )
                 )
 
                 StatCard(
@@ -671,25 +645,27 @@ fun StatsScreen(
                     label =
                         when (selectedPeriod) {
                             StatsPeriod.WEEK ->
-                                "Finished this week"
+                                stringResource(
+                                    R.string.finished_this_week
+                                )
 
                             StatsPeriod.MONTH ->
-                                "Finished this month"
+                                stringResource(
+                                    R.string.finished_this_month
+                                )
 
                             StatsPeriod.ALL_TIME ->
-                                "Finished books"
+                                stringResource(
+                                    R.string.finished_books
+                                )
                         }
                 )
             }
 
-            /*
-             * WEEK VIEW
-             */
             if (
                 selectedPeriod ==
                 StatsPeriod.WEEK
             ) {
-
                 Spacer(
                     modifier =
                         Modifier.height(28.dp)
@@ -697,7 +673,9 @@ fun StatsScreen(
 
                 Text(
                     text =
-                        "This week's activity",
+                        stringResource(
+                            R.string.this_week_activity
+                        ),
                     style =
                         MaterialTheme
                             .typography
@@ -719,14 +697,10 @@ fun StatsScreen(
                 )
             }
 
-            /*
-             * MONTH VIEW
-             */
             if (
                 selectedPeriod ==
                 StatsPeriod.MONTH
             ) {
-
                 Spacer(
                     modifier =
                         Modifier.height(28.dp)
@@ -734,7 +708,9 @@ fun StatsScreen(
 
                 Text(
                     text =
-                        "Monthly activity",
+                        stringResource(
+                            R.string.monthly_activity
+                        ),
                     style =
                         MaterialTheme
                             .typography
@@ -755,11 +731,9 @@ fun StatsScreen(
                         displayedYearMonth,
                     activities =
                         monthActivities,
-                    today =
-                        today,
+                    today = today,
 
                     onPreviousMonth = {
-
                         val previous =
                             displayedYearMonth
                                 .minusMonths(1)
@@ -772,7 +746,6 @@ fun StatsScreen(
                     },
 
                     onNextMonth = {
-
                         val next =
                             displayedYearMonth
                                 .plusMonths(1)
@@ -791,16 +764,16 @@ fun StatsScreen(
                 )
             }
 
-            /*
-             * MILESTONES
-             */
             Spacer(
                 modifier =
                     Modifier.height(30.dp)
             )
 
             Text(
-                text = "Milestones",
+                text =
+                    stringResource(
+                        R.string.milestones
+                    ),
                 style =
                     MaterialTheme
                         .typography
@@ -820,7 +793,6 @@ fun StatsScreen(
                 verticalArrangement =
                     Arrangement.spacedBy(10.dp)
             ) {
-
                 achievements.forEach {
                         achievement ->
 
@@ -836,12 +808,8 @@ fun StatsScreen(
                     Modifier.height(30.dp)
             )
 
-            /*
-             * RECENT ACTIVITY
-             */
             Text(
-                text =
-                    recentActivityTitle,
+                text = recentActivityTitle,
                 style =
                     MaterialTheme
                         .typography
@@ -858,25 +826,25 @@ fun StatsScreen(
             )
         }
 
-        /*
-         * RECENT SESSION LIST
-         */
         if (recentSessions.isEmpty()) {
-
             item {
-
                 Text(
                     text =
                         when (selectedPeriod) {
-
                             StatsPeriod.WEEK ->
-                                "No reading sessions this week."
+                                stringResource(
+                                    R.string.no_sessions_week
+                                )
 
                             StatsPeriod.MONTH ->
-                                "No reading sessions this month."
+                                stringResource(
+                                    R.string.no_sessions_month
+                                )
 
                             StatsPeriod.ALL_TIME ->
-                                "No reading sessions yet."
+                                stringResource(
+                                    R.string.no_sessions_yet
+                                )
                         },
                     style =
                         MaterialTheme
@@ -888,9 +856,7 @@ fun StatsScreen(
                             .onSurfaceVariant
                 )
             }
-
         } else {
-
             items(recentSessions) {
                     session ->
 
@@ -902,11 +868,12 @@ fun StatsScreen(
                     }
 
                 ReadingSessionCard(
-                    session =
-                        session,
+                    session = session,
                     bookTitle =
                         book?.title
-                            ?: "Unknown book"
+                            ?: stringResource(
+                                R.string.unknown_book
+                            )
                 )
 
                 Spacer(
@@ -917,11 +884,7 @@ fun StatsScreen(
         }
     }
 
-    /*
-     * DAY DETAILS
-     */
     selectedDay?.let { date ->
-
         val sessionsForDay =
             sessions
                 .filter {
@@ -943,7 +906,6 @@ fun StatsScreen(
     }
 }
 
-
 @Composable
 private fun StatsPeriodButton(
     text: String,
@@ -957,34 +919,31 @@ private fun StatsPeriodButton(
         shape =
             RoundedCornerShape(50.dp),
         colors =
-            ButtonDefaults
-                .buttonColors(
-                    containerColor =
-                        if (selected) {
-                            ShelfWood
-                        } else {
-                            MaterialTheme
-                                .colorScheme
-                                .surfaceVariant
-                        },
-                    contentColor =
-                        if (selected) {
-                            Color.White
-                        } else {
-                            MaterialTheme
-                                .colorScheme
-                                .onSurfaceVariant
-                        }
-                )
+            ButtonDefaults.buttonColors(
+                containerColor =
+                    if (selected) {
+                        ShelfWood
+                    } else {
+                        MaterialTheme
+                            .colorScheme
+                            .surfaceVariant
+                    },
+                contentColor =
+                    if (selected) {
+                        Color.White
+                    } else {
+                        MaterialTheme
+                            .colorScheme
+                            .onSurfaceVariant
+                    }
+            )
     ) {
-
         Text(
             text = text,
             fontSize = 12.sp
         )
     }
 }
-
 
 @Composable
 private fun WeekActivityRow(
@@ -997,9 +956,7 @@ private fun WeekActivityRow(
         horizontalArrangement =
             Arrangement.spacedBy(6.dp)
     ) {
-
         days.forEach { day ->
-
             val hasRead =
                 day.readingSeconds > 0
 
@@ -1042,13 +999,14 @@ private fun WeekActivityRow(
                     Alignment
                         .CenterHorizontally
             ) {
-
                 Text(
                     text =
                         day.date
                             .dayOfWeek
-                            .name
-                            .take(1),
+                            .getDisplayName(
+                                TextStyle.NARROW,
+                                Locale.getDefault()
+                            ),
                     fontSize = 12.sp,
                     color = textColor
                 )
@@ -1070,14 +1028,16 @@ private fun WeekActivityRow(
                 )
 
                 if (isToday) {
-
                     Spacer(
                         modifier =
                             Modifier.height(4.dp)
                     )
 
                     Text(
-                        text = "Today",
+                        text =
+                            stringResource(
+                                R.string.today_label
+                            ),
                         fontSize = 9.sp,
                         color =
                             if (hasRead) {
@@ -1093,7 +1053,6 @@ private fun WeekActivityRow(
         }
     }
 }
-
 
 @Composable
 private fun MonthlyReadingCalendar(
@@ -1119,10 +1078,6 @@ private fun MonthlyReadingCalendar(
         verticalArrangement =
             Arrangement.spacedBy(8.dp)
     ) {
-
-        /*
-         * MONTH NAVIGATION
-         */
         Row(
             modifier =
                 Modifier.fillMaxWidth(),
@@ -1131,7 +1086,6 @@ private fun MonthlyReadingCalendar(
             verticalAlignment =
                 Alignment.CenterVertically
         ) {
-
             TextButton(
                 onClick =
                     onPreviousMonth
@@ -1146,10 +1100,9 @@ private fun MonthlyReadingCalendar(
             Text(
                 text =
                     yearMonth.format(
-                        DateTimeFormatter
-                            .ofPattern(
-                                "MMMM yyyy"
-                            )
+                        DateTimeFormatter.ofPattern(
+                            "MMMM yyyy"
+                        )
                     ),
                 style =
                     MaterialTheme
@@ -1175,44 +1128,34 @@ private fun MonthlyReadingCalendar(
             }
         }
 
-        /*
-         * WEEKDAY HEADER
-         */
         Row(
             modifier =
                 Modifier.fillMaxWidth()
         ) {
-
-            listOf(
-                "M",
-                "T",
-                "W",
-                "T",
-                "F",
-                "S",
-                "S"
-            ).forEach { dayName ->
-
-                Text(
-                    text = dayName,
-                    modifier =
-                        Modifier.weight(1f),
-                    textAlign =
-                        TextAlign.Center,
-                    fontSize = 11.sp,
-                    fontWeight =
-                        FontWeight.Bold,
-                    color =
-                        MaterialTheme
-                            .colorScheme
-                            .onSurfaceVariant
-                )
-            }
+            DayOfWeek.entries
+                .forEach { dayOfWeek ->
+                    Text(
+                        text =
+                            dayOfWeek
+                                .getDisplayName(
+                                    TextStyle.NARROW,
+                                    Locale.getDefault()
+                                ),
+                        modifier =
+                            Modifier.weight(1f),
+                        textAlign =
+                            TextAlign.Center,
+                        fontSize = 11.sp,
+                        fontWeight =
+                            FontWeight.Bold,
+                        color =
+                            MaterialTheme
+                                .colorScheme
+                                .onSurfaceVariant
+                    )
+                }
         }
 
-        /*
-         * Calendar starts Monday.
-         */
         val leadingEmptyCells =
             yearMonth
                 .atDay(1)
@@ -1221,7 +1164,6 @@ private fun MonthlyReadingCalendar(
 
         val calendarCells =
             buildList<DayReadingActivity?> {
-
                 repeat(
                     leadingEmptyCells
                 ) {
@@ -1238,28 +1180,24 @@ private fun MonthlyReadingCalendar(
         calendarCells
             .chunked(7)
             .forEach { week ->
-
                 Row(
                     modifier =
                         Modifier.fillMaxWidth(),
                     horizontalArrangement =
-                        Arrangement.spacedBy(4.dp)
+                        Arrangement.spacedBy(
+                            4.dp
+                        )
                 ) {
-
                     week.forEach {
                             activity ->
 
                         if (activity == null) {
-
                             Spacer(
-                                modifier =
-                                    Modifier
-                                        .weight(1f)
-                                        .aspectRatio(1f)
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .aspectRatio(1f)
                             )
-
                         } else {
-
                             CalendarDayCell(
                                 activity =
                                     activity,
@@ -1288,7 +1226,6 @@ private fun MonthlyReadingCalendar(
             verticalAlignment =
                 Alignment.CenterVertically
         ) {
-
             Text(
                 text = "●",
                 color = ShelfWood,
@@ -1302,7 +1239,9 @@ private fun MonthlyReadingCalendar(
 
             Text(
                 text =
-                    "Reading activity",
+                    stringResource(
+                        R.string.reading_activity
+                    ),
                 fontSize = 11.sp,
                 color =
                     MaterialTheme
@@ -1312,7 +1251,6 @@ private fun MonthlyReadingCalendar(
         }
     }
 }
-
 
 @Composable
 private fun CalendarDayCell(
@@ -1378,7 +1316,6 @@ private fun CalendarDayCell(
         verticalArrangement =
             Arrangement.Center
     ) {
-
         Text(
             text =
                 activity.date
@@ -1395,7 +1332,6 @@ private fun CalendarDayCell(
         )
 
         if (hasRead) {
-
             Text(
                 text = "•",
                 fontSize = 15.sp,
@@ -1404,7 +1340,6 @@ private fun CalendarDayCell(
         }
     }
 }
-
 
 @Composable
 private fun ReadingDayDetailsDialog(
@@ -1448,34 +1383,32 @@ private fun ReadingDayDetailsDialog(
         },
 
         text = {
-
             Column(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .heightIn(
-                            max = 430.dp
-                        )
-                        .verticalScroll(
-                            rememberScrollState()
-                        ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(
+                        max = 430.dp
+                    )
+                    .verticalScroll(
+                        rememberScrollState()
+                    ),
                 verticalArrangement =
-                    Arrangement.spacedBy(12.dp)
+                    Arrangement.spacedBy(
+                        12.dp
+                    )
             ) {
-
                 if (sessions.isEmpty()) {
-
                     Text(
                         text =
-                            "No reading activity on this day.",
+                            stringResource(
+                                R.string.no_reading_activity_day
+                            ),
                         color =
                             MaterialTheme
                                 .colorScheme
                                 .onSurfaceVariant
                     )
-
                 } else {
-
                     Row(
                         modifier =
                             Modifier.fillMaxWidth(),
@@ -1484,7 +1417,6 @@ private fun ReadingDayDetailsDialog(
                                 8.dp
                             )
                     ) {
-
                         StatCard(
                             modifier =
                                 Modifier.weight(1f),
@@ -1493,7 +1425,9 @@ private fun ReadingDayDetailsDialog(
                                     totalSeconds
                                 ),
                             label =
-                                "Reading time"
+                                stringResource(
+                                    R.string.stats_reading_time
+                                )
                         )
 
                         StatCard(
@@ -1503,21 +1437,19 @@ private fun ReadingDayDetailsDialog(
                                 totalPages
                                     .toString(),
                             label =
-                                "Pages"
+                                stringResource(
+                                    R.string.stats_pages
+                                )
                         )
                     }
 
                     Text(
                         text =
-                            "${sessions.size} reading ${
-                                if (
-                                    sessions.size == 1
-                                ) {
-                                    "session"
-                                } else {
-                                    "sessions"
-                                }
-                            }",
+                            pluralStringResource(
+                                R.plurals.reading_sessions_count,
+                                sessions.size,
+                                sessions.size
+                            ),
                         style =
                             MaterialTheme
                                 .typography
@@ -1534,11 +1466,12 @@ private fun ReadingDayDetailsDialog(
                             }
 
                         ReadingSessionCard(
-                            session =
-                                session,
+                            session = session,
                             bookTitle =
                                 book?.title
-                                    ?: "Unknown book"
+                                    ?: stringResource(
+                                        R.string.unknown_book
+                                    )
                         )
                     }
                 }
@@ -1546,19 +1479,19 @@ private fun ReadingDayDetailsDialog(
         },
 
         confirmButton = {
-
             TextButton(
                 onClick = onDismiss
             ) {
-
                 Text(
-                    text = "Close"
+                    text =
+                        stringResource(
+                            R.string.close_action
+                        )
                 )
             }
         }
     )
 }
-
 
 @Composable
 private fun StatCard(
@@ -1580,7 +1513,6 @@ private fun StatCard(
             )
             .padding(16.dp)
     ) {
-
         Text(
             text = value,
             style =
@@ -1611,7 +1543,6 @@ private fun StatCard(
         )
     }
 }
-
 
 @Composable
 private fun ReadingSessionCard(
@@ -1663,7 +1594,6 @@ private fun ReadingSessionCard(
             )
             .padding(16.dp)
     ) {
-
         Text(
             text = bookTitle,
             style =
@@ -1683,7 +1613,13 @@ private fun ReadingSessionCard(
 
         Text(
             text =
-                "${date.format(dateFormatter)} • $time",
+                stringResource(
+                    R.string.session_date_time,
+                    date.format(
+                        dateFormatter
+                    ),
+                    time
+                ),
             style =
                 MaterialTheme
                     .typography
@@ -1701,11 +1637,13 @@ private fun ReadingSessionCard(
 
         Text(
             text =
-                "${
+                stringResource(
+                    R.string.session_duration_pages,
                     formatReadingDuration(
                         session.durationSeconds
-                    )
-                } · $pages pages",
+                    ),
+                    pages
+                ),
             style =
                 MaterialTheme
                     .typography
@@ -1717,7 +1655,6 @@ private fun ReadingSessionCard(
         )
     }
 }
-
 
 private fun sessionDate(
     session: ReadingSession
@@ -1731,7 +1668,6 @@ private fun sessionDate(
         )
         .toLocalDate()
 }
-
 
 private fun calculateLongestStreak(
     sessionDates: Set<LocalDate>
@@ -1750,7 +1686,6 @@ private fun calculateLongestStreak(
     index in 1 until
             sortedDates.size
     ) {
-
         val previousDate =
             sortedDates[index - 1]
 
@@ -1761,7 +1696,6 @@ private fun calculateLongestStreak(
             currentDate ==
             previousDate.plusDays(1)
         ) {
-
             currentStreak++
 
             if (
@@ -1771,9 +1705,7 @@ private fun calculateLongestStreak(
                 longestStreak =
                     currentStreak
             }
-
         } else {
-
             currentStreak = 1
         }
     }
@@ -1781,7 +1713,7 @@ private fun calculateLongestStreak(
     return longestStreak
 }
 
-
+@Composable
 private fun formatReadingDuration(
     seconds: Long
 ): String {
@@ -1792,25 +1724,33 @@ private fun formatReadingDuration(
         (seconds % 3600) / 60
 
     return when {
-
         hours > 0 ->
-            "${hours}h ${minutes}m"
+            stringResource(
+                R.string.duration_hours_minutes,
+                hours,
+                minutes
+            )
 
         minutes > 0 ->
-            "${minutes}m"
+            stringResource(
+                R.string.duration_minutes,
+                minutes
+            )
 
         else ->
-            "${seconds}s"
+            stringResource(
+                R.string.duration_seconds,
+                seconds
+            )
     }
 }
 
-
+@Composable
 private fun buildAchievements(
     sessions: List<ReadingSession>,
     books: List<Book>,
     currentStreak: Int
 ): List<ReadingAchievement> {
-
     val totalPagesRead =
         sessions.sumOf {
                 session ->
@@ -1834,36 +1774,44 @@ private fun buildAchievements(
         }
 
     return listOf(
-
         ReadingAchievement(
             title =
-                "First Chapter",
+                stringResource(
+                    R.string.achievement_first_chapter
+                ),
             description =
-                "Complete your first reading session",
-            emoji =
-                "🌱",
+                stringResource(
+                    R.string.achievement_first_chapter_description
+                ),
+            emoji = "🌱",
             isUnlocked =
                 sessions.isNotEmpty()
         ),
 
         ReadingAchievement(
             title =
-                "Page Turner",
+                stringResource(
+                    R.string.achievement_page_turner
+                ),
             description =
-                "Read 100 pages",
-            emoji =
-                "📖",
+                stringResource(
+                    R.string.achievement_page_turner_description
+                ),
+            emoji = "📖",
             isUnlocked =
                 totalPagesRead >= 100
         ),
 
         ReadingAchievement(
             title =
-                "Lost in a Book",
+                stringResource(
+                    R.string.achievement_lost_in_book
+                ),
             description =
-                "Read for 1 hour",
-            emoji =
-                "⏳",
+                stringResource(
+                    R.string.achievement_lost_in_book_description
+                ),
+            emoji = "⏳",
             isUnlocked =
                 totalReadingSeconds >=
                         3600
@@ -1871,28 +1819,33 @@ private fun buildAchievements(
 
         ReadingAchievement(
             title =
-                "On a Roll",
+                stringResource(
+                    R.string.achievement_on_a_roll
+                ),
             description =
-                "Reach a 3 day reading streak",
-            emoji =
-                "🔥",
+                stringResource(
+                    R.string.achievement_on_a_roll_description
+                ),
+            emoji = "🔥",
             isUnlocked =
                 currentStreak >= 3
         ),
 
         ReadingAchievement(
             title =
-                "The End",
+                stringResource(
+                    R.string.achievement_the_end
+                ),
             description =
-                "Finish your first book",
-            emoji =
-                "🏆",
+                stringResource(
+                    R.string.achievement_the_end_description
+                ),
+            emoji = "🏆",
             isUnlocked =
                 hasFinishedBook
         )
     )
 }
-
 
 @Composable
 private fun AchievementCard(
@@ -1915,7 +1868,6 @@ private fun AchievementCard(
         verticalAlignment =
             Alignment.CenterVertically
     ) {
-
         Text(
             text =
                 achievement.emoji,
@@ -1931,7 +1883,6 @@ private fun AchievementCard(
             modifier =
                 Modifier.weight(1f)
         ) {
-
             Text(
                 text =
                     achievement.title,
@@ -1963,8 +1914,7 @@ private fun AchievementCard(
 
             Text(
                 text =
-                    achievement
-                        .description,
+                    achievement.description,
                 style =
                     MaterialTheme
                         .typography
@@ -1979,8 +1929,7 @@ private fun AchievementCard(
         Text(
             text =
                 if (
-                    achievement
-                        .isUnlocked
+                    achievement.isUnlocked
                 ) {
                     "✓"
                 } else {

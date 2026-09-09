@@ -26,8 +26,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.readingbunny.R
 import com.example.readingbunny.ReadingBunnyApplication
+import com.example.readingbunny.model.BookshelfStyle
 import com.example.readingbunny.model.ReadingStatus
 import com.example.readingbunny.ui.viewmodel.BookSearchViewModel
 import com.example.readingbunny.ui.viewmodel.BookSearchViewModelFactory
@@ -41,12 +44,10 @@ import com.example.readingbunny.ui.viewmodel.ReadingJournalViewModel
 import com.example.readingbunny.ui.viewmodel.ReadingJournalViewModelFactory
 import com.example.readingbunny.ui.viewmodel.ReadingSessionViewModel
 import com.example.readingbunny.ui.viewmodel.ReadingSessionViewModelFactory
-import kotlinx.coroutines.launch
 import com.example.readingbunny.util.calculateCurrentStreak
 import java.time.Instant
-import java.time.LocalDate
 import java.time.ZoneId
-import com.example.readingbunny.model.BookshelfStyle
+import kotlinx.coroutines.launch
 
 @Composable
 fun ReadingBunnyApp() {
@@ -61,50 +62,106 @@ fun ReadingBunnyApp() {
     val context = LocalContext.current
 
     val application =
-        context.applicationContext as ReadingBunnyApplication
+        context.applicationContext as
+                ReadingBunnyApplication
 
-    val bookViewModel: BookViewModel = viewModel(
-        factory = BookViewModelFactory(application.repository)
-    )
-
-    val bookshelfViewModel: BookshelfViewModel = viewModel(
-        factory = BookshelfViewModelFactory(
-            application.decorationRepository,
-            application.bookPositionRepository,
-            application.userPreferencesRepository,
+    /*
+     * These have to be read here, inside the
+     * Composable. The backup callbacks below
+     * cannot call stringResource directly.
+     */
+    val backupExportSuccess =
+        stringResource(
+            R.string.backup_export_success
         )
-    )
 
-    val decorations by bookshelfViewModel.decorations.collectAsState(
-        initial = emptyList()
-    )
+    val backupExportError =
+        stringResource(
+            R.string.backup_export_error
+        )
 
-    val books by bookViewModel.books.collectAsState(
-        initial = emptyList()
-    )
+    val backupRestoreSuccess =
+        stringResource(
+            R.string.backup_restore_success
+        )
 
-    val bookPositions by bookshelfViewModel.bookPositions.collectAsState(
-        initial = emptyList()
-    )
+    val backupRestoreError =
+        stringResource(
+            R.string.backup_restore_error
+        )
 
-    val bookshelfStyle by bookshelfViewModel.bookshelfStyle.collectAsState(
-        initial = BookshelfStyle.COZY
-    )
+    val bookViewModel:
+            BookViewModel =
+        viewModel(
+            factory =
+                BookViewModelFactory(
+                    application.repository
+                )
+        )
 
-    val readingJournalViewModel: ReadingJournalViewModel = viewModel(
-        factory =
-            ReadingJournalViewModelFactory(
-                application.readingJournalRepository
-            )
-    )
+    val bookshelfViewModel:
+            BookshelfViewModel =
+        viewModel(
+            factory =
+                BookshelfViewModelFactory(
+                    application
+                        .decorationRepository,
+                    application
+                        .bookPositionRepository,
+                    application
+                        .userPreferencesRepository,
+                )
+        )
 
-    var selectedBookId by rememberSaveable {
+    val decorations by
+    bookshelfViewModel
+        .decorations
+        .collectAsState(
+            initial = emptyList()
+        )
+
+    val books by
+    bookViewModel
+        .books
+        .collectAsState(
+            initial = emptyList()
+        )
+
+    val bookPositions by
+    bookshelfViewModel
+        .bookPositions
+        .collectAsState(
+            initial = emptyList()
+        )
+
+    val bookshelfStyle by
+    bookshelfViewModel
+        .bookshelfStyle
+        .collectAsState(
+            initial =
+                BookshelfStyle.COZY
+        )
+
+    val readingJournalViewModel:
+            ReadingJournalViewModel =
+        viewModel(
+            factory =
+                ReadingJournalViewModelFactory(
+                    application
+                        .readingJournalRepository
+                )
+        )
+
+    var selectedBookId by
+    rememberSaveable {
         mutableStateOf<Int?>(null)
     }
 
-    val selectedBook = books.firstOrNull { book ->
-        book.id == selectedBookId
-    }
+    val selectedBook =
+        books.firstOrNull { book ->
+            book.id ==
+                    selectedBookId
+        }
 
     val journalEntries by
     readingJournalViewModel
@@ -122,52 +179,76 @@ fun ReadingBunnyApp() {
             initial = emptyList()
         )
 
-    val currentBooks = books.filter { book ->
-        book.status == ReadingStatus.READING
-    }
+    val currentBooks =
+        books.filter { book ->
+            book.status ==
+                    ReadingStatus.READING
+        }
 
-    val readingSessionViewModel: ReadingSessionViewModel = viewModel(
-        factory = ReadingSessionViewModelFactory(
-            application.readingSessionRepository
+    val readingSessionViewModel:
+            ReadingSessionViewModel =
+        viewModel(
+            factory =
+                ReadingSessionViewModelFactory(
+                    application
+                        .readingSessionRepository
+                )
         )
-    )
 
     val elapsedSeconds by
-    readingSessionViewModel.elapsedSeconds.collectAsState()
+    readingSessionViewModel
+        .elapsedSeconds
+        .collectAsState()
 
     val isSessionRunning by
-    readingSessionViewModel.isRunning.collectAsState()
+    readingSessionViewModel
+        .isRunning
+        .collectAsState()
 
     val readingSessions by
-    readingSessionViewModel.sessions.collectAsState(
-        initial = emptyList()
-    )
-
-    val profileViewModel: ProfileViewModel = viewModel(
-        factory = ProfileViewModelFactory(
-            application.userPreferencesRepository
+    readingSessionViewModel
+        .sessions
+        .collectAsState(
+            initial = emptyList()
         )
-    )
+
+    val profileViewModel:
+            ProfileViewModel =
+        viewModel(
+            factory =
+                ProfileViewModelFactory(
+                    application
+                        .userPreferencesRepository
+                )
+        )
 
     val dailyGoalMinutes by
-    profileViewModel.dailyGoalMinutes.collectAsState()
+    profileViewModel
+        .dailyGoalMinutes
+        .collectAsState()
 
     val coroutineScope =
         rememberCoroutineScope()
 
-    var backupMessage by remember {
+    var backupMessage by
+    remember {
         mutableStateOf<String?>(null)
     }
 
-    val today = java.time.LocalDate.now()
+    val today =
+        java.time.LocalDate.now()
 
     val todayReadingSeconds =
         readingSessions
             .filter { session ->
                 val sessionDate =
-                    java.time.Instant
-                        .ofEpochMilli(session.startedAt)
-                        .atZone(java.time.ZoneId.systemDefault())
+                    Instant
+                        .ofEpochMilli(
+                            session.startedAt
+                        )
+                        .atZone(
+                            ZoneId.systemDefault()
+                        )
                         .toLocalDate()
 
                 sessionDate == today
@@ -180,414 +261,627 @@ fun ReadingBunnyApp() {
         readingSessions
             .map { session ->
                 Instant
-                    .ofEpochMilli(session.startedAt)
-                    .atZone(ZoneId.systemDefault())
+                    .ofEpochMilli(
+                        session.startedAt
+                    )
+                    .atZone(
+                        ZoneId.systemDefault()
+                    )
                     .toLocalDate()
             }
             .toSet()
 
     val currentStreak =
         calculateCurrentStreak(
-            sessionDates = sessionDates,
+            sessionDates =
+                sessionDates,
             today = today
         )
 
-    var activeSessionBookId by rememberSaveable {
+    var activeSessionBookId by
+    rememberSaveable {
         mutableStateOf<Int?>(null)
     }
 
     val activeSessionBook =
         books.firstOrNull { book ->
-            book.id == activeSessionBookId
+            book.id ==
+                    activeSessionBookId
         }
 
-    val bookSearchViewModel: BookSearchViewModel = viewModel(
-        factory = BookSearchViewModelFactory(
-            application.bookSearchRepository
+    val bookSearchViewModel:
+            BookSearchViewModel =
+        viewModel(
+            factory =
+                BookSearchViewModelFactory(
+                    application
+                        .bookSearchRepository
+                )
         )
-    )
 
     if (activeSessionBook != null) {
-        val sessionBook = activeSessionBook
+        val sessionBook =
+            activeSessionBook
 
         ReadingSessionScreen(
             book = sessionBook,
-            elapsedSeconds = elapsedSeconds,
-            isRunning = isSessionRunning,
+            elapsedSeconds =
+                elapsedSeconds,
+            isRunning =
+                isSessionRunning,
 
-            onAddJournalEntry = { type, content, page ->
-                readingJournalViewModel.addEntry(
-                    bookId = sessionBook.id,
-                    type =type,
-                    content = content,
-                    page = page
-                )
+            onAddJournalEntry = {
+                    type,
+                    content,
+                    page ->
+
+                readingJournalViewModel
+                    .addEntry(
+                        bookId =
+                            sessionBook.id,
+                        type = type,
+                        content = content,
+                        page = page
+                    )
             },
 
             onPause = {
-                readingSessionViewModel.pauseSession()
+                readingSessionViewModel
+                    .pauseSession()
             },
 
             onResume = {
-                readingSessionViewModel.resumeSession()
+                readingSessionViewModel
+                    .resumeSession()
             },
 
-            onFinish = { endPage ->
-                readingSessionViewModel.finishSession(
-                    endPage = endPage
-                ) {
-                    val newStatus =
-                        if (endPage >= sessionBook.totalPages) {
-                            ReadingStatus.FINISHED
-                        } else {
-                            ReadingStatus.READING
-                        }
+            onFinish = {
+                    endPage ->
 
-                    bookViewModel.updateBook(
-                        sessionBook.copy(
-                            currentPage = endPage,
-                            status = newStatus
-                        )
-                    )
+                readingSessionViewModel
+                    .finishSession(
+                        endPage = endPage
+                    ) {
+                        val newStatus =
+                            if (
+                                endPage >=
+                                sessionBook
+                                    .totalPages
+                            ) {
+                                ReadingStatus
+                                    .FINISHED
+                            } else {
+                                ReadingStatus
+                                    .READING
+                            }
 
-                    activeSessionBookId = null
-                }
+                        bookViewModel
+                            .updateBook(
+                                sessionBook.copy(
+                                    currentPage =
+                                        endPage,
+                                    status =
+                                        newStatus
+                                )
+                            )
+
+                        activeSessionBookId =
+                            null
+                    }
             },
 
             onCancel = {
-                readingSessionViewModel.cancelSession()
-                activeSessionBookId = null
-            },
+                readingSessionViewModel
+                    .cancelSession()
 
-
-
+                activeSessionBookId =
+                    null
+            }
         )
     } else {
         val currentlyReadingBooks =
             books.count { book ->
-                book.status == ReadingStatus.READING
+                book.status ==
+                        ReadingStatus.READING
             }
 
         val finishedBooks =
             books.count { book ->
-                book.status == ReadingStatus.FINISHED
+                book.status ==
+                        ReadingStatus.FINISHED
             }
 
         Scaffold(
-            containerColor = MaterialTheme.colorScheme.background,
+            containerColor =
+                MaterialTheme
+                    .colorScheme
+                    .background,
 
             bottomBar = {
                 NavigationBar {
                     NavigationBarItem(
-                        selected = selectedItem == 0,
+                        selected =
+                            selectedItem == 0,
                         onClick = {
                             selectedItem = 0
                         },
                         icon = {
                             Icon(
-                                imageVector = Icons.Filled.Home,
-                                contentDescription = "Home"
+                                imageVector =
+                                    Icons.Filled.Home,
+                                contentDescription =
+                                    null
                             )
                         },
                         label = {
-                            Text("Home")
+                            Text(
+                                stringResource(
+                                    R.string
+                                        .nav_home
+                                )
+                            )
                         }
                     )
 
                     NavigationBarItem(
-                        selected = selectedItem == 1,
+                        selected =
+                            selectedItem == 1,
                         onClick = {
                             selectedItem = 1
                         },
                         icon = {
                             Icon(
                                 imageVector =
-                                    Icons.AutoMirrored.Filled.MenuBook,
-                                contentDescription = "Books"
+                                    Icons
+                                        .AutoMirrored
+                                        .Filled
+                                        .MenuBook,
+                                contentDescription =
+                                    null
                             )
                         },
                         label = {
-                            Text("Books")
+                            Text(
+                                stringResource(
+                                    R.string
+                                        .nav_books
+                                )
+                            )
                         }
                     )
 
                     NavigationBarItem(
-                        selected = selectedItem == 2,
+                        selected =
+                            selectedItem == 2,
                         onClick = {
                             selectedItem = 2
                         },
                         icon = {
                             Icon(
                                 imageVector =
-                                    Icons.Filled.CollectionsBookmark,
-                                contentDescription = "Bookshelf"
+                                    Icons.Filled
+                                        .CollectionsBookmark,
+                                contentDescription =
+                                    null
                             )
                         },
                         label = {
-                            Text("Bookshelf")
+                            Text(
+                                stringResource(
+                                    R.string
+                                        .nav_bookshelf
+                                )
+                            )
                         }
                     )
 
                     NavigationBarItem(
-                        selected = selectedItem == 3,
+                        selected =
+                            selectedItem == 3,
                         onClick = {
                             selectedItem = 3
                         },
                         icon = {
                             Icon(
-                                imageVector = Icons.Filled.BarChart,
-                                contentDescription = "Stats"
+                                imageVector =
+                                    Icons.Filled
+                                        .BarChart,
+                                contentDescription =
+                                    null
                             )
                         },
                         label = {
-                            Text("Stats")
+                            Text(
+                                stringResource(
+                                    R.string
+                                        .nav_stats
+                                )
+                            )
                         }
                     )
 
                     NavigationBarItem(
-                        selected = selectedItem == 4,
+                        selected =
+                            selectedItem == 4,
                         onClick = {
                             selectedItem = 4
                         },
                         icon = {
                             Icon(
-                                imageVector = Icons.Filled.Person,
-                                contentDescription = "Profile"
+                                imageVector =
+                                    Icons.Filled
+                                        .Person,
+                                contentDescription =
+                                    null
                             )
                         },
                         label = {
-                            Text("Profile")
+                            Text(
+                                stringResource(
+                                    R.string
+                                        .nav_profile
+                                )
+                            )
                         }
                     )
                 }
             }
-        ) { innerPadding ->
+        ) {
+                innerPadding ->
+
             Box(
-                modifier = Modifier.padding(innerPadding)
+                modifier =
+                    Modifier.padding(
+                        innerPadding
+                    )
             ) {
                 when (selectedItem) {
-                    0 -> HomeScreen(
-                        books= currentBooks,
-                        onBookClick = { book ->
-                            selectedBookId = book.id
-                            selectedItem = 1
+                    0 ->
+                        HomeScreen(
+                            books =
+                                currentBooks,
+                            onBookClick = {
+                                    book ->
 
-                        },
-                        todayReadingSeconds = todayReadingSeconds,
-                        dailyGoalMinutes = dailyGoalMinutes,
-                        currentStreak = currentStreak,
-                        onStartReading = { book ->
-                            activeSessionBookId = book.id
+                                selectedBookId =
+                                    book.id
 
-                            readingSessionViewModel.startSession(
-                                book
-                            )
-                        }
-                    )
+                                selectedItem =
+                                    1
+                            },
+                            todayReadingSeconds =
+                                todayReadingSeconds,
+                            dailyGoalMinutes =
+                                dailyGoalMinutes,
+                            currentStreak =
+                                currentStreak,
+                            onStartReading = {
+                                    book ->
+
+                                activeSessionBookId =
+                                    book.id
+
+                                readingSessionViewModel
+                                    .startSession(
+                                        book
+                                    )
+                            }
+                        )
 
                     1 -> {
-                        if (selectedBook != null) {
+                        if (
+                            selectedBook !=
+                            null
+                        ) {
                             BookDetailsScreen(
-                                book = selectedBook,
-                                journalEntries = journalEntries,
+                                book =
+                                    selectedBook,
+                                journalEntries =
+                                    journalEntries,
                                 onBackClick = {
-                                    selectedBookId = null
+                                    selectedBookId =
+                                        null
                                 },
-                                onUpdateBook = { updatedBook ->
-                                    bookViewModel.updateBook(updatedBook)
+                                onUpdateBook = {
+                                        updatedBook ->
+
+                                    bookViewModel
+                                        .updateBook(
+                                            updatedBook
+                                        )
                                 },
-                                onDeleteBook = { book ->
-                                    bookViewModel.deleteBook(book)
-                                    selectedBookId = null
+                                onDeleteBook = {
+                                        book ->
+
+                                    bookViewModel
+                                        .deleteBook(
+                                            book
+                                        )
+
+                                    selectedBookId =
+                                        null
                                 },
                                 onAddJournalEntry = {
                                         type,
                                         content,
                                         page ->
 
-                                    readingJournalViewModel.addEntry(
-                                        bookId = selectedBook.id,
-                                        type = type,
-                                        content = content,
-                                        page = page
-                                    )
+                                    readingJournalViewModel
+                                        .addEntry(
+                                            bookId =
+                                                selectedBook.id,
+                                            type =
+                                                type,
+                                            content =
+                                                content,
+                                            page =
+                                                page
+                                        )
                                 },
-                                onUpdateJournalEntry ={ entry ->
-                                    readingJournalViewModel.updateEntry(entry)
-                                } ,
-                                onDeleteJournalEntry = { entry ->
-                                    readingJournalViewModel.deleteEntry(
-                                        entry
-                                    )
+                                onUpdateJournalEntry = {
+                                        entry ->
+
+                                    readingJournalViewModel
+                                        .updateEntry(
+                                            entry
+                                        )
+                                },
+                                onDeleteJournalEntry = {
+                                        entry ->
+
+                                    readingJournalViewModel
+                                        .deleteEntry(
+                                            entry
+                                        )
                                 }
                             )
-                        } else if (isAddingBook) {
+                        } else if (
+                            isAddingBook
+                        ) {
                             AddBookScreen(
                                 onBackClick = {
-                                    isAddingBook = false
+                                    isAddingBook =
+                                        false
                                 },
-                                onSaveBook = { newBook ->
-                                    bookViewModel.addBook(newBook)
-                                    isAddingBook = false
+                                onSaveBook = {
+                                        newBook ->
+
+                                    bookViewModel
+                                        .addBook(
+                                            newBook
+                                        )
+
+                                    isAddingBook =
+                                        false
                                 },
-                                bookSearchViewModel = bookSearchViewModel
+                                bookSearchViewModel =
+                                    bookSearchViewModel
                             )
                         } else {
                             BookScreen(
                                 books = books,
                                 onAddBookClick = {
-                                    isAddingBook = true
+                                    isAddingBook =
+                                        true
                                 },
-                                onBookClick = { book ->
-                                    selectedBookId = book.id
+                                onBookClick = {
+                                        book ->
+
+                                    selectedBookId =
+                                        book.id
                                 }
                             )
                         }
                     }
 
-                    2 -> BookshelfScreen(
-                        books = books,
-                        decorations = decorations,
-                        bookPositions = bookPositions,
+                    2 ->
+                        BookshelfScreen(
+                            books = books,
+                            decorations =
+                                decorations,
+                            bookPositions =
+                                bookPositions,
 
-                        onBookshelfStyleChange = {style ->
-                            bookshelfViewModel.setBookshelfStyle(style)
-                        },
+                            onBookshelfStyleChange = {
+                                    style ->
 
-                        onBookClick = { book ->
-                            selectedBookId = book.id
-                            selectedItem = 1
-                        },
+                                bookshelfViewModel
+                                    .setBookshelfStyle(
+                                        style
+                                    )
+                            },
 
-                        onAddDecoration = { type, shelfIndex, slotIndex ->
-                            bookshelfViewModel.addDecoration(
-                                type,
-                                shelfIndex,
-                                slotIndex
-                            )
-                        },
+                            onBookClick = {
+                                    book ->
 
-                        onDeleteDecoration = { decoration ->
-                            bookshelfViewModel.deleteDecoration(decoration)
-                        },
+                                selectedBookId =
+                                    book.id
 
-                        onMoveBook = { bookId, shelfIndex, slotIndex ->
-                            bookshelfViewModel.moveBook(
-                                bookId,
-                                shelfIndex,
-                                slotIndex
-                            )
-                        },
+                                selectedItem = 1
+                            },
 
-                        onMoveDecoration = { decoration, shelfIndex, slotIndex ->
-                            bookshelfViewModel.moveDecoration(
-                                decoration,
-                                shelfIndex,
-                                slotIndex
-                            )
-                        },
+                            onAddDecoration = {
+                                    type,
+                                    shelfIndex,
+                                    slotIndex ->
 
-                        onUpdateDecorationTransform = {
-                        decoration,
-                        scale,
-                        rotation,
-                        offsetX,
-                        offsetY ->
+                                bookshelfViewModel
+                                    .addDecoration(
+                                        type,
+                                        shelfIndex,
+                                        slotIndex
+                                    )
+                            },
 
-                        bookshelfViewModel.updateDecorationTransform(
-                            decoration = decoration,
-                            scale = scale,
-                            rotation = rotation,
-                            offsetX = offsetX,
-                            offsetY = offsetY
+                            onDeleteDecoration = {
+                                    decoration ->
+
+                                bookshelfViewModel
+                                    .deleteDecoration(
+                                        decoration
+                                    )
+                            },
+
+                            onMoveBook = {
+                                    bookId,
+                                    shelfIndex,
+                                    slotIndex ->
+
+                                bookshelfViewModel
+                                    .moveBook(
+                                        bookId,
+                                        shelfIndex,
+                                        slotIndex
+                                    )
+                            },
+
+                            onMoveDecoration = {
+                                    decoration,
+                                    shelfIndex,
+                                    slotIndex ->
+
+                                bookshelfViewModel
+                                    .moveDecoration(
+                                        decoration,
+                                        shelfIndex,
+                                        slotIndex
+                                    )
+                            },
+
+                            onUpdateDecorationTransform = {
+                                    decoration,
+                                    scale,
+                                    rotation,
+                                    offsetX,
+                                    offsetY ->
+
+                                bookshelfViewModel
+                                    .updateDecorationTransform(
+                                        decoration =
+                                            decoration,
+                                        scale = scale,
+                                        rotation =
+                                            rotation,
+                                        offsetX =
+                                            offsetX,
+                                        offsetY =
+                                            offsetY
+                                    )
+                            },
+
+                            bookshelfStyle =
+                                bookshelfStyle
                         )
 
-                    },
+                    3 ->
+                        StatsScreen(
+                            sessions =
+                                readingSessions,
+                            books = books
+                        )
 
-                        bookshelfStyle = bookshelfStyle,
+                    4 ->
+                        ProfileScreen(
+                            dailyGoalMinutes =
+                                dailyGoalMinutes,
+                            totalBooks =
+                                books.size,
+                            currentlyReadingBooks =
+                                currentlyReadingBooks,
+                            finishedBooks =
+                                finishedBooks,
 
+                            onDailyGoalChange = {
+                                    minutes ->
 
-                    )
-
-                    3 -> StatsScreen(
-                        sessions = readingSessions,
-                        books = books
-                    )
-
-                    4 -> ProfileScreen(
-                        dailyGoalMinutes = dailyGoalMinutes,
-                        totalBooks = books.size,
-                        currentlyReadingBooks = currentlyReadingBooks,
-                        finishedBooks = finishedBooks,
-
-                        onDailyGoalChange = { minutes ->
-                            profileViewModel.setDailyGoalMinutes(
-                                minutes
-                            )
-                        },
-
-                        onExportBackup = { uri ->
-                            backupMessage = null
-
-                            coroutineScope.launch {
-                                try {
-                                    application.backupRepository
-                                        .exportBackup(
-                                            uri = uri,
-                                            books = books,
-                                            readingSessions =
-                                                readingSessions,
-                                            shelfDecorations =
-                                                decorations,
-                                            shelfBookPositions =
-                                                bookPositions,
-                                            readingJournalEntries =
-                                                allJournalEntries,
-                                            dailyGoalMinutes =
-                                                dailyGoalMinutes
-                                        )
-
-                                    backupMessage =
-                                        "Backup exported successfully."
-                                } catch (exception: Exception) {
-                                    Log.e(
-                                        "Backup",
-                                        "Backup export failed",
-                                        exception
+                                profileViewModel
+                                    .setDailyGoalMinutes(
+                                        minutes
                                     )
+                            },
 
-                                    backupMessage =
-                                        "Could not export backup. Please try again."
-                                }
-                            }
-                        },
+                            onExportBackup = {
+                                    uri ->
 
-                        onRestoreBackup = { uri ->
-                            backupMessage = null
+                                backupMessage =
+                                    null
 
-                            coroutineScope.launch {
-                                try {
-                                    application.backupRepository
-                                        .restoreBackup(uri)
+                                coroutineScope
+                                    .launch {
+                                        try {
+                                            application
+                                                .backupRepository
+                                                .exportBackup(
+                                                    uri =
+                                                        uri,
+                                                    books =
+                                                        books,
+                                                    readingSessions =
+                                                        readingSessions,
+                                                    shelfDecorations =
+                                                        decorations,
+                                                    shelfBookPositions =
+                                                        bookPositions,
+                                                    readingJournalEntries =
+                                                        allJournalEntries,
+                                                    dailyGoalMinutes =
+                                                        dailyGoalMinutes
+                                                )
 
+                                            backupMessage =
+                                                backupExportSuccess
+                                        } catch (
+                                            exception:
+                                            Exception
+                                        ) {
+                                            Log.e(
+                                                "Backup",
+                                                "Backup export failed",
+                                                exception
+                                            )
 
-                                    backupMessage =
-                                        "Backup restored successfully."
-                                } catch (exception: Exception) {
-                                    Log.e(
-                                        "Backup",
-                                        "Backup restore failed",
-                                        exception
-                                    )
+                                            backupMessage =
+                                                backupExportError
+                                        }
+                                    }
+                            },
 
-                                    backupMessage =
-                                        "Could not restore backup. Please check the backup file and try again."
-                                }
-                            }
-                        },
+                            onRestoreBackup = {
+                                    uri ->
 
-                        backupMessage = backupMessage
-                    )
+                                backupMessage =
+                                    null
+
+                                coroutineScope
+                                    .launch {
+                                        try {
+                                            application
+                                                .backupRepository
+                                                .restoreBackup(
+                                                    uri
+                                                )
+
+                                            backupMessage =
+                                                backupRestoreSuccess
+                                        } catch (
+                                            exception:
+                                            Exception
+                                        ) {
+                                            Log.e(
+                                                "Backup",
+                                                "Backup restore failed",
+                                                exception
+                                            )
+
+                                            backupMessage =
+                                                backupRestoreError
+                                        }
+                                    }
+                            },
+
+                            backupMessage =
+                                backupMessage
+                        )
                 }
             }
         }

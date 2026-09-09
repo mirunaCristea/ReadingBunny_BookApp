@@ -1,5 +1,6 @@
 package com.example.readingbunny.ui.screens
 
+import com.example.readingbunny.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -37,6 +38,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.example.readingbunny.model.Book
+import androidx.compose.ui.res.stringResource
 
 @Composable
 fun HomeScreen(
@@ -82,7 +84,7 @@ fun HomeScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "ReadingBunny",
+                text = stringResource(R.string.app_name),
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -93,9 +95,9 @@ fun HomeScreen(
             ) {
                 Text(
                     text = if (currentStreak == 0) {
-                        "Start streak 🔥"
+                        stringResource(R.string.start_streak)
                     } else {
-                        "$currentStreak day streak 🔥"
+                        stringResource(R.string.day_streak, currentStreak)
                     },
                     modifier = Modifier.padding(
                         horizontal = 14.dp,
@@ -108,12 +110,12 @@ fun HomeScreen(
         }
 
         Text(
-            text = "A quiet corner for every story.",
+            text = stringResource(R.string.home_tagline),
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
         Text(
-            text = "Currently reading",
+            text = stringResource(R.string.currently_reading),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onBackground
@@ -143,12 +145,12 @@ fun HomeScreen(
                     Spacer(modifier = Modifier.height(10.dp))
 
                     Text(
-                        text = "No book in progress",
+                        text = stringResource(R.string.no_book_in_progress),
                         style = MaterialTheme.typography.titleMedium
                     )
 
                     Text(
-                        text = "Choose a book to start reading",
+                        text = stringResource(R.string.choose_book_to_start),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -197,7 +199,10 @@ fun HomeScreen(
                                 if (!book.coverUrl.isNullOrBlank()) {
                                     AsyncImage(
                                         model = book.coverUrl,
-                                        contentDescription = "Cover ${book.title}",
+                                        contentDescription = stringResource(
+                                            R.string.book_cover_content_description,
+                                            book.title
+                                        ),
                                         modifier = Modifier.fillMaxSize(),
                                         contentScale = ContentScale.Crop
                                     )
@@ -227,7 +232,9 @@ fun HomeScreen(
                                 Text(
                                     text = book.author,
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
 
                                 Spacer(modifier = Modifier.height(10.dp))
@@ -240,7 +247,12 @@ fun HomeScreen(
                                 Spacer(modifier = Modifier.height(5.dp))
 
                                 Text(
-                                    text = "${book.currentPage} / ${book.totalPages} pages · ${(progress * 100).toInt()}%",
+                                    text = stringResource(
+                                        R.string.book_progress,
+                                        book.currentPage,
+                                        book.totalPages,
+                                        (progress * 100).toInt()
+                                    ),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -253,7 +265,7 @@ fun HomeScreen(
                                     },
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
-                                    Text("Start reading")
+                                    Text(stringResource(R.string.start_reading))
                                 }
                             }
                         }
@@ -281,13 +293,17 @@ fun HomeScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Today's goal",
+                        text = stringResource(R.string.todays_goal),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
 
                     Text(
-                        text = "$todayReadingMinutes / $dailyGoalMinutes min",
+                        text = stringResource(
+                            R.string.daily_goal_progress,
+                            todayReadingMinutes,
+                            dailyGoalMinutes
+                        ),
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.onSurface
@@ -313,9 +329,12 @@ fun HomeScreen(
 
                 Text(
                     text = if (remainingMinutes > 0) {
-                        "$remainingMinutes min remaining"
+                        stringResource(
+                            R.string.minutes_remaining,
+                            remainingMinutes
+                        )
                     } else {
-                        "Daily goal completed! 📚"
+                        stringResource(R.string.daily_goal_completed)
                     },
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant

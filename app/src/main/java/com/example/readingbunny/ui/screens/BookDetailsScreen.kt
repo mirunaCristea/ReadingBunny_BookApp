@@ -1,8 +1,6 @@
 package com.example.readingbunny.ui.screens
 
-import android.graphics.drawable.ColorDrawable
 import android.view.WindowManager
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,13 +18,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Settings
-
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -46,14 +42,12 @@ import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -61,41 +55,36 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.DialogWindowProvider
-
+import androidx.core.graphics.drawable.toDrawable
 import coil3.compose.AsyncImage
-
+import com.example.readingbunny.R
 import com.example.readingbunny.model.Book
 import com.example.readingbunny.model.BookOwnership
 import com.example.readingbunny.model.JournalEntryType
 import com.example.readingbunny.model.ReadingJournalEntry
 import com.example.readingbunny.model.ReadingStatus
-
 import com.example.readingbunny.ui.theme.DarkBrown
 import com.example.readingbunny.ui.theme.Terracotta
-
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import androidx.core.graphics.drawable.toDrawable
 
 private val PageBackground = Color(0xFFFFF9F3)
 private val CreamCard = Color(0xFFFFF1E6)
 private val LightCream = Color(0xFFFFF7F0)
 private val MutedBrown = Color(0xFF78645D)
-private val SoftBorder = Color(0xFFE9D8CC)
 private val SoftSage = Color(0xFF94A98B)
 private val DangerRed = Color(0xFFB64A45)
-
 
 @Composable
 fun BookDetailsScreen(
@@ -121,16 +110,18 @@ fun BookDetailsScreen(
             .fillMaxSize()
             .background(PageBackground)
     ) {
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
-                .padding(top = 14.dp, bottom = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(18.dp),
+                .padding(
+                    top = 14.dp,
+                    bottom = 32.dp
+                ),
+            verticalArrangement =
+                Arrangement.spacedBy(18.dp),
         ) {
-
             BookDetailsHeader(
                 onBackClick = onBackClick,
                 onSettingsClick = {
@@ -157,9 +148,12 @@ fun BookDetailsScreen(
                 bookId = book.id,
                 journalEntries = journalEntries,
                 totalPages = book.totalPages,
-                onAddJournalEntry = onAddJournalEntry,
-                onUpdateJournalEntry = onUpdateJournalEntry,
-                onDeleteJournalEntry = onDeleteJournalEntry
+                onAddJournalEntry =
+                    onAddJournalEntry,
+                onUpdateJournalEntry =
+                    onUpdateJournalEntry,
+                onDeleteJournalEntry =
+                    onDeleteJournalEntry
             )
 
             Spacer(
@@ -170,15 +164,22 @@ fun BookDetailsScreen(
                 onClick = {
                     onDeleteBook(book)
                 },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = DangerRed
-                ),
-                shape = RoundedCornerShape(14.dp)
+                modifier =
+                    Modifier.fillMaxWidth(),
+                colors =
+                    ButtonDefaults
+                        .outlinedButtonColors(
+                            contentColor = DangerRed
+                        ),
+                shape =
+                    RoundedCornerShape(14.dp)
             ) {
                 Text(
-                    text = "Delete Book",
-                    fontWeight = FontWeight.SemiBold,
+                    text = stringResource(
+                        R.string.delete_book
+                    ),
+                    fontWeight =
+                        FontWeight.SemiBold,
                 )
             }
         }
@@ -186,7 +187,9 @@ fun BookDetailsScreen(
         if (isEditSectionVisible) {
             BookSettingDialog(
                 bookId = book.id,
-                coverUrl = book.largeCoverUrl ?: book.coverUrl,
+                coverUrl =
+                    book.largeCoverUrl
+                        ?: book.coverUrl,
                 title = book.title,
                 author = book.author,
                 status = book.status,
@@ -200,34 +203,41 @@ fun BookDetailsScreen(
 
                 onTitleChange = { newTitle ->
                     onUpdateBook(
-                        book.copy(title = newTitle)
+                        book.copy(
+                            title = newTitle
+                        )
                     )
                 },
 
                 onAuthorChange = { newAuthor ->
                     onUpdateBook(
-                        book.copy(author = newAuthor)
+                        book.copy(
+                            author = newAuthor
+                        )
                     )
                 },
 
                 onStatusChange = { newStatus ->
-
                     val updatedBook =
                         when {
-
-                            newStatus == ReadingStatus.FINISHED &&
-                                    book.status != ReadingStatus.FINISHED -> {
+                            newStatus ==
+                                    ReadingStatus.FINISHED &&
+                                    book.status !=
+                                    ReadingStatus.FINISHED -> {
 
                                 book.copy(
                                     status = newStatus,
                                     finishedAt =
                                         book.finishedAt
-                                            ?: System.currentTimeMillis()
+                                            ?: System
+                                                .currentTimeMillis()
                                 )
                             }
 
-                            newStatus != ReadingStatus.FINISHED &&
-                                    book.status == ReadingStatus.FINISHED -> {
+                            newStatus !=
+                                    ReadingStatus.FINISHED &&
+                                    book.status ==
+                                    ReadingStatus.FINISHED -> {
 
                                 book.copy(
                                     status = newStatus,
@@ -242,31 +252,47 @@ fun BookDetailsScreen(
                             }
                         }
 
-                    onUpdateBook(updatedBook)
-                },
-
-                onOwnershipChange = { newOwnership ->
                     onUpdateBook(
-                        book.copy(ownership = newOwnership)
+                        updatedBook
                     )
                 },
 
-                onCurrentPageChange = { newCurrentPage ->
+                onOwnershipChange = {
+                        newOwnership ->
+
                     onUpdateBook(
-                        book.copy(currentPage = newCurrentPage)
+                        book.copy(
+                            ownership =
+                                newOwnership
+                        )
                     )
                 },
 
-                onTotalPagesChange = { newTotalPages ->
+                onCurrentPageChange = {
+                        newCurrentPage ->
+
                     onUpdateBook(
-                        book.copy(totalPages = newTotalPages)
+                        book.copy(
+                            currentPage =
+                                newCurrentPage
+                        )
+                    )
+                },
+
+                onTotalPagesChange = {
+                        newTotalPages ->
+
+                    onUpdateBook(
+                        book.copy(
+                            totalPages =
+                                newTotalPages
+                        )
                     )
                 }
             )
         }
     }
 }
-
 
 @Composable
 private fun BookDetailsHeader(
@@ -275,9 +301,9 @@ private fun BookDetailsHeader(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment =
+            Alignment.CenterVertically,
     ) {
-
         Surface(
             shape = CircleShape,
             color = CreamCard,
@@ -286,15 +312,23 @@ private fun BookDetailsHeader(
                 onClick = onBackClick
             ) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
+                    imageVector =
+                        Icons.AutoMirrored
+                            .Filled
+                            .ArrowBack,
+                    contentDescription =
+                        stringResource(
+                            R.string.go_back
+                        ),
                     tint = DarkBrown,
                 )
             }
         }
 
         Text(
-            text = "Book Details",
+            text = stringResource(
+                R.string.book_details_title
+            ),
             modifier = Modifier.weight(1f),
             textAlign = TextAlign.Center,
             fontSize = 24.sp,
@@ -310,15 +344,18 @@ private fun BookDetailsHeader(
                 onClick = onSettingsClick
             ) {
                 Icon(
-                    imageVector = Icons.Default.Settings,
-                    contentDescription = "Edit Book",
+                    imageVector =
+                        Icons.Default.Settings,
+                    contentDescription =
+                        stringResource(
+                            R.string.edit_book
+                        ),
                     tint = Terracotta,
                 )
             }
         }
     }
 }
-
 
 @Composable
 private fun BookHeader(
@@ -330,66 +367,95 @@ private fun BookHeader(
     isbn: String?,
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(22.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = CreamCard
-        ),
+        modifier =
+            Modifier.fillMaxWidth(),
+        shape =
+            RoundedCornerShape(22.dp),
+        colors =
+            CardDefaults.cardColors(
+                containerColor =
+                    CreamCard
+            ),
     ) {
-
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(18.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp),
+            verticalArrangement =
+                Arrangement.spacedBy(14.dp),
         ) {
-
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(18.dp),
-                verticalAlignment = Alignment.CenterVertically,
+                modifier =
+                    Modifier.fillMaxWidth(),
+                horizontalArrangement =
+                    Arrangement.spacedBy(18.dp),
+                verticalAlignment =
+                    Alignment.CenterVertically,
             ) {
-
                 Box(
                     modifier = Modifier
                         .size(
                             width = 110.dp,
                             height = 160.dp
                         )
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(Terracotta),
-                    contentAlignment = Alignment.Center,
+                        .clip(
+                            RoundedCornerShape(
+                                14.dp
+                            )
+                        )
+                        .background(
+                            Terracotta
+                        ),
+                    contentAlignment =
+                        Alignment.Center,
                 ) {
-
                     if (!coverUrl.isNullOrBlank()) {
                         AsyncImage(
                             model = coverUrl,
-                            contentDescription = "Book cover of $title",
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop,
+                            contentDescription =
+                                stringResource(
+                                    R.string
+                                        .book_cover_content_description,
+                                    title
+                                ),
+                            modifier =
+                                Modifier
+                                    .fillMaxSize(),
+                            contentScale =
+                                ContentScale.Crop,
                         )
                     } else {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Filled.MenuBook,
-                            contentDescription = null,
+                            imageVector =
+                                Icons.AutoMirrored
+                                    .Filled
+                                    .MenuBook,
+                            contentDescription =
+                                null,
                             tint = Color.White,
-                            modifier = Modifier.size(42.dp),
+                            modifier =
+                                Modifier.size(
+                                    42.dp
+                                ),
                         )
                     }
                 }
 
                 Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier =
+                        Modifier.weight(1f),
+                    verticalArrangement =
+                        Arrangement.spacedBy(8.dp),
                 ) {
-
                     Text(
                         text = title,
                         fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight =
+                            FontWeight.Bold,
                         color = DarkBrown,
                         maxLines = 3,
-                        overflow = TextOverflow.Ellipsis,
+                        overflow =
+                            TextOverflow.Ellipsis,
                     )
 
                     Text(
@@ -397,30 +463,47 @@ private fun BookHeader(
                         fontSize = 15.sp,
                         color = MutedBrown,
                         maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
+                        overflow =
+                            TextOverflow.Ellipsis,
                     )
 
                     Spacer(
-                        modifier = Modifier.height(4.dp)
+                        modifier =
+                            Modifier.height(4.dp)
                     )
 
                     BookInfoPill(
-                        text = status.displayName(),
-                        backgroundColor = Terracotta.copy(alpha = 0.14f),
-                        textColor = Terracotta,
+                        text =
+                            status.displayName(),
+                        backgroundColor =
+                            Terracotta.copy(
+                                alpha = 0.14f
+                            ),
+                        textColor =
+                            Terracotta,
                     )
 
                     BookInfoPill(
-                        text = ownership.displayName(),
-                        backgroundColor = SoftSage.copy(alpha = 0.20f),
-                        textColor = Color(0xFF66785F),
+                        text =
+                            ownership.displayName(),
+                        backgroundColor =
+                            SoftSage.copy(
+                                alpha = 0.20f
+                            ),
+                        textColor =
+                            Color(
+                                0xFF66785F
+                            ),
                     )
                 }
             }
 
             if (!isbn.isNullOrBlank()) {
                 Text(
-                    text = "ISBN  •  $isbn",
+                    text = stringResource(
+                        R.string.book_isbn_details,
+                        isbn
+                    ),
                     fontSize = 13.sp,
                     color = MutedBrown,
                 )
@@ -429,7 +512,6 @@ private fun BookHeader(
     }
 }
 
-
 @Composable
 private fun BookInfoPill(
     text: String,
@@ -437,22 +519,24 @@ private fun BookInfoPill(
     textColor: Color,
 ) {
     Surface(
-        shape = RoundedCornerShape(50.dp),
+        shape =
+            RoundedCornerShape(50.dp),
         color = backgroundColor,
     ) {
         Text(
             text = text,
-            modifier = Modifier.padding(
-                horizontal = 12.dp,
-                vertical = 6.dp
-            ),
+            modifier =
+                Modifier.padding(
+                    horizontal = 12.dp,
+                    vertical = 6.dp
+                ),
             color = textColor,
             fontSize = 12.sp,
-            fontWeight = FontWeight.SemiBold,
+            fontWeight =
+                FontWeight.SemiBold,
         )
     }
 }
-
 
 @Composable
 private fun BookInfoSection(
@@ -463,9 +547,12 @@ private fun BookInfoSection(
     val progress =
         if (totalPages > 0) {
             (
-                currentPage.toFloat() /
-                    totalPages.toFloat()
-                ).coerceIn(0f, 1f)
+                    currentPage.toFloat() /
+                            totalPages.toFloat()
+                    ).coerceIn(
+                    0f,
+                    1f
+                )
         } else {
             0f
         }
@@ -473,47 +560,68 @@ private fun BookInfoSection(
     val progressPercentage =
         (progress * 100).toInt()
 
-    var isDescriptionExpanded by rememberSaveable {
+    var isDescriptionExpanded by
+    rememberSaveable {
         mutableStateOf(false)
     }
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(22.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White
-        ),
+        modifier =
+            Modifier.fillMaxWidth(),
+        shape =
+            RoundedCornerShape(22.dp),
+        colors =
+            CardDefaults.cardColors(
+                containerColor =
+                    Color.White
+            ),
     ) {
-
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(18.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement =
+                Arrangement.spacedBy(12.dp),
         ) {
-
             Text(
-                text = "Reading Progress",
+                text = stringResource(
+                    R.string
+                        .reading_progress_title
+                ),
                 color = DarkBrown,
                 fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
+                fontWeight =
+                    FontWeight.Bold,
             )
 
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
+                modifier =
+                    Modifier.fillMaxWidth(),
+                horizontalArrangement =
+                    Arrangement.SpaceBetween,
+                verticalAlignment =
+                    Alignment.CenterVertically,
             ) {
-
                 Column {
                     Text(
-                        text = "$currentPage / $totalPages pages",
+                        text =
+                            stringResource(
+                                R.string
+                                    .pages_progress,
+                                currentPage,
+                                totalPages
+                            ),
                         color = DarkBrown,
-                        fontWeight = FontWeight.SemiBold,
+                        fontWeight =
+                            FontWeight.SemiBold,
                     )
 
                     Text(
-                        text = "Keep going ✨",
+                        text =
+                            stringResource(
+                                R.string
+                                    .keep_going
+                            ),
                         color = MutedBrown,
                         fontSize = 12.sp,
                     )
@@ -521,65 +629,97 @@ private fun BookInfoSection(
 
                 Surface(
                     shape = CircleShape,
-                    color = Terracotta.copy(alpha = 0.12f),
+                    color =
+                        Terracotta.copy(
+                            alpha = 0.12f
+                        ),
                 ) {
                     Text(
-                        text = "$progressPercentage%",
-                        modifier = Modifier.padding(
-                            horizontal = 12.dp,
-                            vertical = 8.dp
-                        ),
+                        text =
+                            stringResource(
+                                R.string
+                                    .progress_percentage,
+                                progressPercentage
+                            ),
+                        modifier =
+                            Modifier.padding(
+                                horizontal =
+                                    12.dp,
+                                vertical =
+                                    8.dp
+                            ),
                         color = Terracotta,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight =
+                            FontWeight.Bold,
                     )
                 }
             }
 
             LinearProgressIndicator(
-            progress = { progress },
-            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(9.dp)
-                                .clip(RoundedCornerShape(10.dp)),
-            color = Terracotta,
-            trackColor = Terracotta.copy(alpha = 0.13f),
-            strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
+                progress = {
+                    progress
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(9.dp)
+                    .clip(
+                        RoundedCornerShape(
+                            10.dp
+                        )
+                    ),
+                color = Terracotta,
+                trackColor =
+                    Terracotta.copy(
+                        alpha = 0.13f
+                    ),
+                strokeCap =
+                    ProgressIndicatorDefaults
+                        .LinearStrokeCap,
             )
 
             Spacer(
-                modifier = Modifier.height(6.dp)
+                modifier =
+                    Modifier.height(6.dp)
             )
 
             Text(
-                text = "About this book",
+                text = stringResource(
+                    R.string.about_this_book
+                ),
                 color = DarkBrown,
                 fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
+                fontWeight =
+                    FontWeight.Bold,
             )
 
             if (description.isNullOrBlank()) {
-
                 Text(
-                    text = "No description available.",
+                    text =
+                        stringResource(
+                            R.string
+                                .no_description_available
+                        ),
                     color = MutedBrown,
                     fontSize = 14.sp,
-                    fontStyle = FontStyle.Italic,
+                    fontStyle =
+                        FontStyle.Italic,
                 )
-
             } else {
-
                 Text(
                     text = description,
                     color = MutedBrown,
                     fontSize = 14.sp,
                     lineHeight = 21.sp,
                     maxLines =
-                        if (isDescriptionExpanded) {
+                        if (
+                            isDescriptionExpanded
+                        ) {
                             Int.MAX_VALUE
                         } else {
                             4
                         },
-                    overflow = TextOverflow.Ellipsis,
+                    overflow =
+                        TextOverflow.Ellipsis,
                 )
 
                 TextButton(
@@ -587,50 +727,74 @@ private fun BookInfoSection(
                         isDescriptionExpanded =
                             !isDescriptionExpanded
                     },
-                    modifier = Modifier.align(Alignment.End)
+                    modifier =
+                        Modifier.align(
+                            Alignment.End
+                        )
                 ) {
                     Text(
                         text =
-                            if (isDescriptionExpanded) {
-                                "Show less"
+                            if (
+                                isDescriptionExpanded
+                            ) {
+                                stringResource(
+                                    R.string
+                                        .show_less
+                                )
                             } else {
-                                "Show more"
+                                stringResource(
+                                    R.string
+                                        .show_more
+                                )
                             },
                         color = Terracotta,
-                        fontWeight = FontWeight.SemiBold,
+                        fontWeight =
+                            FontWeight.SemiBold,
                     )
                 }
             }
         }
     }
 }
+
 @Composable
 private fun ReadingJournalSection(
     bookId: Int,
-    journalEntries: List<ReadingJournalEntry>,
+    journalEntries:
+    List<ReadingJournalEntry>,
     totalPages: Int,
     onAddJournalEntry: (
         JournalEntryType,
         String,
         Int?
     ) -> Unit,
-    onUpdateJournalEntry: (ReadingJournalEntry) -> Unit,
-    onDeleteJournalEntry: (ReadingJournalEntry) -> Unit,
+    onUpdateJournalEntry:
+        (ReadingJournalEntry) -> Unit,
+    onDeleteJournalEntry:
+        (ReadingJournalEntry) -> Unit,
 ) {
-    var journalText by rememberSaveable(bookId) {
+    var journalText by
+    rememberSaveable(bookId) {
         mutableStateOf("")
     }
 
-    var journalPageText by rememberSaveable(bookId) {
+    var journalPageText by
+    rememberSaveable(bookId) {
         mutableStateOf("")
     }
 
-    var selectedJournalType by rememberSaveable(bookId) {
-        mutableStateOf(JournalEntryType.NOTE)
+    var selectedJournalType by
+    rememberSaveable(bookId) {
+        mutableStateOf(
+            JournalEntryType.NOTE
+        )
     }
 
-    var selectedFilter by rememberSaveable(bookId) {
-        mutableStateOf(JournalFilter.ALL)
+    var selectedFilter by
+    rememberSaveable(bookId) {
+        mutableStateOf(
+            JournalFilter.ALL
+        )
     }
 
     val filteredEntries =
@@ -639,13 +803,17 @@ private fun ReadingJournalSection(
                 journalEntries
 
             JournalFilter.NOTES ->
-                journalEntries.filter { entry ->
-                    entry.type == JournalEntryType.NOTE
+                journalEntries.filter {
+                        entry ->
+                    entry.type ==
+                            JournalEntryType.NOTE
                 }
 
             JournalFilter.QUOTES ->
-                journalEntries.filter { entry ->
-                    entry.type == JournalEntryType.QUOTE
+                journalEntries.filter {
+                        entry ->
+                    entry.type ==
+                            JournalEntryType.QUOTE
                 }
         }
 
@@ -657,88 +825,123 @@ private fun ReadingJournalSection(
                 (
                         journalPage != null &&
                                 journalPage > 0 &&
-                                journalPage <= totalPages
+                                journalPage <=
+                                totalPages
                         )
 
     Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        modifier =
+            Modifier.fillMaxWidth(),
+        verticalArrangement =
+            Arrangement.spacedBy(12.dp),
     ) {
-
         Text(
-            text = "Reading Journal",
+            text = stringResource(
+                R.string.reading_journal
+            ),
             color = DarkBrown,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
         )
 
         Text(
-            text = "Save thoughts, favourite quotes and little moments from your reading.",
+            text = stringResource(
+                R.string
+                    .reading_journal_description
+            ),
             color = MutedBrown,
             fontSize = 13.sp,
         )
 
-        // ADD NEW JOURNAL ENTRY
         Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(22.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = CreamCard
-            ),
+            modifier =
+                Modifier.fillMaxWidth(),
+            shape =
+                RoundedCornerShape(22.dp),
+            colors =
+                CardDefaults.cardColors(
+                    containerColor =
+                        CreamCard
+                ),
         ) {
-
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement =
+                    Arrangement.spacedBy(12.dp),
             ) {
-
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    modifier =
+                        Modifier.fillMaxWidth(),
+                    horizontalArrangement =
+                        Arrangement.spacedBy(
+                            10.dp
+                        ),
                 ) {
-
                     JournalTypeButton(
-                        text = "📝 Note",
+                        text =
+                            stringResource(
+                                R.string
+                                    .journal_note_type
+                            ),
                         selected =
                             selectedJournalType ==
-                                    JournalEntryType.NOTE,
-                        modifier = Modifier.weight(1f),
+                                    JournalEntryType
+                                        .NOTE,
+                        modifier =
+                            Modifier.weight(1f),
                         onClick = {
                             selectedJournalType =
-                                JournalEntryType.NOTE
+                                JournalEntryType
+                                    .NOTE
                         }
                     )
 
                     JournalTypeButton(
-                        text = "💬 Quote",
+                        text =
+                            stringResource(
+                                R.string
+                                    .journal_quote_type
+                            ),
                         selected =
                             selectedJournalType ==
-                                    JournalEntryType.QUOTE,
-                        modifier = Modifier.weight(1f),
+                                    JournalEntryType
+                                        .QUOTE,
+                        modifier =
+                            Modifier.weight(1f),
                         onClick = {
                             selectedJournalType =
-                                JournalEntryType.QUOTE
+                                JournalEntryType
+                                    .QUOTE
                         }
                     )
                 }
 
                 OutlinedTextField(
                     value = journalText,
-                    onValueChange = { value ->
+                    onValueChange = {
+                            value ->
                         journalText = value
                     },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier =
+                        Modifier.fillMaxWidth(),
                     label = {
                         Text(
                             if (
                                 selectedJournalType ==
-                                JournalEntryType.QUOTE
+                                JournalEntryType
+                                    .QUOTE
                             ) {
-                                "Favourite quote"
+                                stringResource(
+                                    R.string
+                                        .favourite_quote
+                                )
                             } else {
-                                "Your note"
+                                stringResource(
+                                    R.string
+                                        .your_note
+                                )
                             }
                         )
                     },
@@ -746,50 +949,80 @@ private fun ReadingJournalSection(
                         Text(
                             if (
                                 selectedJournalType ==
-                                JournalEntryType.QUOTE
+                                JournalEntryType
+                                    .QUOTE
                             ) {
-                                "Write the quote here..."
+                                stringResource(
+                                    R.string
+                                        .write_quote_here
+                                )
                             } else {
-                                "What are you thinking?"
+                                stringResource(
+                                    R.string
+                                        .what_are_you_thinking
+                                )
                             }
                         )
                     },
                     minLines = 3,
-                    shape = RoundedCornerShape(14.dp),
+                    shape =
+                        RoundedCornerShape(
+                            14.dp
+                        ),
                 )
 
                 OutlinedTextField(
-                    value = journalPageText,
-                    onValueChange = { value ->
+                    value =
+                        journalPageText,
+                    onValueChange = {
+                            value ->
 
                         if (
-                            value.all { character ->
-                                character.isDigit()
+                            value.all {
+                                    character ->
+                                character
+                                    .isDigit()
                             }
                         ) {
-                            journalPageText = value
+                            journalPageText =
+                                value
                         }
                     },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier =
+                        Modifier.fillMaxWidth(),
                     label = {
-                        Text("Page (optional)")
+                        Text(
+                            stringResource(
+                                R.string
+                                    .page_optional
+                            )
+                        )
                     },
                     singleLine = true,
-                    isError = !isJournalPageValid,
+                    isError =
+                        !isJournalPageValid,
                     supportingText = {
-                        if (!isJournalPageValid) {
+                        if (
+                            !isJournalPageValid
+                        ) {
                             Text(
                                 text =
-                                    "Page must be between 1 and $totalPages."
+                                    stringResource(
+                                        R.string
+                                            .journal_page_range_error,
+                                        totalPages
+                                    )
                             )
                         }
                     },
-                    shape = RoundedCornerShape(14.dp),
+                    shape =
+                        RoundedCornerShape(
+                            14.dp
+                        ),
                 )
 
                 Button(
                     onClick = {
-
                         onAddJournalEntry(
                             selectedJournalType,
                             journalText,
@@ -799,88 +1032,121 @@ private fun ReadingJournalSection(
                         journalText = ""
                         journalPageText = ""
                     },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier =
+                        Modifier.fillMaxWidth(),
                     enabled =
-                        journalText.isNotBlank() &&
+                        journalText
+                            .isNotBlank() &&
                                 isJournalPageValid,
-                    shape = RoundedCornerShape(14.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Terracotta
-                    )
+                    shape =
+                        RoundedCornerShape(
+                            14.dp
+                        ),
+                    colors =
+                        ButtonDefaults
+                            .buttonColors(
+                                containerColor =
+                                    Terracotta
+                            )
                 ) {
                     Text(
-                        text = "Save to Journal",
-                        fontWeight = FontWeight.SemiBold,
+                        text =
+                            stringResource(
+                                R.string
+                                    .save_to_journal
+                            ),
+                        fontWeight =
+                            FontWeight.SemiBold,
                     )
                 }
             }
         }
 
-        // NO ENTRIES AT ALL
         if (journalEntries.isEmpty()) {
-
             Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(18.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = LightCream
-                )
+                modifier =
+                    Modifier.fillMaxWidth(),
+                shape =
+                    RoundedCornerShape(
+                        18.dp
+                    ),
+                colors =
+                    CardDefaults.cardColors(
+                        containerColor =
+                            LightCream
+                    )
             ) {
-
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(20.dp),
                     horizontalAlignment =
-                        Alignment.CenterHorizontally,
+                        Alignment
+                            .CenterHorizontally,
                     verticalArrangement =
-                        Arrangement.spacedBy(8.dp)
+                        Arrangement.spacedBy(
+                            8.dp
+                        )
                 ) {
-
                     Text(
                         text = "📖",
                         fontSize = 28.sp
                     )
 
                     Text(
-                        text = "No journal entries yet",
+                        text =
+                            stringResource(
+                                R.string
+                                    .no_journal_entries_yet
+                            ),
                         color = DarkBrown,
-                        fontWeight = FontWeight.Bold
+                        fontWeight =
+                            FontWeight.Bold
                     )
 
                     Text(
                         text =
-                            "Add a note or save a favourite quote from this book.",
+                            stringResource(
+                                R.string
+                                    .journal_empty_hint
+                            ),
                         color = MutedBrown,
                         fontSize = 13.sp,
-                        textAlign = TextAlign.Center
+                        textAlign =
+                            TextAlign.Center
                     )
                 }
             }
-
         } else {
-
-            // ENTRIES HEADER
             Text(
-                text = "Your entries",
+                text = stringResource(
+                    R.string.your_entries
+                ),
                 color = DarkBrown,
                 fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
+                fontWeight =
+                    FontWeight.Bold,
             )
 
-            // FILTERS
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier =
+                    Modifier.fillMaxWidth(),
                 horizontalArrangement =
-                    Arrangement.spacedBy(8.dp)
+                    Arrangement.spacedBy(
+                        8.dp
+                    )
             ) {
-
                 JournalFilterButton(
-                    text = "All",
+                    text =
+                        stringResource(
+                            R.string
+                                .filter_all
+                        ),
                     selected =
                         selectedFilter ==
                                 JournalFilter.ALL,
-                    modifier = Modifier.weight(1f),
+                    modifier =
+                        Modifier.weight(1f),
                     onClick = {
                         selectedFilter =
                             JournalFilter.ALL
@@ -888,11 +1154,16 @@ private fun ReadingJournalSection(
                 )
 
                 JournalFilterButton(
-                    text = "Notes",
+                    text =
+                        stringResource(
+                            R.string
+                                .journal_filter_notes
+                        ),
                     selected =
                         selectedFilter ==
                                 JournalFilter.NOTES,
-                    modifier = Modifier.weight(1f),
+                    modifier =
+                        Modifier.weight(1f),
                     onClick = {
                         selectedFilter =
                             JournalFilter.NOTES
@@ -900,11 +1171,16 @@ private fun ReadingJournalSection(
                 )
 
                 JournalFilterButton(
-                    text = "Quotes",
+                    text =
+                        stringResource(
+                            R.string
+                                .journal_filter_quotes
+                        ),
                     selected =
                         selectedFilter ==
                                 JournalFilter.QUOTES,
-                    modifier = Modifier.weight(1f),
+                    modifier =
+                        Modifier.weight(1f),
                     onClick = {
                         selectedFilter =
                             JournalFilter.QUOTES
@@ -912,37 +1188,47 @@ private fun ReadingJournalSection(
                 )
             }
 
-            // FILTER HAS NO RESULTS
             if (filteredEntries.isEmpty()) {
-
                 Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(18.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = LightCream
-                    )
+                    modifier =
+                        Modifier.fillMaxWidth(),
+                    shape =
+                        RoundedCornerShape(
+                            18.dp
+                        ),
+                    colors =
+                        CardDefaults
+                            .cardColors(
+                                containerColor =
+                                    LightCream
+                            )
                 ) {
-
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(18.dp),
                         horizontalAlignment =
-                            Alignment.CenterHorizontally,
+                            Alignment
+                                .CenterHorizontally,
                         verticalArrangement =
-                            Arrangement.spacedBy(6.dp)
+                            Arrangement
+                                .spacedBy(6.dp)
                     ) {
-
                         Text(
                             text =
-                                when (selectedFilter) {
-                                    JournalFilter.NOTES ->
+                                when (
+                                    selectedFilter
+                                ) {
+                                    JournalFilter
+                                        .NOTES ->
                                         "📝"
 
-                                    JournalFilter.QUOTES ->
+                                    JournalFilter
+                                        .QUOTES ->
                                         "💬"
 
-                                    JournalFilter.ALL ->
+                                    JournalFilter
+                                        .ALL ->
                                         "📖"
                                 },
                             fontSize = 24.sp
@@ -950,55 +1236,87 @@ private fun ReadingJournalSection(
 
                         Text(
                             text =
-                                when (selectedFilter) {
-                                    JournalFilter.NOTES ->
-                                        "No notes yet"
+                                when (
+                                    selectedFilter
+                                ) {
+                                    JournalFilter
+                                        .NOTES ->
+                                        stringResource(
+                                            R.string
+                                                .no_notes_yet
+                                        )
 
-                                    JournalFilter.QUOTES ->
-                                        "No quotes yet"
+                                    JournalFilter
+                                        .QUOTES ->
+                                        stringResource(
+                                            R.string
+                                                .no_quotes_yet
+                                        )
 
-                                    JournalFilter.ALL ->
-                                        "No journal entries yet"
+                                    JournalFilter
+                                        .ALL ->
+                                        stringResource(
+                                            R.string
+                                                .no_journal_entries_yet
+                                        )
                                 },
                             color = DarkBrown,
-                            fontWeight = FontWeight.SemiBold
+                            fontWeight =
+                                FontWeight
+                                    .SemiBold
                         )
 
                         Text(
                             text =
-                                when (selectedFilter) {
-                                    JournalFilter.NOTES ->
-                                        "Your notes will appear here."
+                                when (
+                                    selectedFilter
+                                ) {
+                                    JournalFilter
+                                        .NOTES ->
+                                        stringResource(
+                                            R.string
+                                                .notes_appear_here
+                                        )
 
-                                    JournalFilter.QUOTES ->
-                                        "Your favourite quotes will appear here."
+                                    JournalFilter
+                                        .QUOTES ->
+                                        stringResource(
+                                            R.string
+                                                .quotes_appear_here
+                                        )
 
-                                    JournalFilter.ALL ->
-                                        "Your journal entries will appear here."
+                                    JournalFilter
+                                        .ALL ->
+                                        stringResource(
+                                            R.string
+                                                .journal_entries_appear_here
+                                        )
                                 },
                             color = MutedBrown,
                             fontSize = 12.sp,
-                            textAlign = TextAlign.Center
+                            textAlign =
+                                TextAlign.Center
                         )
                     }
                 }
-
             } else {
-
-                // FILTERED ENTRIES
-                filteredEntries.forEach { entry ->
-
-                    JournalEntryCard(
-                        entry = entry,
-                        totalPages = totalPages,
-                        onUpdate = onUpdateJournalEntry,
-                        onDelete = onDeleteJournalEntry
-                    )
-                }
+                filteredEntries
+                    .forEach { entry ->
+                        JournalEntryCard(
+                            entry = entry,
+                            totalPages =
+                                totalPages,
+                            onUpdate =
+                                onUpdateJournalEntry,
+                            onDelete =
+                                onDeleteJournalEntry
+                        )
+                    }
             }
         }
     }
 }
+
 @Composable
 private fun JournalFilterButton(
     text: String,
@@ -1009,21 +1327,26 @@ private fun JournalFilterButton(
     OutlinedButton(
         onClick = onClick,
         modifier = modifier,
-        shape = RoundedCornerShape(50.dp),
-        colors = ButtonDefaults.outlinedButtonColors(
-            containerColor =
-                if (selected) {
-                    Terracotta.copy(alpha = 0.12f)
-                } else {
-                    Color.Transparent
-                },
-            contentColor =
-                if (selected) {
-                    Terracotta
-                } else {
-                    MutedBrown
-                }
-        )
+        shape =
+            RoundedCornerShape(50.dp),
+        colors =
+            ButtonDefaults
+                .outlinedButtonColors(
+                    containerColor =
+                        if (selected) {
+                            Terracotta.copy(
+                                alpha = 0.12f
+                            )
+                        } else {
+                            Color.Transparent
+                        },
+                    contentColor =
+                        if (selected) {
+                            Terracotta
+                        } else {
+                            MutedBrown
+                        }
+                )
     ) {
         Text(
             text = text,
@@ -1037,6 +1360,7 @@ private fun JournalFilterButton(
         )
     }
 }
+
 @Composable
 private fun JournalTypeButton(
     text: String,
@@ -1047,36 +1371,46 @@ private fun JournalTypeButton(
     Button(
         onClick = onClick,
         modifier = modifier,
-        shape = RoundedCornerShape(14.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor =
-                if (selected) {
-                    Terracotta
-                } else {
-                    LightCream
-                },
-            contentColor =
-                if (selected) {
-                    Color.White
-                } else {
-                    DarkBrown
-                }
-        ),
+        shape =
+            RoundedCornerShape(14.dp),
+        colors =
+            ButtonDefaults
+                .buttonColors(
+                    containerColor =
+                        if (selected) {
+                            Terracotta
+                        } else {
+                            LightCream
+                        },
+                    contentColor =
+                        if (selected) {
+                            Color.White
+                        } else {
+                            DarkBrown
+                        }
+                ),
     ) {
         Text(
             text = text,
-            fontWeight = FontWeight.SemiBold,
+            fontWeight =
+                FontWeight.SemiBold,
         )
     }
 }
 
-private fun formatJournalDate(timestamp: Long): String {
+private fun formatJournalDate(
+    timestamp: Long
+): String {
     val formatter =
-        DateTimeFormatter.ofPattern("dd MMM yyyy • HH:mm")
+        DateTimeFormatter.ofPattern(
+            "dd MMM yyyy • HH:mm"
+        )
 
     return Instant
         .ofEpochMilli(timestamp)
-        .atZone(ZoneId.systemDefault())
+        .atZone(
+            ZoneId.systemDefault()
+        )
         .format(formatter)
 }
 
@@ -1085,89 +1419,130 @@ private enum class JournalFilter {
     NOTES,
     QUOTES
 }
+
 @Composable
 private fun JournalEntryCard(
     entry: ReadingJournalEntry,
     totalPages: Int,
-    onUpdate: (ReadingJournalEntry) -> Unit,
-    onDelete: (ReadingJournalEntry) -> Unit,
+    onUpdate:
+        (ReadingJournalEntry) -> Unit,
+    onDelete:
+        (ReadingJournalEntry) -> Unit,
 ) {
-    var showDeleteConfirmation by rememberSaveable {
+    var showDeleteConfirmation by
+    rememberSaveable {
         mutableStateOf(false)
     }
 
-    var showEditDialog by rememberSaveable {
+    var showEditDialog by
+    rememberSaveable {
         mutableStateOf(false)
     }
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(
-            containerColor =
-                if (entry.type == JournalEntryType.QUOTE) {
-                    Color(0xFFF7EFE4)
-                } else {
-                    Color.White
-                }
-        ),
+        modifier =
+            Modifier.fillMaxWidth(),
+        shape =
+            RoundedCornerShape(18.dp),
+        colors =
+            CardDefaults.cardColors(
+                containerColor =
+                    if (
+                        entry.type ==
+                        JournalEntryType.QUOTE
+                    ) {
+                        Color(0xFFF7EFE4)
+                    } else {
+                        Color.White
+                    }
+            ),
     ) {
-
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement =
+                Arrangement.spacedBy(8.dp),
         ) {
-
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
+                modifier =
+                    Modifier.fillMaxWidth(),
+                horizontalArrangement =
+                    Arrangement.SpaceBetween,
+                verticalAlignment =
+                    Alignment.CenterVertically,
             ) {
-
                 Text(
                     text =
-                        when (entry.type) {
-                            JournalEntryType.NOTE ->
-                                "📝 Note"
-
-                            JournalEntryType.QUOTE ->
-                                "💬 Quote"
+                        if (
+                            entry.type ==
+                            JournalEntryType.NOTE
+                        ) {
+                            stringResource(
+                                R.string
+                                    .journal_note_type
+                            )
+                        } else {
+                            stringResource(
+                                R.string
+                                    .journal_quote_type
+                            )
                         },
                     color = DarkBrown,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight =
+                        FontWeight.Bold,
                 )
 
                 entry.page?.let { page ->
-
                     Surface(
-                        shape = RoundedCornerShape(50.dp),
-                        color = Terracotta.copy(alpha = 0.10f),
+                        shape =
+                            RoundedCornerShape(
+                                50.dp
+                            ),
+                        color =
+                            Terracotta.copy(
+                                alpha = 0.10f
+                            ),
                     ) {
                         Text(
-                            text = "Page $page",
-                            modifier = Modifier.padding(
-                                horizontal = 10.dp,
-                                vertical = 5.dp
-                            ),
+                            text =
+                                stringResource(
+                                    R.string
+                                        .page_number,
+                                    page
+                                ),
+                            modifier =
+                                Modifier.padding(
+                                    horizontal =
+                                        10.dp,
+                                    vertical =
+                                        5.dp
+                                ),
                             color = Terracotta,
                             fontSize = 12.sp,
-                            fontWeight = FontWeight.SemiBold,
+                            fontWeight =
+                                FontWeight
+                                    .SemiBold,
                         )
                     }
                 }
             }
 
             Text(
-                text = formatJournalDate(entry.createdAt),
+                text =
+                    formatJournalDate(
+                        entry.createdAt
+                    ),
                 color = MutedBrown,
                 fontSize = 12.sp
             )
 
             Text(
                 text = entry.content,
-                color = DarkBrown.copy(alpha = 0.86f),
+                color =
+                    DarkBrown.copy(
+                        alpha = 0.86f
+                    ),
                 fontSize = 14.sp,
                 lineHeight = 20.sp,
                 fontStyle =
@@ -1182,8 +1557,14 @@ private fun JournalEntryCard(
             )
 
             Row(
-                modifier = Modifier.align(Alignment.End),
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                modifier =
+                    Modifier.align(
+                        Alignment.End
+                    ),
+                horizontalArrangement =
+                    Arrangement.spacedBy(
+                        4.dp
+                    )
             ) {
                 TextButton(
                     onClick = {
@@ -1191,19 +1572,30 @@ private fun JournalEntryCard(
                     }
                 ) {
                     Text(
-                        text = "Edit",
+                        text =
+                            stringResource(
+                                R.string
+                                    .edit_action
+                            ),
                         color = Terracotta,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight =
+                            FontWeight
+                                .SemiBold
                     )
                 }
 
                 TextButton(
                     onClick = {
-                        showDeleteConfirmation = true
+                        showDeleteConfirmation =
+                            true
                     }
                 ) {
                     Text(
-                        text = "Delete",
+                        text =
+                            stringResource(
+                                R.string
+                                    .delete_action
+                            ),
                         color = DangerRed
                     )
                 }
@@ -1218,113 +1610,182 @@ private fun JournalEntryCard(
             onDismiss = {
                 showEditDialog = false
             },
-            onSave = { updatedEntry ->
+            onSave = {
+                    updatedEntry ->
+
                 onUpdate(updatedEntry)
                 showEditDialog = false
             }
         )
     }
 
-
     if (showDeleteConfirmation) {
-
         AlertDialog(
             onDismissRequest = {
-                showDeleteConfirmation = false
+                showDeleteConfirmation =
+                    false
             },
 
             title = {
                 Text(
                     text =
-                        if (entry.type == JournalEntryType.QUOTE) {
-                            "Delete this quote?"
+                        if (
+                            entry.type ==
+                            JournalEntryType.QUOTE
+                        ) {
+                            stringResource(
+                                R.string
+                                    .delete_quote_question
+                            )
                         } else {
-                            "Delete this note?"
+                            stringResource(
+                                R.string
+                                    .delete_note_question
+                            )
                         },
                     color = DarkBrown,
-                    fontWeight = FontWeight.Bold
+                    fontWeight =
+                        FontWeight.Bold
                 )
             },
 
             text = {
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                    verticalArrangement =
+                        Arrangement.spacedBy(
+                            10.dp
+                        )
                 ) {
-
                     Text(
                         text =
-                            if (entry.type == JournalEntryType.QUOTE) {
-                                "This quote will be permanently removed from your reading journal."
+                            if (
+                                entry.type ==
+                                JournalEntryType.QUOTE
+                            ) {
+                                stringResource(
+                                    R.string
+                                        .delete_quote_warning
+                                )
                             } else {
-                                "This note will be permanently removed from your reading journal."
+                                stringResource(
+                                    R.string
+                                        .delete_note_warning
+                                )
                             },
                         color = MutedBrown,
                         fontSize = 14.sp
                     )
 
                     Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(14.dp),
+                        modifier =
+                            Modifier.fillMaxWidth(),
+                        shape =
+                            RoundedCornerShape(
+                                14.dp
+                            ),
                         color = LightCream
                     ) {
                         Column(
-                            modifier = Modifier.padding(12.dp),
-                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                            modifier =
+                                Modifier.padding(
+                                    12.dp
+                                ),
+                            verticalArrangement =
+                                Arrangement
+                                    .spacedBy(6.dp)
                         ) {
-
                             Row(
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth(),
                                 horizontalArrangement =
-                                    Arrangement.SpaceBetween,
+                                    Arrangement
+                                        .SpaceBetween,
                                 verticalAlignment =
-                                    Alignment.CenterVertically
+                                    Alignment
+                                        .CenterVertically
                             ) {
-
                                 Text(
                                     text =
-                                        when (entry.type) {
-                                            JournalEntryType.NOTE ->
-                                                "📝 Note"
-
-                                            JournalEntryType.QUOTE ->
-                                                "💬 Quote"
+                                        if (
+                                            entry.type ==
+                                            JournalEntryType.NOTE
+                                        ) {
+                                            stringResource(
+                                                R.string
+                                                    .journal_note_type
+                                            )
+                                        } else {
+                                            stringResource(
+                                                R.string
+                                                    .journal_quote_type
+                                            )
                                         },
-                                    color = DarkBrown,
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold
+                                    color =
+                                        DarkBrown,
+                                    fontSize =
+                                        12.sp,
+                                    fontWeight =
+                                        FontWeight
+                                            .Bold
                                 )
 
-                                entry.page?.let { page ->
+                                entry.page?.let {
+                                        page ->
+
                                     Text(
-                                        text = "Page $page",
-                                        color = Terracotta,
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.SemiBold
+                                        text =
+                                            stringResource(
+                                                R.string
+                                                    .page_number,
+                                                page
+                                            ),
+                                        color =
+                                            Terracotta,
+                                        fontSize =
+                                            11.sp,
+                                        fontWeight =
+                                            FontWeight
+                                                .SemiBold
                                     )
                                 }
                             }
 
                             Text(
-                                text = entry.content,
-                                color = DarkBrown.copy(alpha = 0.80f),
+                                text =
+                                    entry.content,
+                                color =
+                                    DarkBrown.copy(
+                                        alpha =
+                                            0.80f
+                                    ),
                                 fontSize = 13.sp,
                                 maxLines = 3,
-                                overflow = TextOverflow.Ellipsis,
+                                overflow =
+                                    TextOverflow
+                                        .Ellipsis,
                                 fontStyle =
                                     if (
                                         entry.type ==
-                                        JournalEntryType.QUOTE
+                                        JournalEntryType
+                                            .QUOTE
                                     ) {
-                                        FontStyle.Italic
+                                        FontStyle
+                                            .Italic
                                     } else {
-                                        FontStyle.Normal
+                                        FontStyle
+                                            .Normal
                                     }
                             )
                         }
                     }
 
                     Text(
-                        text = "This action cannot be undone.",
+                        text =
+                            stringResource(
+                                R.string
+                                    .action_cannot_be_undone
+                            ),
                         color = DangerRed,
                         fontSize = 12.sp
                     )
@@ -1335,17 +1796,30 @@ private fun JournalEntryCard(
                 Button(
                     onClick = {
                         onDelete(entry)
-                        showDeleteConfirmation = false
+                        showDeleteConfirmation =
+                            false
                     },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = DangerRed,
-                        contentColor = Color.White
-                    ),
-                    shape = RoundedCornerShape(12.dp)
+                    colors =
+                        ButtonDefaults
+                            .buttonColors(
+                                containerColor =
+                                    DangerRed,
+                                contentColor =
+                                    Color.White
+                            ),
+                    shape =
+                        RoundedCornerShape(
+                            12.dp
+                        )
                 ) {
                     Text(
-                        text = "Delete",
-                        fontWeight = FontWeight.Bold
+                        text =
+                            stringResource(
+                                R.string
+                                    .delete_action
+                            ),
+                        fontWeight =
+                            FontWeight.Bold
                     )
                 }
             },
@@ -1353,13 +1827,20 @@ private fun JournalEntryCard(
             dismissButton = {
                 TextButton(
                     onClick = {
-                        showDeleteConfirmation = false
+                        showDeleteConfirmation =
+                            false
                     }
                 ) {
                     Text(
-                        text = "Keep entry",
+                        text =
+                            stringResource(
+                                R.string
+                                    .keep_entry
+                            ),
                         color = DarkBrown,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight =
+                            FontWeight
+                                .SemiBold
                     )
                 }
             }
@@ -1367,27 +1848,39 @@ private fun JournalEntryCard(
     }
 }
 
-
 @Composable
 private fun EditJournalEntryDialog(
     entry: ReadingJournalEntry,
     totalPages: Int,
     onDismiss: () -> Unit,
-    onSave: (ReadingJournalEntry) -> Unit,
+    onSave:
+        (ReadingJournalEntry) -> Unit,
 ) {
-    var content by rememberSaveable(entry.id) {
-        mutableStateOf(entry.content)
+    var content by
+    rememberSaveable(entry.id) {
+        mutableStateOf(
+            entry.content
+        )
     }
 
-    var pageText by rememberSaveable(entry.id) {
-        mutableStateOf(entry.page?.toString() ?: "")
+    var pageText by
+    rememberSaveable(entry.id) {
+        mutableStateOf(
+            entry.page
+                ?.toString()
+                ?: ""
+        )
     }
 
-    var selectedType by rememberSaveable(entry.id) {
-        mutableStateOf(entry.type)
+    var selectedType by
+    rememberSaveable(entry.id) {
+        mutableStateOf(
+            entry.type
+        )
     }
 
-    val page = pageText.toIntOrNull()
+    val page =
+        pageText.toIntOrNull()
 
     val isPageValid =
         pageText.isBlank() ||
@@ -1402,39 +1895,67 @@ private fun EditJournalEntryDialog(
 
         title = {
             Text(
-                text = "Edit journal entry",
+                text =
+                    stringResource(
+                        R.string
+                            .edit_journal_entry
+                    ),
                 color = DarkBrown,
-                fontWeight = FontWeight.Bold
+                fontWeight =
+                    FontWeight.Bold
             )
         },
 
         text = {
             Column(
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement =
+                    Arrangement.spacedBy(
+                        12.dp
+                    )
             ) {
-
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    modifier =
+                        Modifier.fillMaxWidth(),
+                    horizontalArrangement =
+                        Arrangement.spacedBy(
+                            10.dp
+                        )
                 ) {
-
                     JournalTypeButton(
-                        text = "📝 Note",
+                        text =
+                            stringResource(
+                                R.string
+                                    .journal_note_type
+                            ),
                         selected =
-                            selectedType == JournalEntryType.NOTE,
-                        modifier = Modifier.weight(1f),
+                            selectedType ==
+                                    JournalEntryType
+                                        .NOTE,
+                        modifier =
+                            Modifier.weight(1f),
                         onClick = {
-                            selectedType = JournalEntryType.NOTE
+                            selectedType =
+                                JournalEntryType
+                                    .NOTE
                         }
                     )
 
                     JournalTypeButton(
-                        text = "💬 Quote",
+                        text =
+                            stringResource(
+                                R.string
+                                    .journal_quote_type
+                            ),
                         selected =
-                            selectedType == JournalEntryType.QUOTE,
-                        modifier = Modifier.weight(1f),
+                            selectedType ==
+                                    JournalEntryType
+                                        .QUOTE,
+                        modifier =
+                            Modifier.weight(1f),
                         onClick = {
-                            selectedType = JournalEntryType.QUOTE
+                            selectedType =
+                                JournalEntryType
+                                    .QUOTE
                         }
                     )
                 }
@@ -1444,48 +1965,76 @@ private fun EditJournalEntryDialog(
                     onValueChange = {
                         content = it
                     },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier =
+                        Modifier.fillMaxWidth(),
                     label = {
                         Text(
                             if (
                                 selectedType ==
-                                JournalEntryType.QUOTE
+                                JournalEntryType
+                                    .QUOTE
                             ) {
-                                "Favourite quote"
+                                stringResource(
+                                    R.string
+                                        .favourite_quote
+                                )
                             } else {
-                                "Your note"
+                                stringResource(
+                                    R.string
+                                        .your_note
+                                )
                             }
                         )
                     },
                     minLines = 3,
-                    shape = RoundedCornerShape(14.dp)
+                    shape =
+                        RoundedCornerShape(
+                            14.dp
+                        )
                 )
 
                 OutlinedTextField(
                     value = pageText,
-                    onValueChange = { value ->
+                    onValueChange = {
+                            value ->
+
                         if (
-                            value.all { character ->
-                                character.isDigit()
+                            value.all {
+                                    character ->
+                                character
+                                    .isDigit()
                             }
                         ) {
                             pageText = value
                         }
                     },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier =
+                        Modifier.fillMaxWidth(),
                     label = {
-                        Text("Page (optional)")
+                        Text(
+                            stringResource(
+                                R.string
+                                    .page_optional
+                            )
+                        )
                     },
                     singleLine = true,
                     isError = !isPageValid,
                     supportingText = {
                         if (!isPageValid) {
                             Text(
-                                "Page must be between 1 and $totalPages."
+                                stringResource(
+                                    R.string
+                                        .journal_page_range_error,
+                                    totalPages
+                                )
                             )
                         }
                     },
-                    shape = RoundedCornerShape(14.dp)
+                    shape =
+                        RoundedCornerShape(
+                            14.dp
+                        )
                 )
             }
         },
@@ -1495,8 +2044,10 @@ private fun EditJournalEntryDialog(
                 onClick = {
                     onSave(
                         entry.copy(
-                            type = selectedType,
-                            content = content.trim(),
+                            type =
+                                selectedType,
+                            content =
+                                content.trim(),
                             page = page
                         )
                     )
@@ -1506,9 +2057,14 @@ private fun EditJournalEntryDialog(
                             isPageValid
             ) {
                 Text(
-                    text = "Save",
+                    text =
+                        stringResource(
+                            R.string
+                                .save_action
+                        ),
                     color = Terracotta,
-                    fontWeight = FontWeight.Bold
+                    fontWeight =
+                        FontWeight.Bold
                 )
             }
         },
@@ -1518,7 +2074,11 @@ private fun EditJournalEntryDialog(
                 onClick = onDismiss
             ) {
                 Text(
-                    text = "Cancel",
+                    text =
+                        stringResource(
+                            R.string
+                                .cancel_action
+                        ),
                     color = DarkBrown
                 )
             }
@@ -1526,7 +2086,9 @@ private fun EditJournalEntryDialog(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(
+    ExperimentalMaterial3Api::class
+)
 @Composable
 private fun BookSettingDialog(
     bookId: Int,
@@ -1540,40 +2102,56 @@ private fun BookSettingDialog(
     onDismiss: () -> Unit = {},
     onTitleChange: (String) -> Unit = {},
     onAuthorChange: (String) -> Unit = {},
-    onStatusChange: (ReadingStatus) -> Unit = {},
-    onOwnershipChange: (BookOwnership) -> Unit = {},
-    onCurrentPageChange: (Int) -> Unit = {},
-    onTotalPagesChange: (Int) -> Unit = {},
+    onStatusChange:
+        (ReadingStatus) -> Unit = {},
+    onOwnershipChange:
+        (BookOwnership) -> Unit = {},
+    onCurrentPageChange:
+        (Int) -> Unit = {},
+    onTotalPagesChange:
+        (Int) -> Unit = {},
 ) {
-    var currentTitleText by rememberSaveable(bookId) {
+    var currentTitleText by
+    rememberSaveable(bookId) {
         mutableStateOf(title)
     }
 
-    var currentAuthorText by rememberSaveable(bookId) {
+    var currentAuthorText by
+    rememberSaveable(bookId) {
         mutableStateOf(author)
     }
 
-    var currentPageText by rememberSaveable(bookId) {
-        mutableStateOf(currentPage.toString())
+    var currentPageText by
+    rememberSaveable(bookId) {
+        mutableStateOf(
+            currentPage.toString()
+        )
     }
 
-    var totalPagesText by rememberSaveable(bookId) {
-        mutableStateOf(totalPages.toString())
+    var totalPagesText by
+    rememberSaveable(bookId) {
+        mutableStateOf(
+            totalPages.toString()
+        )
     }
 
-    var selectedStatus by rememberSaveable(bookId) {
+    var selectedStatus by
+    rememberSaveable(bookId) {
         mutableStateOf(status)
     }
 
-    var selectedOwnership by rememberSaveable(bookId) {
+    var selectedOwnership by
+    rememberSaveable(bookId) {
         mutableStateOf(ownership)
     }
 
-    var isStatusMenuExpanded by rememberSaveable(bookId) {
+    var isStatusMenuExpanded by
+    rememberSaveable(bookId) {
         mutableStateOf(false)
     }
 
-    var isOwnershipMenuExpanded by rememberSaveable(bookId) {
+    var isOwnershipMenuExpanded by
+    rememberSaveable(bookId) {
         mutableStateOf(false)
     }
 
@@ -1581,45 +2159,67 @@ private fun BookSettingDialog(
         coverUrl = coverUrl,
         onDismiss = onDismiss,
     ) {
-
         Card(
             modifier = Modifier
                 .fillMaxWidth(0.90f)
                 .heightIn(max = 700.dp),
-            shape = RoundedCornerShape(28.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = Color(0xFFFFFBF7)
-            ),
+            shape =
+                RoundedCornerShape(28.dp),
+            colors =
+                CardDefaults.cardColors(
+                    containerColor =
+                        Color(
+                            0xFFFFFBF7
+                        )
+                ),
         ) {
-
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
+                    .verticalScroll(
+                        rememberScrollState()
+                    )
                     .padding(22.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp),
+                verticalArrangement =
+                    Arrangement.spacedBy(
+                        14.dp
+                    ),
             ) {
-
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
+                    modifier =
+                        Modifier.fillMaxWidth(),
+                    verticalAlignment =
+                        Alignment
+                            .CenterVertically,
                 ) {
-
                     Column(
-                        modifier = Modifier.weight(1f)
+                        modifier =
+                            Modifier.weight(1f)
                     ) {
-
                         Text(
-                            text = "Edit Book",
-                            fontSize = 23.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = DarkBrown,
+                            text =
+                                stringResource(
+                                    R.string
+                                        .edit_book
+                                ),
+                            fontSize =
+                                23.sp,
+                            fontWeight =
+                                FontWeight.Bold,
+                            color =
+                                DarkBrown,
                         )
 
                         Text(
-                            text = "Changes are saved automatically",
-                            fontSize = 12.sp,
-                            color = MutedBrown,
+                            text =
+                                stringResource(
+                                    R.string
+                                        .changes_saved_automatically
+                                ),
+                            fontSize =
+                                12.sp,
+                            color =
+                                MutedBrown,
                         )
                     }
 
@@ -1628,79 +2228,134 @@ private fun BookSettingDialog(
                         color = CreamCard,
                     ) {
                         IconButton(
-                            onClick = onDismiss
+                            onClick =
+                                onDismiss
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "Close",
-                                tint = DarkBrown,
+                                imageVector =
+                                    Icons.Default
+                                        .Close,
+                                contentDescription =
+                                    stringResource(
+                                        R.string
+                                            .close_action
+                                    ),
+                                tint =
+                                    DarkBrown,
                             )
                         }
                     }
                 }
 
                 Spacer(
-                    modifier = Modifier.height(2.dp)
+                    modifier =
+                        Modifier.height(2.dp)
                 )
 
                 Text(
-                    text = "Book information",
-                    fontWeight = FontWeight.Bold,
+                    text =
+                        stringResource(
+                            R.string
+                                .book_information
+                        ),
+                    fontWeight =
+                        FontWeight.Bold,
                     color = DarkBrown,
                 )
 
                 OutlinedTextField(
-                    value = currentTitleText,
-                    onValueChange = { newTitle ->
+                    value =
+                        currentTitleText,
+                    onValueChange = {
+                            newTitle ->
 
-                        currentTitleText = newTitle
+                        currentTitleText =
+                            newTitle
 
-                        if (newTitle.isNotBlank()) {
-                            onTitleChange(newTitle)
+                        if (
+                            newTitle
+                                .isNotBlank()
+                        ) {
+                            onTitleChange(
+                                newTitle
+                            )
                         }
                     },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier =
+                        Modifier.fillMaxWidth(),
                     label = {
-                        Text("Title")
+                        Text(
+                            stringResource(
+                                R.string
+                                    .title_label
+                            )
+                        )
                     },
                     singleLine = true,
-                    shape = RoundedCornerShape(14.dp),
+                    shape =
+                        RoundedCornerShape(
+                            14.dp
+                        ),
                 )
 
                 OutlinedTextField(
-                    value = currentAuthorText,
-                    onValueChange = { newAuthor ->
+                    value =
+                        currentAuthorText,
+                    onValueChange = {
+                            newAuthor ->
 
-                        currentAuthorText = newAuthor
+                        currentAuthorText =
+                            newAuthor
 
-                        if (newAuthor.isNotBlank()) {
-                            onAuthorChange(newAuthor)
+                        if (
+                            newAuthor
+                                .isNotBlank()
+                        ) {
+                            onAuthorChange(
+                                newAuthor
+                            )
                         }
                     },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier =
+                        Modifier.fillMaxWidth(),
                     label = {
-                        Text("Author")
+                        Text(
+                            stringResource(
+                                R.string
+                                    .author_label
+                            )
+                        )
                     },
                     singleLine = true,
-                    shape = RoundedCornerShape(14.dp),
+                    shape =
+                        RoundedCornerShape(
+                            14.dp
+                        ),
                 )
 
                 Text(
-                    text = "Reading",
-                    fontWeight = FontWeight.Bold,
+                    text =
+                        stringResource(
+                            R.string
+                                .reading_section
+                        ),
+                    fontWeight =
+                        FontWeight.Bold,
                     color = DarkBrown,
                 )
 
                 ExposedDropdownMenuBox(
-                    expanded = isStatusMenuExpanded,
+                    expanded =
+                        isStatusMenuExpanded,
                     onExpandedChange = {
                         isStatusMenuExpanded =
                             !isStatusMenuExpanded
                     },
                 ) {
-
                     OutlinedTextField(
-                        value = selectedStatus.displayName(),
+                        value =
+                            selectedStatus
+                                .displayName(),
                         onValueChange = {},
                         modifier = Modifier
                             .fillMaxWidth()
@@ -1711,10 +2366,18 @@ private fun BookSettingDialog(
                                 enabled = true,
                             ),
                         label = {
-                            Text("Reading Status")
+                            Text(
+                                stringResource(
+                                    R.string
+                                        .reading_status
+                                )
+                            )
                         },
                         readOnly = true,
-                        shape = RoundedCornerShape(14.dp),
+                        shape =
+                            RoundedCornerShape(
+                                14.dp
+                            ),
                         trailingIcon = {
                             ExposedDropdownMenuDefaults
                                 .TrailingIcon(
@@ -1725,46 +2388,48 @@ private fun BookSettingDialog(
                     )
 
                     ExposedDropdownMenu(
-                        expanded = isStatusMenuExpanded,
+                        expanded =
+                            isStatusMenuExpanded,
                         onDismissRequest = {
-                            isStatusMenuExpanded = false
+                            isStatusMenuExpanded =
+                                false
                         },
                     ) {
+                        ReadingStatus.entries
+                            .forEach {
+                                    statusOption ->
 
-                        ReadingStatus.entries.forEach {
-                            statusOption ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            statusOption
+                                                .displayName()
+                                        )
+                                    },
+                                    onClick = {
+                                        selectedStatus =
+                                            statusOption
 
-                            DropdownMenuItem(
-                                text = {
-                                    Text(
-                                        statusOption
-                                            .displayName()
-                                    )
-                                },
-                                onClick = {
-                                    selectedStatus =
-                                        statusOption
+                                        onStatusChange(
+                                            statusOption
+                                        )
 
-                                    onStatusChange(
-                                        statusOption
-                                    )
-
-                                    isStatusMenuExpanded =
-                                        false
-                                }
-                            )
-                        }
+                                        isStatusMenuExpanded =
+                                            false
+                                    }
+                                )
+                            }
                     }
                 }
 
                 ExposedDropdownMenuBox(
-                    expanded = isOwnershipMenuExpanded,
+                    expanded =
+                        isOwnershipMenuExpanded,
                     onExpandedChange = {
                         isOwnershipMenuExpanded =
                             !isOwnershipMenuExpanded
                     },
                 ) {
-
                     OutlinedTextField(
                         value =
                             selectedOwnership
@@ -1779,10 +2444,18 @@ private fun BookSettingDialog(
                                 enabled = true,
                             ),
                         label = {
-                            Text("Ownership")
+                            Text(
+                                stringResource(
+                                    R.string
+                                        .ownership_label
+                                )
+                            )
                         },
                         readOnly = true,
-                        shape = RoundedCornerShape(14.dp),
+                        shape =
+                            RoundedCornerShape(
+                                14.dp
+                            ),
                         trailingIcon = {
                             ExposedDropdownMenuDefaults
                                 .TrailingIcon(
@@ -1800,64 +2473,77 @@ private fun BookSettingDialog(
                                 false
                         },
                     ) {
+                        BookOwnership.entries
+                            .forEach {
+                                    ownershipOption ->
 
-                        BookOwnership.entries.forEach {
-                            ownershipOption ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            ownershipOption
+                                                .displayName()
+                                        )
+                                    },
+                                    onClick = {
+                                        selectedOwnership =
+                                            ownershipOption
 
-                            DropdownMenuItem(
-                                text = {
-                                    Text(
-                                        ownershipOption
-                                            .displayName()
-                                    )
-                                },
-                                onClick = {
+                                        onOwnershipChange(
+                                            ownershipOption
+                                        )
 
-                                    selectedOwnership =
-                                        ownershipOption
-
-                                    onOwnershipChange(
-                                        ownershipOption
-                                    )
-
-                                    isOwnershipMenuExpanded =
-                                        false
-                                }
-                            )
-                        }
+                                        isOwnershipMenuExpanded =
+                                            false
+                                    }
+                                )
+                            }
                     }
                 }
 
                 Text(
-                    text = "Pages",
-                    fontWeight = FontWeight.Bold,
+                    text =
+                        stringResource(
+                            R.string
+                                .pages_section
+                        ),
+                    fontWeight =
+                        FontWeight.Bold,
                     color = DarkBrown,
                 )
 
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier =
+                        Modifier.fillMaxWidth(),
                     horizontalArrangement =
-                        Arrangement.spacedBy(10.dp),
+                        Arrangement.spacedBy(
+                            10.dp
+                        ),
                 ) {
-
                     OutlinedTextField(
-                        value = currentPageText,
-                        onValueChange = { value ->
+                        value =
+                            currentPageText,
+                        onValueChange = {
+                                value ->
 
                             if (
                                 value.all {
-                                    character ->
-                                    character.isDigit()
+                                        character ->
+                                    character
+                                        .isDigit()
                                 }
                             ) {
-                                currentPageText = value
+                                currentPageText =
+                                    value
 
                                 val newCurrentPage =
-                                    value.toIntOrNull()
+                                    value
+                                        .toIntOrNull()
 
                                 if (
-                                    newCurrentPage != null &&
-                                    newCurrentPage >= 0 &&
+                                    newCurrentPage !=
+                                    null &&
+                                    newCurrentPage >=
+                                    0 &&
                                     newCurrentPage <=
                                     totalPages
                                 ) {
@@ -1867,37 +2553,54 @@ private fun BookSettingDialog(
                                 }
                             }
                         },
-                        modifier = Modifier.weight(1f),
+                        modifier =
+                            Modifier.weight(1f),
                         label = {
-                            Text("Current")
+                            Text(
+                                stringResource(
+                                    R.string
+                                        .current_page_label
+                                )
+                            )
                         },
                         singleLine = true,
-                        shape = RoundedCornerShape(14.dp),
+                        shape =
+                            RoundedCornerShape(
+                                14.dp
+                            ),
                     )
 
                     OutlinedTextField(
-                        value = totalPagesText,
-                        onValueChange = { value ->
+                        value =
+                            totalPagesText,
+                        onValueChange = {
+                                value ->
 
                             if (
                                 value.all {
-                                    character ->
-                                    character.isDigit()
+                                        character ->
+                                    character
+                                        .isDigit()
                                 }
                             ) {
-                                totalPagesText = value
+                                totalPagesText =
+                                    value
 
                                 val newTotalPages =
-                                    value.toIntOrNull()
+                                    value
+                                        .toIntOrNull()
 
                                 val typedCurrentPage =
-                                    currentPageText.toIntOrNull()
+                                    currentPageText
+                                        .toIntOrNull()
 
                                 val currentPageLowerBound =
-                                    typedCurrentPage ?: currentPage
+                                    typedCurrentPage
+                                        ?: currentPage
 
                                 if (
-                                    newTotalPages != null &&
+                                    newTotalPages !=
+                                    null &&
                                     newTotalPages > 0 &&
                                     newTotalPages >=
                                     currentPageLowerBound
@@ -1907,45 +2610,65 @@ private fun BookSettingDialog(
                                     )
 
                                     if (
-                                        typedCurrentPage != null &&
-                                        typedCurrentPage >= 0
-                                        )
-                                    {
+                                        typedCurrentPage !=
+                                        null &&
+                                        typedCurrentPage >=
+                                        0
+                                    ) {
                                         onCurrentPageChange(
                                             typedCurrentPage
                                         )
                                     }
-
                                 }
                             }
                         },
-                        modifier = Modifier.weight(1f),
+                        modifier =
+                            Modifier.weight(1f),
                         label = {
-                            Text("Total")
+                            Text(
+                                stringResource(
+                                    R.string
+                                        .total_label
+                                )
+                            )
                         },
                         singleLine = true,
-                        shape = RoundedCornerShape(14.dp),
+                        shape =
+                            RoundedCornerShape(
+                                14.dp
+                            ),
                     )
                 }
 
                 Button(
                     onClick = onDismiss,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(14.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Terracotta
-                    )
+                    modifier =
+                        Modifier.fillMaxWidth(),
+                    shape =
+                        RoundedCornerShape(
+                            14.dp
+                        ),
+                    colors =
+                        ButtonDefaults
+                            .buttonColors(
+                                containerColor =
+                                    Terracotta
+                            )
                 ) {
                     Text(
-                        text = "Done",
-                        fontWeight = FontWeight.Bold,
+                        text =
+                            stringResource(
+                                R.string
+                                    .done_action
+                            ),
+                        fontWeight =
+                            FontWeight.Bold,
                     )
                 }
             }
         }
     }
 }
-
 
 @Composable
 private fun BookBackdropDialog(
@@ -1955,53 +2678,68 @@ private fun BookBackdropDialog(
 ) {
     Dialog(
         onDismissRequest = onDismiss,
-        properties = DialogProperties(
-            usePlatformDefaultWidth = false,
-            decorFitsSystemWindows = false,
-        )
+        properties =
+            DialogProperties(
+                usePlatformDefaultWidth =
+                    false,
+                decorFitsSystemWindows =
+                    false,
+            )
     ) {
-
         val dialogWindow =
             (
-                LocalView.current.parent
-                    as? DialogWindowProvider
-                )?.window
+                    LocalView.current.parent
+                            as? DialogWindowProvider
+                    )?.window
 
         SideEffect {
-
             dialogWindow?.setLayout(
-                WindowManager.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.MATCH_PARENT
+                WindowManager
+                    .LayoutParams
+                    .MATCH_PARENT,
+                WindowManager
+                    .LayoutParams
+                    .MATCH_PARENT
             )
 
-            dialogWindow?.setBackgroundDrawable(
-                android.graphics.Color.TRANSPARENT.toDrawable()
-            )
+            dialogWindow
+                ?.setBackgroundDrawable(
+                    android.graphics
+                        .Color
+                        .TRANSPARENT
+                        .toDrawable()
+                )
 
-            dialogWindow?.setDimAmount(0f)
+            dialogWindow
+                ?.setDimAmount(0f)
         }
 
         Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center,
+            modifier =
+                Modifier.fillMaxSize(),
+            contentAlignment =
+                Alignment.Center,
         ) {
-
             if (!coverUrl.isNullOrBlank()) {
-
                 AsyncImage(
                     model = coverUrl,
                     contentDescription = null,
                     modifier = Modifier
                         .fillMaxSize()
                         .alpha(0.82f),
-                    contentScale = ContentScale.Crop,
+                    contentScale =
+                        ContentScale.Crop,
                 )
 
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(
-                            Color.Black.copy(alpha = 0.14f)
+                            Color.Black
+                                .copy(
+                                    alpha =
+                                        0.14f
+                                )
                         )
                 )
             }
@@ -2011,36 +2749,60 @@ private fun BookBackdropDialog(
     }
 }
 
-
+@Composable
 private fun ReadingStatus.displayName(): String {
     return when (this) {
         ReadingStatus.READING ->
-            "Currently Reading"
+            stringResource(
+                R.string
+                    .status_currently_reading
+            )
 
         ReadingStatus.WANT_TO_READ ->
-            "Want to Read"
+            stringResource(
+                R.string
+                    .status_want_to_read
+            )
 
         ReadingStatus.FINISHED ->
-            "Finished"
+            stringResource(
+                R.string
+                    .status_finished
+            )
 
         ReadingStatus.DNF ->
-            "Did Not Finish"
+            stringResource(
+                R.string
+                    .status_did_not_finish
+            )
 
         ReadingStatus.UNREAD ->
-            "Unread"
+            stringResource(
+                R.string
+                    .status_unread
+            )
     }
 }
 
-
+@Composable
 private fun BookOwnership.displayName(): String {
     return when (this) {
         BookOwnership.OWNED ->
-            "Owned"
+            stringResource(
+                R.string
+                    .ownership_owned
+            )
 
         BookOwnership.BORROWED ->
-            "Borrowed"
+            stringResource(
+                R.string
+                    .ownership_borrowed
+            )
 
         BookOwnership.WISHLIST ->
-            "Wishlist"
+            stringResource(
+                R.string
+                    .ownership_wishlist
+            )
     }
 }

@@ -47,6 +47,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -54,6 +55,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
+import com.example.readingbunny.R
 import com.example.readingbunny.model.Book
 import com.example.readingbunny.model.BookOwnership
 import com.example.readingbunny.model.BookSearchResult
@@ -61,6 +63,7 @@ import com.example.readingbunny.model.ReadingStatus
 import com.example.readingbunny.ui.scanner.BookScannerMode
 import com.example.readingbunny.ui.scanner.BookScannerScreen
 import com.example.readingbunny.ui.viewmodel.BookSearchViewModel
+import androidx.compose.ui.text.style.TextOverflow
 
 private enum class AddBookMethod {
     SEARCH,
@@ -75,7 +78,8 @@ fun AddBookScreen(
     onSaveBook: (Book) -> Unit,
     bookSearchViewModel: BookSearchViewModel
 ) {
-    val searchUiState by bookSearchViewModel.uiState.collectAsStateWithLifecycle()
+    val searchUiState by
+    bookSearchViewModel.uiState.collectAsStateWithLifecycle()
 
     var searchQuery by rememberSaveable {
         mutableStateOf("")
@@ -124,16 +128,20 @@ fun AddBookScreen(
     var selectedLargeCoverUrl by rememberSaveable {
         mutableStateOf<String?>(null)
     }
-    
+
     var selectedDescription by rememberSaveable {
         mutableStateOf<String?>(null)
     }
 
-    val totalPages = bookTotalPages.toIntOrNull()
+    val totalPages =
+        bookTotalPages.toIntOrNull()
 
     val hasPagesError =
         bookTotalPages.isNotBlank() &&
-                (totalPages == null || totalPages <= 0)
+                (
+                        totalPages == null ||
+                                totalPages <= 0
+                        )
 
     var selectedStatus by rememberSaveable {
         mutableStateOf<ReadingStatus?>(null)
@@ -163,6 +171,9 @@ fun AddBookScreen(
         mutableStateOf<String?>(null)
     }
 
+    val scannerTextError =
+        stringResource(R.string.scanner_text_error)
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -177,62 +188,107 @@ fun AddBookScreen(
                 onClick = handleBack
             ) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Go back"
+                    imageVector =
+                        Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription =
+                        stringResource(R.string.go_back)
                 )
             }
 
             Text(
                 text = when (selectedMethod) {
-                    AddBookMethod.SEARCH -> "Search for a book"
-                    AddBookMethod.SCAN -> "Scan a book"
-                    AddBookMethod.MANUAL -> "Add manually"
-                    null -> "Add a book"
+                    AddBookMethod.SEARCH ->
+                        stringResource(
+                            R.string.search_for_book_title
+                        )
+
+                    AddBookMethod.SCAN ->
+                        stringResource(
+                            R.string.scan_book_title
+                        )
+
+                    AddBookMethod.MANUAL ->
+                        stringResource(
+                            R.string.add_manually_title
+                        )
+
+                    null ->
+                        stringResource(
+                            R.string.add_book_title
+                        )
                 },
                 style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.weight(1f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(
+            modifier = Modifier.height(24.dp)
+        )
 
         if (selectedMethod == null) {
             Text(
-                text = "How would you like to add it?",
+                text = stringResource(
+                    R.string.choose_add_book_method
+                ),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(
+                modifier = Modifier.height(20.dp)
+            )
 
             AddBookOptionCard(
                 number = "01",
-                title = "Search online",
-                description = "Find the book by its title or author.",
+                title = stringResource(
+                    R.string.search_online
+                ),
+                description = stringResource(
+                    R.string.search_online_description
+                ),
                 onClick = {
-                    selectedMethod = AddBookMethod.SEARCH
+                    selectedMethod =
+                        AddBookMethod.SEARCH
                 }
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(
+                modifier = Modifier.height(12.dp)
+            )
 
             AddBookOptionCard(
                 number = "02",
-                title = "Scan a book",
-                description = "Use the barcode or photograph the book spine.",
+                title = stringResource(
+                    R.string.scan_book
+                ),
+                description = stringResource(
+                    R.string.scan_book_description
+                ),
                 onClick = {
-                    selectedMethod = AddBookMethod.SCAN
+                    selectedMethod =
+                        AddBookMethod.SCAN
                 }
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(
+                modifier = Modifier.height(12.dp)
+            )
 
             AddBookOptionCard(
                 number = "03",
-                title = "Add manually",
-                description = "Enter the title, author and reading details yourself.",
+                title = stringResource(
+                    R.string.add_manually
+                ),
+                description = stringResource(
+                    R.string.add_manually_description
+                ),
                 onClick = {
-                    selectedMethod = AddBookMethod.MANUAL
+                    selectedMethod =
+                        AddBookMethod.MANUAL
                 }
             )
         } else {
@@ -240,69 +296,109 @@ fun AddBookScreen(
                 AddBookMethod.SEARCH -> {
                     Column(
                         modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                        verticalArrangement =
+                            Arrangement.spacedBy(16.dp)
                     ) {
                         OutlinedTextField(
                             value = searchQuery,
                             onValueChange = { newValue ->
                                 searchQuery = newValue
                             },
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier =
+                                Modifier.fillMaxWidth(),
                             label = {
-                                Text("Search by title or author")
+                                Text(
+                                    stringResource(
+                                        R.string.search_by_title_or_author
+                                    )
+                                )
                             },
                             leadingIcon = {
                                 Icon(
-                                    imageVector = Icons.Default.Search,
+                                    imageVector =
+                                        Icons.Default.Search,
                                     contentDescription = null
                                 )
                             },
                             trailingIcon = {
                                 IconButton(
                                     onClick = {
-                                        bookSearchViewModel.searchBooks(searchQuery)
+                                        bookSearchViewModel
+                                            .searchBooks(
+                                                searchQuery
+                                            )
                                     },
-                                    enabled = searchQuery.isNotBlank() &&
-                                            !searchUiState.isLoading
+                                    enabled =
+                                        searchQuery.isNotBlank() &&
+                                                !searchUiState.isLoading
                                 ) {
                                     Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                        contentDescription = "Search"
+                                        imageVector =
+                                            Icons.AutoMirrored
+                                                .Filled
+                                                .ArrowForward,
+                                        contentDescription =
+                                            stringResource(
+                                                R.string.search_action
+                                            )
                                     )
                                 }
                             },
                             singleLine = true,
-                            keyboardOptions = KeyboardOptions(
-                                imeAction = ImeAction.Search
-                            ),
-                            keyboardActions = KeyboardActions(
-                                onSearch = {
-                                    bookSearchViewModel.searchBooks(searchQuery)
-                                }
-                            )
+                            keyboardOptions =
+                                KeyboardOptions(
+                                    imeAction =
+                                        ImeAction.Search
+                                ),
+                            keyboardActions =
+                                KeyboardActions(
+                                    onSearch = {
+                                        bookSearchViewModel
+                                            .searchBooks(
+                                                searchQuery
+                                            )
+                                    }
+                                )
                         )
 
                         if (searchUiState.isLoading) {
                             Column(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                                modifier =
+                                    Modifier.fillMaxWidth(),
+                                horizontalAlignment =
+                                    Alignment.CenterHorizontally,
+                                verticalArrangement =
+                                    Arrangement.spacedBy(8.dp)
                             ) {
                                 CircularProgressIndicator(
-                                    color = MaterialTheme.colorScheme.primary
+                                    color =
+                                        MaterialTheme
+                                            .colorScheme
+                                            .primary
                                 )
 
                                 Text(
-                                    text = "Searching for books...",
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    text =
+                                        stringResource(
+                                            R.string.searching_for_books
+                                        ),
+                                    color =
+                                        MaterialTheme
+                                            .colorScheme
+                                            .onSurfaceVariant
                                 )
                             }
                         }
 
                         searchUiState.errorMessage?.let {
                             Text(
-                                text = "Could not search for books. Please try again.",
-                                color = MaterialTheme.colorScheme.error
+                                text = stringResource(
+                                    R.string.book_search_error
+                                ),
+                                color =
+                                    MaterialTheme
+                                        .colorScheme
+                                        .error
                             )
                         }
 
@@ -312,37 +408,67 @@ fun AddBookScreen(
                             searchUiState.results.isNotEmpty()
                         ) {
                             Text(
-                                text = "${searchUiState.results.size} results",
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onBackground
+                                text = stringResource(
+                                    R.string.search_results_count,
+                                    searchUiState.results.size
+                                ),
+                                fontWeight =
+                                    FontWeight.Bold,
+                                color =
+                                    MaterialTheme
+                                        .colorScheme
+                                        .onBackground
                             )
 
-                                LazyColumn(
-                                    modifier = Modifier.weight(1f),
-                                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
-                                    items(
-                                        items = searchUiState.results,
-                                        key = { book ->
-                                            book.externalId
-                                        }
-                                    ) { book ->
-                                        BookSearchResultCard(
-                                            book = book,
-                                            onClick = {
-                                                bookTitle = book.title
-                                                bookAuthor = book.author
-                                                bookTotalPages = book.totalPages?.toString().orEmpty()
-                                                selectedIsbn = book.isbn
-                                                selectedCoverUrl = book.coverUrl
-                                                selectedLargeCoverUrl = book.largeCoverUrl
-                                                selectedDescription = book.description
-                                                selectedMethod = AddBookMethod.MANUAL
-                                            }
-                                        )
+                            LazyColumn(
+                                modifier =
+                                    Modifier.weight(1f),
+                                verticalArrangement =
+                                    Arrangement.spacedBy(
+                                        12.dp
+                                    )
+                            ) {
+                                items(
+                                    items =
+                                        searchUiState.results,
+                                    key = { book ->
+                                        book.externalId
                                     }
+                                ) { book ->
+                                    BookSearchResultCard(
+                                        book = book,
+                                        onClick = {
+                                            bookTitle =
+                                                book.title
+
+                                            bookAuthor =
+                                                book.author
+
+                                            bookTotalPages =
+                                                book.totalPages
+                                                    ?.toString()
+                                                    .orEmpty()
+
+                                            selectedIsbn =
+                                                book.isbn
+
+                                            selectedCoverUrl =
+                                                book.coverUrl
+
+                                            selectedLargeCoverUrl =
+                                                book.largeCoverUrl
+
+                                            selectedDescription =
+                                                book.description
+
+                                            selectedMethod =
+                                                AddBookMethod.MANUAL
+                                        }
+                                    )
                                 }
                             }
+                        }
+
                         if (
                             searchUiState.hasSearched &&
                             !searchUiState.isLoading &&
@@ -353,34 +479,61 @@ fun AddBookScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(top = 24.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                                horizontalAlignment =
+                                    Alignment.CenterHorizontally,
+                                verticalArrangement =
+                                    Arrangement.spacedBy(12.dp)
                             ) {
                                 Text(
-                                    text = "We couldn't identify this book.",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = MaterialTheme.colorScheme.onBackground
+                                    text =
+                                        stringResource(
+                                            R.string.book_not_identified
+                                        ),
+                                    style =
+                                        MaterialTheme
+                                            .typography
+                                            .titleMedium,
+                                    color =
+                                        MaterialTheme
+                                            .colorScheme
+                                            .onBackground
                                 )
 
                                 Text(
-                                    text = "Try scanning it again or search for it manually.",
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    text =
+                                        stringResource(
+                                            R.string.book_not_identified_hint
+                                        ),
+                                    color =
+                                        MaterialTheme
+                                            .colorScheme
+                                            .onSurfaceVariant
                                 )
 
                                 Button(
                                     onClick = {
-                                        selectedMethod = AddBookMethod.SCAN
+                                        selectedMethod =
+                                            AddBookMethod.SCAN
                                     }
                                 ) {
-                                    Text("Scan again")
+                                    Text(
+                                        stringResource(
+                                            R.string.scan_again
+                                        )
+                                    )
                                 }
 
                                 Button(
                                     onClick = {
-                                        selectedMethod = AddBookMethod.MANUAL
+                                        selectedMethod =
+                                            AddBookMethod.MANUAL
                                     }
                                 ) {
-                                    Text("Add manually")
+                                    Text(
+                                        stringResource(
+                                            R.string.add_manually
+                                        )
+                                    )
                                 }
                             }
                         }
@@ -393,17 +546,17 @@ fun AddBookScreen(
                         onModeChange = { newMode ->
                             scannerMode = newMode
                         },
-
                         onSpineTextRecognized = { text ->
-                            val searchText = text
-                                .lines()
-                                .map { line ->
-                                    line.trim()
-                                }
-                                .filter { line ->
-                                    line.length >= 2
-                                }
-                                .joinToString(" ")
+                            val searchText =
+                                text
+                                    .lines()
+                                    .map { line ->
+                                        line.trim()
+                                    }
+                                    .filter { line ->
+                                        line.length >= 2
+                                    }
+                                    .joinToString(" ")
 
                             val recognizedWords =
                                 searchText
@@ -412,39 +565,47 @@ fun AddBookScreen(
                                         word.length >= 2
                                     }
 
-                            if (recognizedWords.size < 2) {
+                            if (
+                                recognizedWords.size < 2
+                            ) {
                                 scannerMessage =
-                                    "I couldn't read enough text. Try taking another photo."
+                                    scannerTextError
                             } else {
                                 scannerMessage = null
                                 searchQuery = searchText
 
-                                bookSearchViewModel.searchBooksWithFallback(
-                                    searchText
-                                )
+                                bookSearchViewModel
+                                    .searchBooksWithFallback(
+                                        searchText
+                                    )
 
-                                selectedMethod = AddBookMethod.SEARCH
+                                selectedMethod =
+                                    AddBookMethod.SEARCH
                             }
                         },
-
                         onBarcodeDetected = { barcode ->
                             searchQuery = barcode
 
-                            bookSearchViewModel.searchBookByIsbn(
-                                barcode
-                            )
+                            bookSearchViewModel
+                                .searchBookByIsbn(
+                                    barcode
+                                )
 
-                            selectedMethod = AddBookMethod.SEARCH
+                            selectedMethod =
+                                AddBookMethod.SEARCH
                         },
-
                         modifier = Modifier.weight(1f)
                     )
 
                     scannerMessage?.let { message ->
                         Text(
                             text = message,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(top = 8.dp)
+                            color =
+                                MaterialTheme
+                                    .colorScheme
+                                    .primary,
+                            modifier =
+                                Modifier.padding(top = 8.dp)
                         )
                     }
                 }
@@ -457,12 +618,20 @@ fun AddBookScreen(
                                 bookTitle = it
                             },
                             label = {
-                                Text("Book title")
+                                Text(
+                                    stringResource(
+                                        R.string.book_title
+                                    )
+                                )
                             },
-                            modifier = Modifier.fillMaxWidth()
+                            modifier =
+                                Modifier.fillMaxWidth()
                         )
 
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(
+                            modifier =
+                                Modifier.height(12.dp)
+                        )
 
                         OutlinedTextField(
                             value = bookAuthor,
@@ -470,178 +639,286 @@ fun AddBookScreen(
                                 bookAuthor = it
                             },
                             label = {
-                                Text("Author")
+                                Text(
+                                    stringResource(
+                                        R.string.author_label
+                                    )
+                                )
                             },
-                            modifier = Modifier.fillMaxWidth()
+                            modifier =
+                                Modifier.fillMaxWidth()
                         )
 
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(
+                            modifier =
+                                Modifier.height(12.dp)
+                        )
 
                         OutlinedTextField(
                             value = bookTotalPages,
                             onValueChange = { newValue ->
-                                if (newValue.all { character ->
+                                if (
+                                    newValue.all { character ->
                                         character.isDigit()
                                     }
                                 ) {
-                                    bookTotalPages = newValue
+                                    bookTotalPages =
+                                        newValue
                                 }
                             },
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Number
-                            ),
+                            keyboardOptions =
+                                KeyboardOptions(
+                                    keyboardType =
+                                        KeyboardType.Number
+                                ),
                             label = {
-                                Text("Total pages")
+                                Text(
+                                    stringResource(
+                                        R.string.total_pages
+                                    )
+                                )
                             },
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier =
+                                Modifier.fillMaxWidth(),
                             singleLine = true,
                             isError = hasPagesError
                         )
 
                         if (hasPagesError) {
-                            Spacer(modifier = Modifier.height(4.dp))
+                            Spacer(
+                                modifier =
+                                    Modifier.height(4.dp)
+                            )
 
                             Text(
-                                text = "Enter a valid page number",
-                                color = MaterialTheme.colorScheme.error
+                                text =
+                                    stringResource(
+                                        R.string.invalid_page_number
+                                    ),
+                                color =
+                                    MaterialTheme
+                                        .colorScheme
+                                        .error
                             )
                         }
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(
+                            modifier =
+                                Modifier.height(16.dp)
+                        )
 
                         ExposedDropdownMenuBox(
-                            expanded = isStatusMenuExpanded,
+                            expanded =
+                                isStatusMenuExpanded,
                             onExpandedChange = {
-                                isStatusMenuExpanded = !isStatusMenuExpanded
+                                isStatusMenuExpanded =
+                                    !isStatusMenuExpanded
                             }
                         ) {
                             OutlinedTextField(
-                                value = selectedStatus?.displayName() ?: "",
+                                value =
+                                    selectedStatus
+                                        ?.displayName()
+                                        ?: "",
                                 onValueChange = {},
                                 readOnly = true,
                                 label = {
-                                    Text("Reading status")
+                                    Text(
+                                        stringResource(
+                                            R.string.reading_status
+                                        )
+                                    )
                                 },
                                 placeholder = {
-                                    Text("Choose a status")
+                                    Text(
+                                        stringResource(
+                                            R.string.choose_status
+                                        )
+                                    )
                                 },
                                 trailingIcon = {
-                                    ExposedDropdownMenuDefaults.TrailingIcon(
-                                        expanded = isStatusMenuExpanded
-                                    )
+                                    ExposedDropdownMenuDefaults
+                                        .TrailingIcon(
+                                            expanded =
+                                                isStatusMenuExpanded
+                                        )
                                 },
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .testTag("reading_status_dropdown")
+                                    .testTag(
+                                        "reading_status_dropdown"
+                                    )
                                     .menuAnchor(
                                         type =
-                                            ExposedDropdownMenuAnchorType.PrimaryNotEditable,
+                                            ExposedDropdownMenuAnchorType
+                                                .PrimaryNotEditable,
                                         enabled = true
                                     )
                             )
 
                             ExposedDropdownMenu(
-                                expanded = isStatusMenuExpanded,
+                                expanded =
+                                    isStatusMenuExpanded,
                                 onDismissRequest = {
-                                    isStatusMenuExpanded = false
+                                    isStatusMenuExpanded =
+                                        false
                                 }
                             ) {
-                                ReadingStatus.entries.forEach { status ->
-                                    DropdownMenuItem(
-                                        text = {
-                                            Text(status.displayName())
-                                        },
-                                        onClick = {
-                                            selectedStatus = status
-                                            isStatusMenuExpanded = false
-                                        }
-                                    )
-                                }
+                                ReadingStatus.entries
+                                    .forEach { status ->
+                                        DropdownMenuItem(
+                                            text = {
+                                                Text(
+                                                    status
+                                                        .displayName()
+                                                )
+                                            },
+                                            onClick = {
+                                                selectedStatus =
+                                                    status
+
+                                                isStatusMenuExpanded =
+                                                    false
+                                            }
+                                        )
+                                    }
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(
+                            modifier =
+                                Modifier.height(16.dp)
+                        )
 
                         ExposedDropdownMenuBox(
-                            expanded = isOwnershipMenuExpanded,
+                            expanded =
+                                isOwnershipMenuExpanded,
                             onExpandedChange = {
                                 isOwnershipMenuExpanded =
                                     !isOwnershipMenuExpanded
                             }
                         ) {
                             OutlinedTextField(
-                                value = selectedOwnership?.displayName() ?: "",
+                                value =
+                                    selectedOwnership
+                                        ?.displayName()
+                                        ?: "",
                                 onValueChange = {},
                                 readOnly = true,
                                 label = {
-                                    Text("Book ownership")
+                                    Text(
+                                        stringResource(
+                                            R.string.book_ownership
+                                        )
+                                    )
                                 },
                                 placeholder = {
-                                    Text("Choose ownership")
+                                    Text(
+                                        stringResource(
+                                            R.string.choose_ownership
+                                        )
+                                    )
                                 },
                                 trailingIcon = {
-                                    ExposedDropdownMenuDefaults.TrailingIcon(
-                                        expanded = isOwnershipMenuExpanded
-                                    )
+                                    ExposedDropdownMenuDefaults
+                                        .TrailingIcon(
+                                            expanded =
+                                                isOwnershipMenuExpanded
+                                        )
                                 },
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .testTag("book_ownership_dropdown")
+                                    .testTag(
+                                        "book_ownership_dropdown"
+                                    )
                                     .menuAnchor(
                                         type =
-                                            ExposedDropdownMenuAnchorType.PrimaryNotEditable,
+                                            ExposedDropdownMenuAnchorType
+                                                .PrimaryNotEditable,
                                         enabled = true
                                     )
                             )
 
                             ExposedDropdownMenu(
-                                expanded = isOwnershipMenuExpanded,
+                                expanded =
+                                    isOwnershipMenuExpanded,
                                 onDismissRequest = {
-                                    isOwnershipMenuExpanded = false
+                                    isOwnershipMenuExpanded =
+                                        false
                                 }
                             ) {
-                                BookOwnership.entries.forEach { ownership ->
-                                    DropdownMenuItem(
-                                        text = {
-                                            Text(ownership.displayName())
-                                        },
-                                        onClick = {
-                                            selectedOwnership = ownership
-                                            isOwnershipMenuExpanded = false
-                                        }
-                                    )
-                                }
+                                BookOwnership.entries
+                                    .forEach { ownership ->
+                                        DropdownMenuItem(
+                                            text = {
+                                                Text(
+                                                    ownership
+                                                        .displayName()
+                                                )
+                                            },
+                                            onClick = {
+                                                selectedOwnership =
+                                                    ownership
+
+                                                isOwnershipMenuExpanded =
+                                                    false
+                                            }
+                                        )
+                                    }
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(24.dp))
+                        Spacer(
+                            modifier =
+                                Modifier.height(24.dp)
+                        )
 
                         Button(
                             onClick = {
-                                val pages = totalPages ?: return@Button
-                                val status = selectedStatus ?: return@Button
-                                val ownership =
-                                    selectedOwnership ?: return@Button
+                                val pages =
+                                    totalPages
+                                        ?: return@Button
 
-                                val newBook = Book(
-                                    title = bookTitle.trim(),
-                                    author = bookAuthor.trim(),
-                                    status = status,
-                                    currentPage = 0,
-                                    totalPages = pages,
-                                    ownership = ownership,
-                                    isbn = selectedIsbn,
-                                    coverUrl =selectedCoverUrl,
-                                    largeCoverUrl= selectedLargeCoverUrl,
-                                    description = selectedDescription
-                                )
+                                val status =
+                                    selectedStatus
+                                        ?: return@Button
+
+                                val ownership =
+                                    selectedOwnership
+                                        ?: return@Button
+
+                                val newBook =
+                                    Book(
+                                        title =
+                                            bookTitle.trim(),
+                                        author =
+                                            bookAuthor.trim(),
+                                        status = status,
+                                        currentPage = 0,
+                                        totalPages = pages,
+                                        ownership =
+                                            ownership,
+                                        isbn =
+                                            selectedIsbn,
+                                        coverUrl =
+                                            selectedCoverUrl,
+                                        largeCoverUrl =
+                                            selectedLargeCoverUrl,
+                                        description =
+                                            selectedDescription
+                                    )
 
                                 onSaveBook(newBook)
                             },
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier =
+                                Modifier.fillMaxWidth(),
                             enabled = isFormValid
                         ) {
-                            Text("Save book")
+                            Text(
+                                stringResource(
+                                    R.string.save_book
+                                )
+                            )
                         }
                     }
                 }
@@ -664,69 +941,128 @@ private fun AddBookOptionCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor =
+                MaterialTheme.colorScheme.surface
         )
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(18.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment =
+                Alignment.CenterVertically
         ) {
             Box(
                 modifier = Modifier
                     .size(52.dp)
                     .background(
-                        color = MaterialTheme.colorScheme.primary,
-                        shape = RoundedCornerShape(16.dp)
+                        color =
+                            MaterialTheme
+                                .colorScheme
+                                .primary,
+                        shape =
+                            RoundedCornerShape(16.dp)
                     ),
-                contentAlignment = Alignment.Center
+                contentAlignment =
+                    Alignment.Center
             ) {
                 Text(
                     text = number,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimary
+                    color =
+                        MaterialTheme
+                            .colorScheme
+                            .onPrimary
                 )
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(
+                modifier = Modifier.width(16.dp)
+            )
 
             Column(
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
+                    style =
+                        MaterialTheme
+                            .typography
+                            .titleMedium,
+                    color =
+                        MaterialTheme
+                            .colorScheme
+                            .onSurface
                 )
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(
+                    modifier =
+                        Modifier.height(4.dp)
+                )
 
                 Text(
                     text = description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    style =
+                        MaterialTheme
+                            .typography
+                            .bodyMedium,
+                    color =
+                        MaterialTheme
+                            .colorScheme
+                            .onSurfaceVariant
                 )
             }
         }
     }
 }
 
+@Composable
 private fun ReadingStatus.displayName(): String {
     return when (this) {
-        ReadingStatus.READING -> "Currently Reading"
-        ReadingStatus.WANT_TO_READ -> "Want to Read"
-        ReadingStatus.FINISHED -> "Finished"
-        ReadingStatus.DNF -> "Did Not Finish"
-        ReadingStatus.UNREAD -> "Unread"
+        ReadingStatus.READING ->
+            stringResource(
+                R.string.status_currently_reading
+            )
+
+        ReadingStatus.WANT_TO_READ ->
+            stringResource(
+                R.string.status_want_to_read
+            )
+
+        ReadingStatus.FINISHED ->
+            stringResource(
+                R.string.status_finished
+            )
+
+        ReadingStatus.DNF ->
+            stringResource(
+                R.string.status_did_not_finish
+            )
+
+        ReadingStatus.UNREAD ->
+            stringResource(
+                R.string.status_unread
+            )
     }
 }
 
+@Composable
 private fun BookOwnership.displayName(): String {
     return when (this) {
-        BookOwnership.OWNED -> "Owned"
-        BookOwnership.BORROWED -> "Borrowed"
-        BookOwnership.WISHLIST -> "Wishlist"
+        BookOwnership.OWNED ->
+            stringResource(
+                R.string.ownership_owned
+            )
+
+        BookOwnership.BORROWED ->
+            stringResource(
+                R.string.ownership_borrowed
+            )
+
+        BookOwnership.WISHLIST ->
+            stringResource(
+                R.string.ownership_wishlist
+            )
     }
 }
 
@@ -741,30 +1077,44 @@ private fun BookSearchResultCard(
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor =
+                MaterialTheme.colorScheme.surface
         )
     ) {
         Row(
             modifier = Modifier.padding(14.dp),
-            horizontalArrangement = Arrangement.spacedBy(14.dp),
-            verticalAlignment = Alignment.CenterVertically
+            horizontalArrangement =
+                Arrangement.spacedBy(14.dp),
+            verticalAlignment =
+                Alignment.CenterVertically
         ) {
             Box(
                 modifier = Modifier
                     .width(72.dp)
                     .height(104.dp)
-                    .clip(RoundedCornerShape(10.dp))
+                    .clip(
+                        RoundedCornerShape(10.dp)
+                    )
                     .background(
-                        MaterialTheme.colorScheme.surfaceVariant
+                        MaterialTheme
+                            .colorScheme
+                            .surfaceVariant
                     ),
-                contentAlignment = Alignment.Center
+                contentAlignment =
+                    Alignment.Center
             ) {
                 if (!book.coverUrl.isNullOrBlank()) {
                     AsyncImage(
                         model = book.coverUrl,
-                        contentDescription = "Cover of ${book.title}",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
+                        contentDescription =
+                            stringResource(
+                                R.string.book_cover_content_description,
+                                book.title
+                            ),
+                        modifier =
+                            Modifier.fillMaxSize(),
+                        contentScale =
+                            ContentScale.Crop
                     )
                 } else {
                     Text(
@@ -776,33 +1126,67 @@ private fun BookSearchResultCard(
 
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(6.dp)
+                verticalArrangement =
+                    Arrangement.spacedBy(6.dp)
             ) {
                 Text(
                     text = book.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
+                    style =
+                        MaterialTheme
+                            .typography
+                            .titleMedium,
+                    color =
+                        MaterialTheme
+                            .colorScheme
+                            .onSurface,
+                    maxLines = 2,
+                    overflow =
+                        TextOverflow.Ellipsis
                 )
 
                 Text(
                     text = book.author,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    style =
+                        MaterialTheme
+                            .typography
+                            .bodyMedium,
+                    color =
+                        MaterialTheme
+                            .colorScheme
+                            .onSurfaceVariant,
+                    maxLines = 2,
+                    overflow =
+                        TextOverflow.Ellipsis
                 )
 
                 book.totalPages?.let { pageCount ->
                     Text(
-                        text = "$pageCount pages",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        text = stringResource(
+                            R.string.pages_count,
+                            pageCount
+                        ),
+                        style =
+                            MaterialTheme
+                                .typography
+                                .bodySmall,
+                        color =
+                            MaterialTheme
+                                .colorScheme
+                                .onSurfaceVariant
                     )
                 }
 
                 book.isbn?.let { isbn ->
                     Text(
-                        text = "ISBN: $isbn",
+                        text = stringResource(
+                            R.string.isbn_label,
+                            isbn
+                        ),
                         fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color =
+                            MaterialTheme
+                                .colorScheme
+                                .onSurfaceVariant
                     )
                 }
             }
