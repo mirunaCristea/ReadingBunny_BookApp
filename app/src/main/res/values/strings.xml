@@ -363,4 +363,9 @@
     <!-- Accessibility -->
     <string name="increase_decoration_size">Increase decoration size</string>
     <string name="decrease_decoration_size">Decrease decoration size</string>
+    <string name="camera_permission_settings_required">
+    Camera permission is disabled. Enable it from app settings to scan books.
+</string>
+
+    <string name="open_settings">Open settings</string>
 </resources>

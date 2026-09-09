@@ -45,6 +45,14 @@ import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import java.util.concurrent.Executors
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
+import android.content.Intent
+import android.provider.Settings
+import androidx.core.app.ActivityCompat
+import androidx.core.net.toUri
+
 
 @Composable
 fun BookScannerScreen(
@@ -57,6 +65,9 @@ fun BookScannerScreen(
     val context =
         LocalContext.current
 
+    val activity =
+        context.findActivity()
+
     var hasCameraPermission by remember {
         mutableStateOf(
             ContextCompat.checkSelfPermission(
@@ -67,14 +78,53 @@ fun BookScannerScreen(
         )
     }
 
+    var isCameraPermissionPermanentlyDenied by
+    remember {
+        mutableStateOf(false)
+    }
+
+    val settingsLauncher =
+        rememberLauncherForActivityResult(
+            contract =
+                ActivityResultContracts
+                    .StartActivityForResult()
+        ) {
+            hasCameraPermission =
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.CAMERA
+                ) ==
+                        PackageManager.PERMISSION_GRANTED
+
+            if (hasCameraPermission) {
+                isCameraPermissionPermanentlyDenied =
+                    false
+            }
+        }
+
     val permissionLauncher =
         rememberLauncherForActivityResult(
             contract =
                 ActivityResultContracts
                     .RequestPermission()
         ) { granted ->
+
             hasCameraPermission =
                 granted
+
+            if (!granted) {
+                isCameraPermissionPermanentlyDenied =
+                    activity?.let {
+                        !ActivityCompat
+                            .shouldShowRequestPermissionRationale(
+                                it,
+                                Manifest.permission.CAMERA
+                            )
+                    } ?: false
+            } else {
+                isCameraPermissionPermanentlyDenied =
+                    false
+            }
         }
 
     LaunchedEffect(Unit) {
@@ -116,27 +166,47 @@ fun BookScannerScreen(
                     .fillMaxWidth()
                     .weight(1f),
                 horizontalAlignment =
-                    Alignment
-                        .CenterHorizontally,
+                    Alignment.CenterHorizontally,
                 verticalArrangement =
                     Arrangement.Center
             ) {
                 Text(
                     text =
-                        stringResource(
-                            R.string
-                                .camera_permission_required
-                        )
+                        if (
+                            isCameraPermissionPermanentlyDenied
+                        ) {
+                            stringResource(
+                                R.string
+                                    .camera_permission_settings_required
+                            )
+                        } else {
+                            stringResource(
+                                R.string
+                                    .camera_permission_required
+                            )
+                        }
                 )
 
                 Button(
                     onClick = {
-                        permissionLauncher
-                            .launch(
-                                Manifest
-                                    .permission
-                                    .CAMERA
+                        if (
+                            isCameraPermissionPermanentlyDenied
+                        ) {
+                            val intent =
+                                Intent(
+                                    Settings
+                                        .ACTION_APPLICATION_DETAILS_SETTINGS,
+                                    "package:${context.packageName}".toUri()
+                                )
+
+                            settingsLauncher.launch(
+                                intent
                             )
+                        } else {
+                            permissionLauncher.launch(
+                                Manifest.permission.CAMERA
+                            )
+                        }
                     },
                     modifier =
                         Modifier.padding(
@@ -144,10 +214,18 @@ fun BookScannerScreen(
                         )
                 ) {
                     Text(
-                        stringResource(
-                            R.string
-                                .allow_camera
-                        )
+                        text =
+                            if (
+                                isCameraPermissionPermanentlyDenied
+                            ) {
+                                stringResource(
+                                    R.string.open_settings
+                                )
+                            } else {
+                                stringResource(
+                                    R.string.allow_camera
+                                )
+                            }
                     )
                 }
             }
@@ -506,4 +584,19 @@ private fun CameraPreview(
             }
         }
     }
+}
+
+private fun Context.findActivity(): Activity? {
+    var currentContext = this
+
+    while (currentContext is ContextWrapper) {
+        if (currentContext is Activity) {
+            return currentContext
+        }
+
+        currentContext =
+            currentContext.baseContext
+    }
+
+    return null
 }
